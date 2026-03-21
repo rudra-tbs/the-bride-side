@@ -179,7 +179,7 @@ export default function Landing() {
                 <button className="hero-btn-primary" onClick={handleGoogleSignIn} disabled={false}>
                   Start planning →
                 </button>
-                <p className="hero-btn-note">No credit card required. Free forever.</p>
+                <p className="hero-btn-note">Free forever · No card needed</p>
               </div>
               <div className="hero-trust">
                 <div className="hero-trust-item">
