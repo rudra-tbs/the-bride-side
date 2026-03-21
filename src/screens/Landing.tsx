@@ -45,22 +45,40 @@ export default function Landing() {
     setGuests, setVendors, setBudgetCategories, setExpenses,
     setClCategories, setClTasks, setPins, setNotes } = useAppStore()
   const [signingIn, setSigningIn] = useState(false)
-  const previewRef = useRef<HTMLDivElement>(null)
+  const scrollSceneRef = useRef<HTMLElement>(null)
+  const textLayerRef = useRef<HTMLDivElement>(null)
+  const previewLayerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
-    const el = previewRef.current
-    if (!el) return
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
-          el.classList.add('visible')
-          observer.disconnect()
-        }
-      },
-      { threshold: 0.12 }
-    )
-    observer.observe(el)
-    return () => observer.disconnect()
+    const scene = scrollSceneRef.current
+    const text = textLayerRef.current
+    const preview = previewLayerRef.current
+    if (!scene || !text || !preview) return
+
+    function update() {
+      const rect = scene!.getBoundingClientRect()
+      const scrolled = -rect.top
+      const total = scene!.offsetHeight - window.innerHeight
+      if (total <= 0) return
+      const p = Math.max(0, Math.min(1, scrolled / total))
+
+      // Text fades out and slides up in the first 40% of scroll distance
+      const tp = Math.min(1, p / 0.4)
+      text!.style.opacity = String(1 - tp)
+      text!.style.transform = `translateY(${-tp * 60}px)`
+
+      // Preview rises, scales up, and perspective-flattens across the full scroll
+      const scale = 0.7 + 0.3 * p
+      const ty = 200 * (1 - p)
+      const rx = 14 * (1 - p)
+      preview!.style.opacity = String(0.3 + 0.7 * p)
+      preview!.style.transform =
+        `translateX(-50%) perspective(1200px) translateY(${ty}px) scale(${scale}) rotateX(${rx}deg)`
+    }
+
+    window.addEventListener('scroll', update, { passive: true })
+    update()
+    return () => window.removeEventListener('scroll', update)
   }, [])
 
   async function handleGoogleSignIn() {
@@ -110,70 +128,56 @@ export default function Landing() {
         </div>
       </nav>
 
-      {/* Hero — Centered */}
-      <section className="hero-section hero-centered">
-        <div className="hero-blob hero-blob-1" aria-hidden="true" />
-        <div className="hero-blob hero-blob-2" aria-hidden="true" />
-        <div className="container hero-center-container">
-          <div className="hero-eyebrow">India's smartest wedding planner</div>
-          <h1 className="hero-h1 hero-h1-center">
-            Plan your dream wedding,<br />
-            <em>without the chaos.</em>
-          </h1>
-          <p className="hero-sub hero-sub-center">
-            The Bride Side helps you manage guests, vendors, budget, and your entire wedding timeline — all in one beautifully organised place.
-          </p>
-          <div className="hero-btns hero-btns-center">
-            <button className="hero-btn-primary" onClick={handleGoogleSignIn} disabled={signingIn}>
-              {signingIn ? 'Redirecting…' : 'Start Planning Free →'}
-            </button>
-            <button className="hero-btn-ghost" onClick={viewDemo}>
-              See a live demo
-            </button>
-          </div>
-          <div className="hero-stats hero-stats-center">
-            <div className="hero-stat">
-              <div className="hero-stat-n">12,000+</div>
-              <div className="hero-stat-l">Couples planned</div>
-            </div>
-            <div className="hero-stat">
-              <div className="hero-stat-n">₹50Cr+</div>
-              <div className="hero-stat-l">Budgets tracked</div>
-            </div>
-            <div className="hero-stat">
-              <div className="hero-stat-n">4.9 ★</div>
-              <div className="hero-stat-l">Average rating</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      {/* Hero + Dashboard Preview — Apple-style scroll scene */}
+      <section className="hero-scroll-scene" ref={scrollSceneRef}>
+        <div className="hero-sticky">
+          <div className="hero-blob hero-blob-1" aria-hidden="true" />
+          <div className="hero-blob hero-blob-2" aria-hidden="true" />
 
-      {/* Dashboard Preview */}
-      <section className="app-preview-section">
-        <div className="container">
-          <div className="section-header-center">
-            <h2 className="serif section-title">
-              Your wedding command centre
-            </h2>
-            <p className="section-subtitle">
-              Everything you need to plan, track, and manage — all in one beautiful dashboard.
-            </p>
+          {/* Text layer — fades & slides up as you scroll */}
+          <div className="hero-text-layer" ref={textLayerRef}>
+            <div className="container hero-center-container">
+              <div className="hero-eyebrow">India's smartest wedding planner</div>
+              <h1 className="hero-h1 hero-h1-center">
+                Plan your dream wedding,<br />
+                <em>without the chaos.</em>
+              </h1>
+              <p className="hero-sub hero-sub-center">
+                The Bride Side helps you manage guests, vendors, budget, and your entire wedding timeline — all in one beautifully organised place.
+              </p>
+              <div className="hero-btns hero-btns-center">
+                <button className="hero-btn-primary" onClick={handleGoogleSignIn} disabled={signingIn}>
+                  {signingIn ? 'Redirecting…' : 'Start Planning Free →'}
+                </button>
+                <button className="hero-btn-ghost" onClick={viewDemo}>
+                  See a live demo
+                </button>
+              </div>
+              <div className="hero-stats hero-stats-center">
+                <div className="hero-stat">
+                  <div className="hero-stat-n">12,000+</div>
+                  <div className="hero-stat-l">Couples planned</div>
+                </div>
+                <div className="hero-stat">
+                  <div className="hero-stat-n">₹50Cr+</div>
+                  <div className="hero-stat-l">Budgets tracked</div>
+                </div>
+                <div className="hero-stat">
+                  <div className="hero-stat-n">4.9 ★</div>
+                  <div className="hero-stat-l">Average rating</div>
+                </div>
+              </div>
+            </div>
           </div>
-        </div>
 
-        {/* Animated app mockup */}
-        <div className="app-preview-outer" ref={previewRef}>
-          <div className="app-preview-float">
+          {/* Preview layer — rises & scales up as you scroll */}
+          <div className="hero-preview-layer" ref={previewLayerRef}>
             <div className="preview-browser">
-              {/* Browser chrome */}
               <div className="preview-browser-bar">
                 <div className="preview-dots"><span /><span /><span /></div>
                 <div className="preview-address-bar">thebrideside.app/dashboard</div>
               </div>
-
-              {/* App UI */}
               <div className="preview-app-ui">
-                {/* Topbar */}
                 <div className="preview-topbar">
                   <div className="preview-topbar-logo">The Bride Side</div>
                   <div className="preview-topbar-right">
@@ -181,10 +185,7 @@ export default function Landing() {
                     <div className="preview-userav">PA</div>
                   </div>
                 </div>
-
-                {/* App body */}
                 <div className="preview-app-body">
-                  {/* Sidebar */}
                   <div className="preview-sidebar">
                     <div className="preview-sb active">📊 Dashboard</div>
                     <div className="preview-sb">👥 Guests</div>
@@ -193,15 +194,11 @@ export default function Landing() {
                     <div className="preview-sb">✅ Checklist</div>
                     <div className="preview-sb">🌸 Moodboard</div>
                   </div>
-
-                  {/* Main content */}
                   <div className="preview-main">
                     <div className="preview-page-head">
                       <div className="preview-page-title">Priya &amp; Arjun's Wedding</div>
                       <div className="preview-page-date">Tuesday, 2 December 2026</div>
                     </div>
-
-                    {/* Stat tiles */}
                     <div className="preview-tiles">
                       <div className="preview-tile preview-tile-rose">
                         <div className="preview-tile-n">239</div>
@@ -220,10 +217,7 @@ export default function Landing() {
                         <div className="preview-tile-l">Tasks done</div>
                       </div>
                     </div>
-
-                    {/* Content grid */}
                     <div className="preview-content-grid">
-                      {/* Tasks */}
                       <div className="preview-card">
                         <div className="preview-card-title">Pending Tasks</div>
                         <div className="preview-task-list">
@@ -233,8 +227,6 @@ export default function Landing() {
                           <div className="preview-task done-task"><span className="preview-check done" />Finalise venue décor</div>
                         </div>
                       </div>
-
-                      {/* Guests */}
                       <div className="preview-card">
                         <div className="preview-card-title">Recent RSVPs</div>
                         <div className="preview-guest-list">
