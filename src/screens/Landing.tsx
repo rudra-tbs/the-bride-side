@@ -16,18 +16,21 @@ const TESTIMONIALS = [
     location: 'Mumbai',
     text: 'We planned our entire 3-day wedding using The Bride Side. From 400+ guests to 12 vendors — everything was organised in one place. Absolute lifesaver!',
     avatar: 'PA',
+    photo: 'https://picsum.photos/seed/reception-lights/800/480',
   },
   {
     name: 'Sneha & Rohan',
     location: 'Delhi',
     text: 'The budget tracker alone saved us ₹2L. We could see exactly where every rupee was going and avoided last-minute surprises.',
     avatar: 'SR',
+    photo: 'https://picsum.photos/seed/ceremony-florals/800/480',
   },
   {
     name: 'Meera & Karan',
     location: 'Bangalore',
     text: 'As a destination wedding couple, coordinating vendors across cities was a nightmare — until we found The Bride Side. The vendor tracker is brilliant.',
     avatar: 'MK',
+    photo: 'https://picsum.photos/seed/garden-venue-warm/800/480',
   },
 ]
 
@@ -335,16 +338,34 @@ export default function Landing() {
                       className="testimonial-card"
                       ref={pos === 'center' ? centerCardRef : undefined}
                     >
+                      <div className="t-card-photo" style={{ backgroundImage: `url(${t.photo})` }} />
+                      <div className="t-card-scrim" />
                       <div className="t-glare" aria-hidden="true" />
-                      <div className="testimonial-stars">★★★★★</div>
-                      <p className="testimonial-text">"{t.text}"</p>
-                      <div className="testimonial-author">
-                        <div className="testimonial-avatar">{t.avatar}</div>
-                        <div>
-                          <div className="testimonial-name">{t.name}</div>
-                          <div className="testimonial-loc">{t.location}</div>
+                      <div className="t-card-content">
+                        <div className="testimonial-stars">★★★★★</div>
+                        <p className="testimonial-text">"{t.text}"</p>
+                        <div className="testimonial-author">
+                          <div className="testimonial-avatar">{t.avatar}</div>
+                          <div>
+                            <div className="testimonial-name">{t.name}</div>
+                            <div className="testimonial-loc">{t.location}</div>
+                          </div>
                         </div>
                       </div>
+                      {pos === 'center' && (
+                        <>
+                          <button
+                            className="t-nav-zone t-nav-prev"
+                            onClick={() => goTo((activeTest - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)}
+                            aria-label="Previous testimonial"
+                          />
+                          <button
+                            className="t-nav-zone t-nav-next"
+                            onClick={() => goTo((activeTest + 1) % TESTIMONIALS.length)}
+                            aria-label="Next testimonial"
+                          />
+                        </>
+                      )}
                     </div>
                   </div>
                 )
