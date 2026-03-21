@@ -94,12 +94,18 @@ export default function App() {
   const userId = useAppStore(s => s.userId)
   const setScreen = useAppStore(s => s.setScreen)
 
-  // On mount: if the user already has data, send them straight to the dashboard.
-  // screen is not persisted so it always resets to 'landing' (the store default) —
-  // we only override it here when they have an existing wedding to return to.
+  // On mount: honour ?screen= URL param (dev convenience — open each screen
+  // in its own tab at e.g. localhost:5173/?screen=vendors).
+  // Otherwise, auto-route returning users with saved data to the dashboard.
   useEffect(() => {
-    const { userId: uid, wedding: w } = useAppStore.getState()
-    if (uid && w) setScreen('dashboard')
+    const param = new URLSearchParams(window.location.search).get('screen') as Screen | null
+    if (param && Object.keys(SCREEN_LABELS).includes(param)) {
+      if (APP_SCREENS.includes(param)) seedMockData()
+      setScreen(param)
+    } else {
+      const { userId: uid, wedding: w } = useAppStore.getState()
+      if (uid && w) setScreen('dashboard')
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
