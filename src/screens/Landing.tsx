@@ -1,11 +1,5 @@
 import { useRef, useEffect, useState } from 'react'
 import { useAppStore } from '@/store/app'
-import {
-  mockWedding, mockEvents, mockItinerary, mockGuests,
-  mockVendors, mockBudgetCategories, mockExpenses,
-  mockClCategories, mockClTasks, mockPins, mockNotes,
-  MOCK_USER_ID,
-} from '@/mock/data'
 
 const FEATURES = [
   { emoji: '🗒️', color: '#FDE8EC', title: 'Smart Itinerary', desc: 'Timeline planner for every event — Mehendi, Sangeet, Wedding, Reception.' },
@@ -39,9 +33,7 @@ const TESTIMONIALS = [
 
 
 export default function Landing() {
-  const { setScreen, setUserId, setWedding, setEvents, setItinerary,
-    setGuests, setVendors, setBudgetCategories, setExpenses,
-    setClCategories, setClTasks, setPins, setNotes } = useAppStore()
+  const { setScreen } = useAppStore()
   const pageRef = useRef<HTMLDivElement>(null)
   const scrollSceneRef = useRef<HTMLElement>(null)
   const textLayerRef = useRef<HTMLDivElement>(null)
@@ -89,22 +81,6 @@ export default function Landing() {
 
   function handleGoogleSignIn() {
     setScreen('onboarding')
-  }
-
-  function viewDemo() {
-    setUserId(MOCK_USER_ID)
-    setWedding(mockWedding)
-    setEvents(mockEvents)
-    setItinerary(mockItinerary)
-    setGuests(mockGuests)
-    setVendors(mockVendors)
-    setBudgetCategories(mockBudgetCategories)
-    setExpenses(mockExpenses)
-    setClCategories(mockClCategories)
-    setClTasks(mockClTasks)
-    setPins(mockPins)
-    setNotes(mockNotes)
-    setScreen('dashboard')
   }
 
   return (
