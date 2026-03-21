@@ -94,6 +94,18 @@ export default function App() {
   const userId = useAppStore(s => s.userId)
   const setScreen = useAppStore(s => s.setScreen)
 
+  // On mount, route to the right screen based on persisted data.
+  // screen is not persisted so this always runs fresh on load.
+  useEffect(() => {
+    const { userId: uid, wedding: w } = useAppStore.getState()
+    if (uid && w) {
+      setScreen('dashboard')
+    } else {
+      setScreen('landing')
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [])
+
   // Seed mock data if user lands on an app screen without any data
   useEffect(() => {
     if (!wedding && userId && APP_SCREENS.includes(screen)) {

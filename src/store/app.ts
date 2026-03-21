@@ -159,7 +159,6 @@ export const useAppStore = create<AppState>()(
       name: 'tbs-app-store',
       partialize: (state) => ({
         userId: state.userId,
-        screen: state.screen,
         dashTab: state.dashTab,
         wedding: state.wedding,
         events: state.events,
