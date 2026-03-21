@@ -103,28 +103,45 @@ export default function App() {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (session?.user) {
         setUserId(session.user.id)
-        // If user just logged in and is on landing, send to dashboard or onboarding
+        // If user just logged in and is on landing, send to dashboard or onboarding.
+        // Validate the cached wedding belongs to THIS user — stale mock/demo data
+        // from a previous session must not be used to skip onboarding.
         const currentScreen = useAppStore.getState().screen
         if (currentScreen === 'landing') {
-          const hasWedding = useAppStore.getState().wedding
-          setScreen(hasWedding ? 'dashboard' : 'onboarding')
+          const storedWedding = useAppStore.getState().wedding
+          const weddingBelongsToUser = storedWedding?.user_id === session.user.id
+          setScreen(weddingBelongsToUser ? 'dashboard' : 'onboarding')
         }
       }
       setAuthLoading(false)
     })
 
     // Subscribe to auth changes (login, logout, token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      if (session?.user) {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session?.user) {
         setUserId(session.user.id)
         const currentScreen = useAppStore.getState().screen
         if (currentScreen === 'landing') {
-          const hasWedding = useAppStore.getState().wedding
-          setScreen(hasWedding ? 'dashboard' : 'onboarding')
+          const storedWedding = useAppStore.getState().wedding
+          const weddingBelongsToUser = storedWedding?.user_id === session.user.id
+          setScreen(weddingBelongsToUser ? 'dashboard' : 'onboarding')
         }
-      } else {
-        setUserId(null)
-        setScreen('landing')
+      } else if (event === 'SIGNED_OUT') {
+        // Clear all persisted data so the next user starts clean
+        const s = useAppStore.getState()
+        s.setUserId(null)
+        s.setWedding(null)
+        s.setGuests([])
+        s.setVendors([])
+        s.setBudgetCategories([])
+        s.setExpenses([])
+        s.setClCategories([])
+        s.setClTasks([])
+        s.setPins([])
+        s.setNotes([])
+        s.setEvents([])
+        s.setItinerary([])
+        s.setScreen('landing')
       }
     })
 
