@@ -727,7 +727,14 @@ textarea.input { resize: vertical; min-height: 80px; }
   background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
   padding: 36px 40px; display: flex; flex-direction: column; gap: 18px;
   box-shadow: 0 8px 32px rgba(0,0,0,0.06);
+  position: relative; overflow: hidden; transform-style: preserve-3d;
+  will-change: transform;
 }
+.t-glare {
+  position: absolute; inset: 0; border-radius: inherit; pointer-events: none;
+  z-index: 1; transition: background 0.08s ease-out;
+}
+.testimonial-card > *:not(.t-glare) { position: relative; z-index: 2; }
 .testimonial-stars { color: var(--amber); font-size: 16px; letter-spacing: 3px; }
 .testimonial-text { font-size: 15px; color: var(--ink2); line-height: 1.8; flex: 1; font-style: italic; }
 .testimonial-author { display: flex; align-items: center; gap: 12px; padding-top: 18px; border-top: 1px solid var(--border); }

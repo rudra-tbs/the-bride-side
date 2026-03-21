@@ -83,6 +83,27 @@ export default function Landing() {
     setScreen('onboarding')
   }
 
+  function handleCardMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const card = e.currentTarget
+    const rect = card.getBoundingClientRect()
+    const x = (e.clientX - rect.left) / rect.width - 0.5
+    const y = (e.clientY - rect.top) / rect.height - 0.5
+    card.style.transition = 'transform 0.08s ease-out, box-shadow 0.08s ease-out'
+    card.style.transform = `perspective(900px) rotateX(${(-y * 10).toFixed(2)}deg) rotateY(${(x * 10).toFixed(2)}deg) scale3d(1.02,1.02,1.02)`
+    card.style.boxShadow = `${-x * 24}px ${-y * 24}px 48px rgba(196,85,112,0.12), 0 8px 32px rgba(0,0,0,0.06)`
+    const glare = card.querySelector('.t-glare') as HTMLElement | null
+    if (glare) glare.style.background = `radial-gradient(circle at ${(x + 0.5) * 100}% ${(y + 0.5) * 100}%, rgba(255,255,255,0.28) 0%, transparent 65%)`
+  }
+
+  function handleCardMouseLeave(e: React.MouseEvent<HTMLDivElement>) {
+    const card = e.currentTarget
+    card.style.transition = 'transform 0.65s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.65s cubic-bezier(0.23, 1, 0.32, 1)'
+    card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)'
+    card.style.boxShadow = ''
+    const glare = card.querySelector('.t-glare') as HTMLElement | null
+    if (glare) glare.style.background = 'transparent'
+  }
+
   return (
     <div className="landing-page" ref={pageRef}>
       {/* Nav */}
@@ -283,7 +304,12 @@ export default function Landing() {
               >
                 {TESTIMONIALS.map(t => (
                   <div className="testimonial-slide" key={t.name}>
-                    <div className="testimonial-card">
+                    <div
+                      className="testimonial-card"
+                      onMouseMove={handleCardMouseMove}
+                      onMouseLeave={handleCardMouseLeave}
+                    >
+                      <div className="t-glare" aria-hidden="true" />
                       <div className="testimonial-stars">★★★★★</div>
                       <p className="testimonial-text">"{t.text}"</p>
                       <div className="testimonial-author">
