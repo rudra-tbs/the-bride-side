@@ -39,6 +39,7 @@ export default function Landing() {
   const textLayerRef = useRef<HTMLDivElement>(null)
   const previewLayerRef = useRef<HTMLDivElement>(null)
   const [activeTest, setActiveTest] = useState(0)
+  const centerCardRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
     const page = pageRef.current
@@ -75,7 +76,10 @@ export default function Landing() {
   }, [])
 
   useEffect(() => {
-    const t = setInterval(() => setActiveTest(i => (i + 1) % TESTIMONIALS.length), 5000)
+    const t = setInterval(() => {
+      resetCenterTilt()
+      setActiveTest(i => (i + 1) % TESTIMONIALS.length)
+    }, 5000)
     return () => clearInterval(t)
   }, [])
 
@@ -83,25 +87,46 @@ export default function Landing() {
     setScreen('onboarding')
   }
 
-  function handleCardMouseMove(e: React.MouseEvent<HTMLDivElement>) {
-    const card = e.currentTarget
-    const rect = card.getBoundingClientRect()
-    const x = (e.clientX - rect.left) / rect.width - 0.5
-    const y = (e.clientY - rect.top) / rect.height - 0.5
-    card.style.transition = 'transform 0.08s ease-out, box-shadow 0.08s ease-out'
-    card.style.transform = `perspective(900px) rotateX(${(-y * 10).toFixed(2)}deg) rotateY(${(x * 10).toFixed(2)}deg) scale3d(1.02,1.02,1.02)`
-    card.style.boxShadow = `${-x * 24}px ${-y * 24}px 48px rgba(196,85,112,0.12), 0 8px 32px rgba(0,0,0,0.06)`
-    const glare = card.querySelector('.t-glare') as HTMLElement | null
-    if (glare) glare.style.background = `radial-gradient(circle at ${(x + 0.5) * 100}% ${(y + 0.5) * 100}%, rgba(255,255,255,0.28) 0%, transparent 65%)`
-  }
-
-  function handleCardMouseLeave(e: React.MouseEvent<HTMLDivElement>) {
-    const card = e.currentTarget
-    card.style.transition = 'transform 0.65s cubic-bezier(0.23, 1, 0.32, 1), box-shadow 0.65s cubic-bezier(0.23, 1, 0.32, 1)'
-    card.style.transform = 'perspective(900px) rotateX(0deg) rotateY(0deg) scale3d(1,1,1)'
-    card.style.boxShadow = ''
+  function resetCenterTilt() {
+    const card = centerCardRef.current
+    if (!card) return
+    card.style.transition = 'transform 0.7s cubic-bezier(0.23, 1, 0.32, 1)'
+    card.style.transform = 'rotateX(0deg) rotateY(0deg) scale3d(1,1,1)'
     const glare = card.querySelector('.t-glare') as HTMLElement | null
     if (glare) glare.style.background = 'transparent'
+  }
+
+  function goTo(i: number) {
+    resetCenterTilt()
+    setActiveTest(i)
+  }
+
+  function getPos(i: number): 'left' | 'center' | 'right' {
+    if (i === activeTest) return 'center'
+    if (i === (activeTest + 1) % TESTIMONIALS.length) return 'right'
+    return 'left'
+  }
+
+  // Tracks mouse anywhere in the stage — tilt follows even outside the card
+  function handleStageMouseMove(e: React.MouseEvent<HTMLDivElement>) {
+    const card = centerCardRef.current
+    if (!card) return
+    const rect = card.getBoundingClientRect()
+    const cx = rect.left + rect.width / 2
+    const cy = rect.top + rect.height / 2
+    const clamp = (v: number, lo: number, hi: number) => Math.min(hi, Math.max(lo, v))
+    const x = clamp((e.clientX - cx) / (rect.width / 2), -1.5, 1.5)
+    const y = clamp((e.clientY - cy) / (rect.height / 2), -1.5, 1.5)
+    card.style.transition = 'transform 0.08s ease-out'
+    card.style.transform = `rotateX(${(-y * 10).toFixed(2)}deg) rotateY(${(x * 10).toFixed(2)}deg) scale3d(1.03,1.03,1.03)`
+    const glareX = clamp(((e.clientX - rect.left) / rect.width) * 100, 0, 100)
+    const glareY = clamp(((e.clientY - rect.top) / rect.height) * 100, 0, 100)
+    const glare = card.querySelector('.t-glare') as HTMLElement | null
+    if (glare) glare.style.background = `radial-gradient(circle at ${glareX}% ${glareY}%, rgba(255,255,255,0.22) 0%, transparent 65%)`
+  }
+
+  function handleStageMouseLeave() {
+    resetCenterTilt()
   }
 
   return (
@@ -296,18 +321,19 @@ export default function Landing() {
               Real stories from couples who planned their dream wedding with The Bride Side.
             </p>
           </div>
-          <div className="testimonial-carousel">
-            <div className="testimonial-track-wrap">
-              <div
-                className="testimonial-track"
-                style={{ transform: `translateX(${-activeTest * 100}%)` }}
-              >
-                {TESTIMONIALS.map(t => (
-                  <div className="testimonial-slide" key={t.name}>
+          <div className="t-stage-outer" onMouseMove={handleStageMouseMove} onMouseLeave={handleStageMouseLeave}>
+            <div className="t-stage">
+              {TESTIMONIALS.map((t, i) => {
+                const pos = getPos(i)
+                return (
+                  <div
+                    key={t.name}
+                    className={`t-positioner t-pos-${pos}`}
+                    onClick={() => pos !== 'center' && goTo(i)}
+                  >
                     <div
                       className="testimonial-card"
-                      onMouseMove={handleCardMouseMove}
-                      onMouseLeave={handleCardMouseLeave}
+                      ref={pos === 'center' ? centerCardRef : undefined}
                     >
                       <div className="t-glare" aria-hidden="true" />
                       <div className="testimonial-stars">★★★★★</div>
@@ -321,19 +347,19 @@ export default function Landing() {
                       </div>
                     </div>
                   </div>
-                ))}
-              </div>
+                )
+              })}
             </div>
-            <div className="testimonial-dots">
-              {TESTIMONIALS.map((_, i) => (
-                <button
-                  key={i}
-                  className={`testimonial-dot${i === activeTest ? ' active' : ''}`}
-                  onClick={() => setActiveTest(i)}
-                  aria-label={`View testimonial ${i + 1}`}
-                />
-              ))}
-            </div>
+          </div>
+          <div className="testimonial-dots">
+            {TESTIMONIALS.map((_, i) => (
+              <button
+                key={i}
+                className={`testimonial-dot${i === activeTest ? ' active' : ''}`}
+                onClick={() => goTo(i)}
+                aria-label={`View testimonial ${i + 1}`}
+              />
+            ))}
           </div>
         </div>
       </section>
