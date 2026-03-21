@@ -122,11 +122,14 @@ export default function Landing() {
     <div className="landing-page" ref={pageRef}>
       {/* Nav */}
       <nav className="landing-nav">
-        <span className="landing-logo">The Bride Side</span>
+        <span className="landing-logo">
+          <span className="landing-logo-mark" aria-hidden="true">💍</span>
+          The Bride Side
+        </span>
         <div className="landing-links">
-          <button className="landing-link" onClick={viewDemo}>View Demo</button>
-          <button className="btn btn-rose btn-sm" onClick={handleGoogleSignIn} disabled={signingIn}>
-            {signingIn ? 'Redirecting…' : 'Sign in with Google'}
+          <button className="landing-link" onClick={viewDemo}>View demo</button>
+          <button className="landing-nav-cta" onClick={handleGoogleSignIn} disabled={signingIn}>
+            {signingIn ? 'Redirecting…' : 'Get started free'}
           </button>
         </div>
       </nav>
@@ -140,37 +143,42 @@ export default function Landing() {
           {/* Text layer — fades & slides up as you scroll */}
           <div className="hero-text-layer" ref={textLayerRef}>
             <div className="container hero-center-container">
-              <div className="hero-eyebrow">India's smartest wedding planner</div>
+              <div className="hero-eyebrow">✦ India's smartest wedding planner</div>
               <h1 className="hero-h1 hero-h1-center">
-                Plan your dream wedding,<br />
-                <em>without the chaos.</em>
+                Your dream wedding,<br />
+                <em>beautifully organised.</em>
               </h1>
               <p className="hero-sub hero-sub-center">
-                The Bride Side helps you manage guests, vendors, budget, and your entire wedding timeline — all in one beautifully organised place.
+                Guests, vendors, budget, timeline — everything for your big day in one place. Built for the magic and madness of Indian weddings.
               </p>
               <div className="hero-btns hero-btns-center">
                 <button className="hero-btn-primary" onClick={handleGoogleSignIn} disabled={signingIn}>
-                  {signingIn ? 'Redirecting…' : 'Start Planning Free →'}
+                  {signingIn ? 'Redirecting…' : 'Start planning free →'}
                 </button>
                 <button className="hero-btn-ghost" onClick={viewDemo}>
                   See a live demo
                 </button>
               </div>
-              <div className="hero-stats hero-stats-center">
-                <div className="hero-stat">
-                  <div className="hero-stat-n">12,000+</div>
-                  <div className="hero-stat-l">Couples planned</div>
+              <div className="hero-trust">
+                <div className="hero-trust-item">
+                  <strong>12,000+</strong> couples planned
                 </div>
-                <div className="hero-stat">
-                  <div className="hero-stat-n">₹50Cr+</div>
-                  <div className="hero-stat-l">Budgets tracked</div>
+                <div className="hero-trust-dot" aria-hidden="true" />
+                <div className="hero-trust-item">
+                  <strong>₹50Cr+</strong> budgets tracked
                 </div>
-                <div className="hero-stat">
-                  <div className="hero-stat-n">4.9 ★</div>
-                  <div className="hero-stat-l">Average rating</div>
+                <div className="hero-trust-dot" aria-hidden="true" />
+                <div className="hero-trust-item">
+                  <strong>4.9 ★</strong> average rating
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Scroll cue */}
+          <div className="hero-scroll-cue" aria-hidden="true">
+            <span>Scroll to explore</span>
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none"><path d="M8 3v10M3 9l5 5 5-5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/></svg>
           </div>
 
           {/* Preview layer — rises & scales up as you scroll */}
@@ -272,14 +280,15 @@ export default function Landing() {
       <section className="landing-section landing-section-alt">
         <div className="container">
           <div className="section-header-center">
+            <div className="section-eyebrow">Features</div>
             <h2 className="serif section-title">
               Everything you need, <em>in one place</em>
             </h2>
             <p className="section-subtitle">
-              From guest lists to moodboards — six powerful tools built for Indian weddings.
+              Six powerful tools purpose-built for the scale and beauty of Indian weddings.
             </p>
           </div>
-          <div className="g3 feat-grid">
+          <div className="feat-grid">
             {FEATURES.map(f => (
               <div className="feat-card" key={f.title}>
                 <div className="feat-icon" style={{ background: f.color }}>
@@ -297,6 +306,7 @@ export default function Landing() {
       <section className="landing-section">
         <div className="container">
           <div className="section-header-center">
+            <div className="section-eyebrow">Testimonials</div>
             <h2 className="serif section-title">
               Loved by couples across India
             </h2>
@@ -324,16 +334,18 @@ export default function Landing() {
 
       {/* CTA Banner */}
       <section className="landing-cta">
-        <div className="container" style={{ textAlign: 'center' }}>
+        <div className="container landing-cta-inner">
+          <div className="cta-badge">Free to get started</div>
           <h2 className="serif cta-title">
-            Your big day deserves perfect planning
+            Your big day deserves<br />perfect planning
           </h2>
           <p className="cta-subtitle">
-            Join thousands of couples who planned their dream wedding with The Bride Side.
+            Join thousands of couples who turned wedding chaos into calm with The Bride Side.
           </p>
           <button className="cta-btn" onClick={handleGoogleSignIn} disabled={signingIn}>
-            Start for free — no credit card needed
+            {signingIn ? 'Redirecting…' : 'Start planning — it\'s free'}
           </button>
+          <div className="cta-note">No credit card needed · Setup in 2 minutes</div>
         </div>
       </section>
 

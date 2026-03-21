@@ -142,6 +142,9 @@ export default function App() {
         const s = useAppStore.getState()
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         s.setWedding(w as any)
+        // If the user was sent to onboarding because wedding hadn't loaded yet
+        // (race between onAuthStateChange and DB fetch), redirect to dashboard
+        if (useAppStore.getState().screen === 'onboarding') setScreen('dashboard')
         const [guests, vendors, budget, checklist, pins, notes, evData] = await Promise.all([
           dbFetchGuests(w.id),
           dbFetchVendors(w.id),

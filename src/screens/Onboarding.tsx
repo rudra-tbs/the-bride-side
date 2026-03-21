@@ -98,7 +98,12 @@ export default function Onboarding() {
   if (step === 0) {
     return (
       <div className="role-shell">
-        <h1 className="role-title">Who's planning this wedding?</h1>
+        <button className="ob-back-link" onClick={() => setScreen('landing')}>← Back to home</button>
+        <div className="role-shell-header">
+          <div className="ob-step-badge">Step 1 of 4</div>
+          <h1 className="role-title">Who's planning this wedding?</h1>
+          <p className="role-subtitle">We'll personalise your planning experience based on your role.</p>
+        </div>
         <div className="role-cards">
           {ROLES.map(r => (
             <div
@@ -108,7 +113,7 @@ export default function Onboarding() {
             >
               <div className="role-card-art">{r.emoji}</div>
               <div className="role-card-label">{r.label}</div>
-              <div style={{ fontSize: '12px', color: 'var(--ink3)', marginTop: '6px' }}>{r.sub}</div>
+              <div className="role-card-sub">{r.sub}</div>
             </div>
           ))}
         </div>
@@ -116,7 +121,7 @@ export default function Onboarding() {
           <button
             className="btn btn-rose"
             disabled={!role}
-            style={{ marginTop: '32px', opacity: role ? 1 : 0.5 }}
+            style={{ opacity: role ? 1 : 0.5 }}
             onClick={() => setStep(1)}
           >
             Continue →
@@ -132,13 +137,16 @@ export default function Onboarding() {
     <div className="ob-shell">
       <div className="ob-card">
         {/* Progress dots */}
-        <div className="ob-steps">
-          {steps.map((_, i) => (
-            <div
-              key={i}
-              className={`ob-step-dot${i < step - 1 ? ' done' : i === step - 1 ? ' active' : ''}`}
-            />
-          ))}
+        <div className="ob-progress-row">
+          <div className="ob-steps">
+            {steps.map((_, i) => (
+              <div
+                key={i}
+                className={`ob-step-dot${i < step - 1 ? ' done' : i === step - 1 ? ' active' : ''}`}
+              />
+            ))}
+          </div>
+          <span className="ob-step-label">Step {step} of {steps.length + 1}</span>
         </div>
 
         {/* Step 1: Names */}
