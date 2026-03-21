@@ -517,8 +517,106 @@ textarea.input { resize: vertical; min-height: 80px; }
 .feat-icon { width: 42px; height: 42px; border-radius: var(--r-sm); display: flex; align-items: center; justify-content: center; font-size: 18px; margin-bottom: 14px; }
 .feat-title { font-size: 15px; font-weight: 600; color: var(--ink); margin-bottom: 7px; }
 .feat-desc { font-size: 12px; color: var(--ink2); line-height: 1.65; }
+.landing-page { overflow-y: auto; flex: 1; background: var(--bg); }
+
+/* ── CENTERED HERO ─────────────────────────────────────────────── */
+.hero-centered { padding: 100px 0 80px; }
+.hero-center-container { text-align: center; display: flex; flex-direction: column; align-items: center; }
+.hero-h1-center { text-align: center; }
+.hero-sub-center { text-align: center; margin-left: auto; margin-right: auto; }
+.hero-btns-center { justify-content: center; }
+.hero-stats-center { justify-content: center; max-width: 520px; }
+
+/* ── LANDING SECTIONS ──────────────────────────────────────────── */
+.landing-section { padding: 80px 0; }
+.landing-section-alt { background: var(--surface2); }
+.section-header-center { text-align: center; margin-bottom: 48px; }
+.section-title { font-size: 34px; font-weight: 500; color: var(--ink); line-height: 1.2; }
+.section-title em { font-style: italic; color: var(--rose-dark); }
+.section-subtitle { font-size: 15px; color: var(--ink2); margin-top: 12px; max-width: 500px; margin-left: auto; margin-right: auto; line-height: 1.7; }
+.feat-grid { max-width: 900px; margin: 0 auto; }
+
+/* ── DASHBOARD PREVIEW ─────────────────────────────────────────── */
+.dashboard-preview { display: flex; flex-direction: column; gap: 32px; }
+.dash-preview-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.dash-preview-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 22px; text-align: center; transition: all 0.2s; }
+.dash-preview-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: var(--rose-mid); }
+.dash-preview-icon { font-size: 24px; margin-bottom: 10px; }
+.dash-preview-title { font-size: 13px; font-weight: 700; color: var(--ink); margin-bottom: 6px; }
+.dash-preview-desc { font-size: 12px; color: var(--ink3); line-height: 1.6; }
+.dash-preview-mockup {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+  overflow: hidden; box-shadow: var(--shadow-lg);
+}
+.mockup-bar {
+  background: var(--ink); padding: 10px 16px; display: flex; align-items: center; gap: 12px;
+}
+.mockup-dots { display: flex; gap: 6px; }
+.mockup-dots span { width: 10px; height: 10px; border-radius: 50%; }
+.mockup-dots span:nth-child(1) { background: #FF5F57; }
+.mockup-dots span:nth-child(2) { background: #FEBC2E; }
+.mockup-dots span:nth-child(3) { background: #28C840; }
+.mockup-title { font-size: 11px; color: rgba(255,255,255,0.5); font-weight: 500; }
+.mockup-body { padding: 28px 32px; }
+.mockup-stat-row { display: flex; gap: 0; margin-bottom: 24px; }
+.mockup-stat { flex: 1; text-align: center; padding: 0 16px; border-right: 1px solid var(--border); }
+.mockup-stat:last-child { border-right: none; }
+.mockup-stat-n { font-family: var(--serif); font-size: 32px; font-weight: 500; color: var(--rose-dark); line-height: 1.2; }
+.mockup-stat-l { font-size: 11px; color: var(--ink3); margin-top: 4px; font-weight: 500; text-transform: uppercase; letter-spacing: 0.3px; }
+.mockup-progress-row { display: flex; align-items: center; gap: 12px; margin-bottom: 12px; }
+.mockup-progress-label { font-size: 12px; font-weight: 600; color: var(--ink2); width: 100px; flex-shrink: 0; }
+.mockup-progress-bar { flex: 1; height: 8px; background: var(--border); border-radius: 4px; overflow: hidden; }
+.mockup-progress-fill { height: 100%; background: var(--rose); border-radius: 4px; transition: width 0.6s ease; }
+.mockup-fill-sage { background: var(--sage); }
+.mockup-progress-pct { font-size: 12px; font-weight: 700; color: var(--ink2); width: 36px; text-align: right; }
+
+/* ── TESTIMONIALS ──────────────────────────────────────────────── */
+.testimonial-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
+.testimonial-card {
+  background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+  padding: 28px; display: flex; flex-direction: column; gap: 16px;
+  transition: all 0.2s; box-shadow: var(--shadow-xs);
+}
+.testimonial-card:hover { box-shadow: var(--shadow-md); transform: translateY(-2px); border-color: var(--rose-mid); }
+.testimonial-stars { color: var(--amber); font-size: 14px; letter-spacing: 2px; }
+.testimonial-text { font-size: 13px; color: var(--ink2); line-height: 1.7; flex: 1; font-style: italic; }
+.testimonial-author { display: flex; align-items: center; gap: 10px; padding-top: 12px; border-top: 1px solid var(--border); }
+.testimonial-avatar {
+  width: 36px; height: 36px; border-radius: 50%;
+  background: linear-gradient(135deg, var(--rose-mid), var(--mauve-mid));
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; font-weight: 700; color: white; flex-shrink: 0;
+}
+.testimonial-name { font-size: 13px; font-weight: 600; color: var(--ink); }
+.testimonial-loc { font-size: 11px; color: var(--ink3); }
+
+/* ── CTA BANNER ────────────────────────────────────────────────── */
+.landing-cta { padding: 80px 0; background: linear-gradient(135deg, var(--rose-dark), var(--mauve-dark)); }
+.cta-title { font-size: 36px; font-weight: 500; color: white; margin-bottom: 14px; }
+.cta-subtitle { color: rgba(255,255,255,0.8); font-size: 15px; margin-bottom: 28px; }
+.cta-btn {
+  background: white; color: var(--rose-dark); border: none; font-family: var(--sans);
+  font-weight: 600; font-size: 15px; padding: 14px 32px; border-radius: 100px;
+  cursor: pointer; transition: all 0.2s;
+}
+.cta-btn:hover { transform: translateY(-1px); box-shadow: 0 6px 24px rgba(0,0,0,0.15); }
+
 .landing-footer { background: var(--ink); padding: 48px 0; }
 .foot-logo { font-family: var(--serif); font-size: 26px; font-weight: 500; color: white; }
+
+/* ── RESPONSIVE — LANDING ──────────────────────────────────────── */
+@media (max-width: 768px) {
+  .hero-centered { padding: 60px 0 48px; }
+  .hero-h1-center { font-size: 32px !important; }
+  .hero-stats-center { flex-direction: column; gap: 16px; }
+  .hero-stat { border-right: none; padding-right: 0; margin-right: 0; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 0; }
+  .hero-stat:last-child { border-bottom: none; padding-bottom: 0; }
+  .dash-preview-grid { grid-template-columns: repeat(2, 1fr); }
+  .testimonial-grid { grid-template-columns: 1fr; }
+  .feat-grid { grid-template-columns: 1fr 1fr !important; }
+  .mockup-stat-row { flex-wrap: wrap; }
+  .mockup-stat { min-width: 45%; margin-bottom: 12px; }
+}
 
 /* ── MOM / NOTES ───────────────────────────────────────────────── */
 .note-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 18px 20px; margin-bottom: 12px; box-shadow: var(--shadow-xs); transition: box-shadow 0.15s; }
