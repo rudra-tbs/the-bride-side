@@ -1117,7 +1117,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 }
 .ob3-sub {
   font-size: 15px; color: var(--ink3); line-height: 1.6;
-  max-width: 480px;
+  max-width: 480px; margin: 0 auto;
 }
 
 /* ── Role step ─────────────────────────────────────────────────── */
@@ -1248,6 +1248,23 @@ textarea.input { resize: vertical; min-height: 80px; }
 .ob3-chip.on {
   background: var(--rose-light); border-color: var(--rose);
   color: var(--rose-dark); font-weight: 600;
+}
+
+/* ── Yes / No toggle ───────────────────────────────────────────── */
+.ob3-yn-row {
+  display: flex; gap: 12px; margin-top: 8px;
+}
+.ob3-yn-btn {
+  padding: 10px 32px;
+  background: #faf8f5; border: 1.5px solid #ede8e2;
+  border-radius: 50px; font-family: var(--sans);
+  font-size: 14px; font-weight: 600; color: var(--ink2);
+  cursor: pointer; transition: all 0.18s;
+}
+.ob3-yn-btn:hover { border-color: var(--rose-mid); color: var(--rose-dark); }
+.ob3-yn-btn.on {
+  background: var(--rose-light); border-color: var(--rose);
+  color: var(--rose-dark);
 }
 
 /* ── Actions ───────────────────────────────────────────────────── */

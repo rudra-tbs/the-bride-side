@@ -188,6 +188,17 @@ const VIBES = [
   'Modern', 'Minimal', 'Bohemian', 'Vintage', 'Grand', 'Intimate',
 ]
 
+const EVENTS_LIST = ['Wedding', 'Reception', 'Mehndi', 'Sangeet', 'Haldi', 'Engagement', 'Roka']
+
+const RELATIONS = ['Sister', 'Brother', 'Mom', 'Dad', 'Best Friend', 'Cousin', 'Colleague', 'Other']
+
+const HELP_AREAS = [
+  'Decoration', 'Catering', 'Guest Management',
+  'Photography', 'Logistics', 'Shopping', 'Entertainment', 'Other',
+]
+
+const NOTIF_PREFS = ['WhatsApp', 'Email', 'Push Notifications']
+
 export default function Onboarding() {
   const {
     setScreen, setUserId, setWedding, setEvents, setItinerary,
@@ -195,33 +206,79 @@ export default function Onboarding() {
     setClCategories, setClTasks, setPins, setNotes,
   } = useAppStore()
 
-  const [step, setStep]               = useState(0)
-  const [role, setRole]               = useState<Role | null>(null)
-  const [selfName, setSelfName]       = useState('')
-  const [partnerName, setPartnerName] = useState('')
-  const [weddingDate, setWeddingDate] = useState('')
-  const [venue, setVenue]             = useState('')
-  const [city, setCity]               = useState('')
-  const [budget, setBudget]           = useState(0)
-  const [vibes, setVibes]             = useState<string[]>([])
+  const [step, setStep]                         = useState(0)
+  const [role, setRole]                         = useState<Role | null>(null)
+  // Bride / Groom
+  const [selfName, setSelfName]                 = useState('')
+  const [partnerName, setPartnerName]           = useState('')
+  const [whatsapp, setWhatsapp]                 = useState('')
+  const [weddingDate, setWeddingDate]           = useState('')
+  const [city, setCity]                         = useState('')
+  const [guestCount, setGuestCount]             = useState('')
+  const [selectedEvents, setSelectedEvents]     = useState<string[]>(['Wedding'])
+  const [venue, setVenue]                       = useState('')
+  const [budget, setBudget]                     = useState(0)
+  const [vibes, setVibes]                       = useState<string[]>([])
+  // Planner
+  const [agencyName, setAgencyName]             = useState('')
+  const [workEmail, setWorkEmail]               = useState('')
+  const [clientBrideName, setClientBrideName]   = useState('')
+  const [clientGroomName, setClientGroomName]   = useState('')
+  // Other / Family
+  const [relation, setRelation]                 = useState('')
+  const [attendingEvents, setAttendingEvents]   = useState<string[]>([])
+  const [travelOutstation, setTravelOutstation] = useState<boolean | null>(null)
+  const [helpAreas, setHelpAreas]               = useState<string[]>([])
+  const [notifPrefs, setNotifPrefs]             = useState<string[]>([])
+
+  const isBG      = role === 'bride' || role === 'groom'
+  const isPlanner = role === 'planner'
 
   function toggleVibe(v: string) {
     setVibes(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v])
   }
+  function toggleSelectedEvent(ev: string) {
+    setSelectedEvents(prev => prev.includes(ev) ? prev.filter(x => x !== ev) : [...prev, ev])
+  }
+  function toggleAttendingEvent(ev: string) {
+    setAttendingEvents(prev => prev.includes(ev) ? prev.filter(x => x !== ev) : [...prev, ev])
+  }
+  function toggleHelpArea(a: string) {
+    setHelpAreas(prev => prev.includes(a) ? prev.filter(x => x !== a) : [...prev, a])
+  }
+  function toggleNotifPref(n: string) {
+    setNotifPrefs(prev => prev.includes(n) ? prev.filter(x => x !== n) : [...prev, n])
+  }
 
   function finish() {
     const currentUserId = useAppStore.getState().userId ?? uuid()
-    const coupleName = selfName && partnerName
-      ? `${selfName} & ${partnerName}`
-      : selfName || 'The Happy Couple'
+    let coupleName: string, partnerN: string, selfN: string
+
+    if (isBG) {
+      selfN = selfName
+      partnerN = partnerName
+      coupleName = selfName && partnerName
+        ? `${selfName} & ${partnerName}`
+        : selfName || 'The Happy Couple'
+    } else if (isPlanner) {
+      selfN = selfName
+      partnerN = clientGroomName
+      coupleName = clientBrideName && clientGroomName
+        ? `${clientBrideName} & ${clientGroomName}`
+        : clientBrideName || 'The Happy Couple'
+    } else {
+      selfN = selfName
+      partnerN = ''
+      coupleName = 'The Happy Couple'
+    }
 
     const wedding = {
       id: uuid(),
       user_id: currentUserId,
       couple_name: coupleName,
-      partner_name: partnerName,
-      self_name: selfName,
-      role: role ?? 'bride',
+      partner_name: partnerN,
+      self_name: selfN,
+      role: role ?? 'other',
       wedding_date: weddingDate || '2026-12-01',
       venue: venue || 'TBD',
       city: city || 'Mumbai',
@@ -257,19 +314,16 @@ export default function Onboarding() {
     setScreen('dashboard')
   }
 
-  // ── Step 0: Role ───────────────────────────────────────────────
+  // ── Step 0: Role selection ─────────────────────────────────────
   if (step === 0) {
     return (
       <div className="ob3-shell">
         <button className="ob3-back-home" onClick={() => setScreen('landing')}>
           ← Home
         </button>
-
         <div className="ob3-role-wrap" key="step-0">
-          <div className="ob3-eyebrow">Step 1 of 3</div>
           <h1 className="ob3-heading serif">Who's planning<br />this wedding?</h1>
           <p className="ob3-sub">We'll personalise your experience based on your role.</p>
-
           <div className="ob3-role-grid">
             {ROLES.map(r => (
               <button
@@ -290,58 +344,348 @@ export default function Onboarding() {
     )
   }
 
-  // ── Step 1: Names + Date ───────────────────────────────────────
+  // ── Bride / Groom flow ────────────────────────────────────────
+  if (isBG) {
+    if (step === 1) {
+      const canContinue = selfName.trim().length > 0
+      return (
+        <div className="ob3-shell">
+          <div className="ob3-card-wrap" key="bg-1">
+            <div className="ob3-progress">
+              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '25%' }} /></div>
+              <span className="ob3-prog-label">Step 1 of 4</span>
+            </div>
+            <div className="ob3-eyebrow" style={{ marginTop: 24 }}>The couple</div>
+            <h2 className="ob3-card-heading serif">Tell us your names</h2>
+            <div className="ob3-fields">
+              <div className="ob3-field">
+                <label className="ob3-label">Your name <span className="ob3-req">*</span></label>
+                <input className="ob3-input" placeholder="e.g. Priya" value={selfName}
+                  onChange={e => setSelfName(e.target.value)} autoFocus />
+              </div>
+              <div className="ob3-field">
+                <label className="ob3-label">Partner's name <span className="ob3-opt">(optional)</span></label>
+                <input className="ob3-input" placeholder="e.g. Arjun" value={partnerName}
+                  onChange={e => setPartnerName(e.target.value)} />
+              </div>
+              <div className="ob3-field">
+                <label className="ob3-label">WhatsApp number <span className="ob3-opt">(optional)</span></label>
+                <input className="ob3-input" type="tel" placeholder="e.g. +91 98765 43210"
+                  value={whatsapp} onChange={e => setWhatsapp(e.target.value)} />
+              </div>
+            </div>
+            <div className="ob3-actions">
+              <button className="ob3-btn-ghost" onClick={() => setStep(0)}>Back</button>
+              <button className="ob3-btn-primary" disabled={!canContinue} onClick={() => setStep(2)}>
+                Continue →
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    if (step === 2) {
+      return (
+        <div className="ob3-shell">
+          <div className="ob3-card-wrap ob3-card-wide" key="bg-2">
+            <div className="ob3-progress">
+              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '50%' }} /></div>
+              <span className="ob3-prog-label">Step 2 of 4</span>
+            </div>
+            <div className="ob3-eyebrow" style={{ marginTop: 24 }}>The events</div>
+            <h2 className="ob3-card-heading serif">What events are you planning?</h2>
+            <div className="ob3-field" style={{ marginTop: 8 }}>
+              <div className="ob3-chip-row ob3-chip-wrap">
+                {EVENTS_LIST.map(ev => (
+                  <button key={ev} className={`ob3-chip${selectedEvents.includes(ev) ? ' on' : ''}`}
+                    onClick={() => toggleSelectedEvent(ev)}>{ev}</button>
+                ))}
+              </div>
+            </div>
+            <div className="ob3-two-col" style={{ marginTop: 20 }}>
+              <div className="ob3-field">
+                <label className="ob3-label">Wedding date <span className="ob3-opt">(optional)</span></label>
+                <input type="date" className="ob3-input" value={weddingDate}
+                  onChange={e => setWeddingDate(e.target.value)} />
+              </div>
+              <div className="ob3-field">
+                <label className="ob3-label">City</label>
+                <input className="ob3-input" placeholder="e.g. Mumbai" value={city}
+                  onChange={e => setCity(e.target.value)} />
+              </div>
+            </div>
+            <div className="ob3-field" style={{ marginTop: 16 }}>
+              <label className="ob3-label">Expected guest count <span className="ob3-opt">(optional)</span></label>
+              <input className="ob3-input" type="number" placeholder="e.g. 300" value={guestCount}
+                onChange={e => setGuestCount(e.target.value)} />
+            </div>
+            <div className="ob3-actions">
+              <button className="ob3-btn-ghost" onClick={() => setStep(1)}>Back</button>
+              <button className="ob3-btn-primary" onClick={() => setStep(3)}>Continue →</button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    if (step === 3) {
+      return (
+        <div className="ob3-shell">
+          <div className="ob3-card-wrap" key="bg-3">
+            <div className="ob3-progress">
+              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '75%' }} /></div>
+              <span className="ob3-prog-label">Step 3 of 4</span>
+            </div>
+            <div className="ob3-eyebrow" style={{ marginTop: 24 }}>The venue</div>
+            <h2 className="ob3-card-heading serif">Where's the celebration?</h2>
+            <div className="ob3-fields">
+              <div className="ob3-field">
+                <label className="ob3-label">Venue name <span className="ob3-opt">(optional)</span></label>
+                <input className="ob3-input" placeholder="e.g. Grand Hyatt Mumbai" value={venue}
+                  onChange={e => setVenue(e.target.value)} autoFocus />
+              </div>
+            </div>
+            <div className="ob3-field" style={{ marginTop: 20 }}>
+              <label className="ob3-label">Approximate budget</label>
+              <div className="ob3-chip-row ob3-chip-wrap">
+                {BUDGETS.map(b => (
+                  <button key={b.value} className={`ob3-chip${budget === b.value ? ' on' : ''}`}
+                    onClick={() => setBudget(budget === b.value ? 0 : b.value)}>{b.label}</button>
+                ))}
+              </div>
+            </div>
+            <div className="ob3-actions">
+              <button className="ob3-btn-ghost" onClick={() => setStep(2)}>Back</button>
+              <button className="ob3-btn-primary" onClick={() => setStep(4)}>Continue →</button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // Bride/Groom step 4: Vibe
+    return (
+      <div className="ob3-shell">
+        <div className="ob3-card-wrap ob3-card-wide" key="bg-4">
+          <div className="ob3-progress">
+            <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '100%' }} /></div>
+            <span className="ob3-prog-label">Step 4 of 4</span>
+          </div>
+          <div className="ob3-eyebrow" style={{ marginTop: 24 }}>Almost there</div>
+          <h2 className="ob3-card-heading serif">What's the wedding vibe?</h2>
+          <p className="ob3-card-sub">Pick any that match your dream wedding.</p>
+          <div className="ob3-field" style={{ marginTop: 8 }}>
+            <div className="ob3-chip-row ob3-chip-wrap">
+              {VIBES.map(v => (
+                <button key={v} className={`ob3-chip${vibes.includes(v) ? ' on' : ''}`}
+                  onClick={() => toggleVibe(v)}>{v}</button>
+              ))}
+            </div>
+          </div>
+          <div className="ob3-actions" style={{ marginTop: 32 }}>
+            <button className="ob3-btn-ghost" onClick={() => setStep(3)}>Back</button>
+            <button className="ob3-btn-primary ob3-btn-finish" onClick={finish}>Start planning ✨</button>
+          </div>
+          <p className="ob3-skip" onClick={finish}>Skip and go to dashboard →</p>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Planner flow ──────────────────────────────────────────────
+  if (isPlanner) {
+    if (step === 1) {
+      const canContinue = selfName.trim().length > 0
+      return (
+        <div className="ob3-shell">
+          <div className="ob3-card-wrap" key="pl-1">
+            <div className="ob3-progress">
+              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '25%' }} /></div>
+              <span className="ob3-prog-label">Step 1 of 4</span>
+            </div>
+            <div className="ob3-eyebrow" style={{ marginTop: 24 }}>Your details</div>
+            <h2 className="ob3-card-heading serif">Tell us about yourself</h2>
+            <div className="ob3-fields">
+              <div className="ob3-field">
+                <label className="ob3-label">Your name <span className="ob3-req">*</span></label>
+                <input className="ob3-input" placeholder="e.g. Kavya Sharma" value={selfName}
+                  onChange={e => setSelfName(e.target.value)} autoFocus />
+              </div>
+              <div className="ob3-field">
+                <label className="ob3-label">Agency / Studio name <span className="ob3-opt">(optional)</span></label>
+                <input className="ob3-input" placeholder="e.g. Dream Weddings Co." value={agencyName}
+                  onChange={e => setAgencyName(e.target.value)} />
+              </div>
+              <div className="ob3-field">
+                <label className="ob3-label">Work email <span className="ob3-opt">(optional)</span></label>
+                <input className="ob3-input" type="email" placeholder="e.g. kavya@dreamweddings.com"
+                  value={workEmail} onChange={e => setWorkEmail(e.target.value)} />
+              </div>
+            </div>
+            <div className="ob3-actions">
+              <button className="ob3-btn-ghost" onClick={() => setStep(0)}>Back</button>
+              <button className="ob3-btn-primary" disabled={!canContinue} onClick={() => setStep(2)}>
+                Continue →
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    if (step === 2) {
+      return (
+        <div className="ob3-shell">
+          <div className="ob3-card-wrap" key="pl-2">
+            <div className="ob3-progress">
+              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '50%' }} /></div>
+              <span className="ob3-prog-label">Step 2 of 4</span>
+            </div>
+            <div className="ob3-eyebrow" style={{ marginTop: 24 }}>The couple</div>
+            <h2 className="ob3-card-heading serif">Who are you planning for?</h2>
+            <div className="ob3-fields">
+              <div className="ob3-field">
+                <label className="ob3-label">Bride's name <span className="ob3-opt">(optional)</span></label>
+                <input className="ob3-input" placeholder="e.g. Priya" value={clientBrideName}
+                  onChange={e => setClientBrideName(e.target.value)} autoFocus />
+              </div>
+              <div className="ob3-field">
+                <label className="ob3-label">Groom's name <span className="ob3-opt">(optional)</span></label>
+                <input className="ob3-input" placeholder="e.g. Arjun" value={clientGroomName}
+                  onChange={e => setClientGroomName(e.target.value)} />
+              </div>
+            </div>
+            <div className="ob3-actions">
+              <button className="ob3-btn-ghost" onClick={() => setStep(1)}>Back</button>
+              <button className="ob3-btn-primary" onClick={() => setStep(3)}>Continue →</button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    if (step === 3) {
+      return (
+        <div className="ob3-shell">
+          <div className="ob3-card-wrap ob3-card-wide" key="pl-3">
+            <div className="ob3-progress">
+              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '75%' }} /></div>
+              <span className="ob3-prog-label">Step 3 of 4</span>
+            </div>
+            <div className="ob3-eyebrow" style={{ marginTop: 24 }}>The celebration</div>
+            <h2 className="ob3-card-heading serif">Events & logistics</h2>
+            <div className="ob3-field" style={{ marginTop: 8 }}>
+              <label className="ob3-label">Events to plan</label>
+              <div className="ob3-chip-row ob3-chip-wrap" style={{ marginTop: 8 }}>
+                {EVENTS_LIST.map(ev => (
+                  <button key={ev} className={`ob3-chip${selectedEvents.includes(ev) ? ' on' : ''}`}
+                    onClick={() => toggleSelectedEvent(ev)}>{ev}</button>
+                ))}
+              </div>
+            </div>
+            <div className="ob3-two-col" style={{ marginTop: 20 }}>
+              <div className="ob3-field">
+                <label className="ob3-label">Wedding date <span className="ob3-opt">(optional)</span></label>
+                <input type="date" className="ob3-input" value={weddingDate}
+                  onChange={e => setWeddingDate(e.target.value)} />
+              </div>
+              <div className="ob3-field">
+                <label className="ob3-label">City</label>
+                <input className="ob3-input" placeholder="e.g. Mumbai" value={city}
+                  onChange={e => setCity(e.target.value)} />
+              </div>
+            </div>
+            <div className="ob3-two-col" style={{ marginTop: 16 }}>
+              <div className="ob3-field">
+                <label className="ob3-label">Venue <span className="ob3-opt">(optional)</span></label>
+                <input className="ob3-input" placeholder="e.g. The Leela" value={venue}
+                  onChange={e => setVenue(e.target.value)} />
+              </div>
+              <div className="ob3-field">
+                <label className="ob3-label">Guest count <span className="ob3-opt">(optional)</span></label>
+                <input className="ob3-input" type="number" placeholder="e.g. 300" value={guestCount}
+                  onChange={e => setGuestCount(e.target.value)} />
+              </div>
+            </div>
+            <div className="ob3-actions">
+              <button className="ob3-btn-ghost" onClick={() => setStep(2)}>Back</button>
+              <button className="ob3-btn-primary" onClick={() => setStep(4)}>Continue →</button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
+    // Planner step 4: Budget + Vibe
+    return (
+      <div className="ob3-shell">
+        <div className="ob3-card-wrap ob3-card-wide" key="pl-4">
+          <div className="ob3-progress">
+            <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '100%' }} /></div>
+            <span className="ob3-prog-label">Step 4 of 4</span>
+          </div>
+          <div className="ob3-eyebrow" style={{ marginTop: 24 }}>Almost there</div>
+          <h2 className="ob3-card-heading serif">Budget & vibe</h2>
+          <div className="ob3-field" style={{ marginTop: 8 }}>
+            <label className="ob3-label">Total budget</label>
+            <div className="ob3-chip-row ob3-chip-wrap">
+              {BUDGETS.map(b => (
+                <button key={b.value} className={`ob3-chip${budget === b.value ? ' on' : ''}`}
+                  onClick={() => setBudget(budget === b.value ? 0 : b.value)}>{b.label}</button>
+              ))}
+            </div>
+          </div>
+          <div className="ob3-field" style={{ marginTop: 20 }}>
+            <label className="ob3-label">Wedding vibe <span className="ob3-opt">(pick any)</span></label>
+            <div className="ob3-chip-row ob3-chip-wrap">
+              {VIBES.map(v => (
+                <button key={v} className={`ob3-chip${vibes.includes(v) ? ' on' : ''}`}
+                  onClick={() => toggleVibe(v)}>{v}</button>
+              ))}
+            </div>
+          </div>
+          <div className="ob3-actions" style={{ marginTop: 32 }}>
+            <button className="ob3-btn-ghost" onClick={() => setStep(3)}>Back</button>
+            <button className="ob3-btn-primary ob3-btn-finish" onClick={finish}>Start planning ✨</button>
+          </div>
+          <p className="ob3-skip" onClick={finish}>Skip and go to dashboard →</p>
+        </div>
+      </div>
+    )
+  }
+
+  // ── Other / Family flow ───────────────────────────────────────
   if (step === 1) {
     const canContinue = selfName.trim().length > 0
     return (
       <div className="ob3-shell">
-        <div className="ob3-card-wrap" key="step-1">
+        <div className="ob3-card-wrap" key="ot-1">
           <div className="ob3-progress">
             <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '33%' }} /></div>
-            <span className="ob3-prog-label">Step 2 of 3</span>
+            <span className="ob3-prog-label">Step 1 of 3</span>
           </div>
-
-          <div className="ob3-eyebrow" style={{ marginTop: 24 }}>The couple</div>
-          <h2 className="ob3-card-heading serif">Tell us your names</h2>
-
+          <div className="ob3-eyebrow" style={{ marginTop: 24 }}>About you</div>
+          <h2 className="ob3-card-heading serif">Who are you?</h2>
           <div className="ob3-fields">
             <div className="ob3-field">
               <label className="ob3-label">Your name <span className="ob3-req">*</span></label>
-              <input
-                className="ob3-input"
-                placeholder="e.g. Priya"
-                value={selfName}
-                onChange={e => setSelfName(e.target.value)}
-                autoFocus
-              />
+              <input className="ob3-input" placeholder="e.g. Neha" value={selfName}
+                onChange={e => setSelfName(e.target.value)} autoFocus />
             </div>
             <div className="ob3-field">
-              <label className="ob3-label">Partner's name <span className="ob3-opt">(optional)</span></label>
-              <input
-                className="ob3-input"
-                placeholder="e.g. Arjun"
-                value={partnerName}
-                onChange={e => setPartnerName(e.target.value)}
-              />
-            </div>
-            <div className="ob3-field">
-              <label className="ob3-label">Wedding date <span className="ob3-opt">(optional)</span></label>
-              <input
-                type="date"
-                className="ob3-input"
-                value={weddingDate}
-                onChange={e => setWeddingDate(e.target.value)}
-              />
+              <label className="ob3-label">Relation to the couple <span className="ob3-opt">(optional)</span></label>
+              <div className="ob3-chip-row ob3-chip-wrap" style={{ marginTop: 8 }}>
+                {RELATIONS.map(r => (
+                  <button key={r} className={`ob3-chip${relation === r ? ' on' : ''}`}
+                    onClick={() => setRelation(relation === r ? '' : r)}>{r}</button>
+                ))}
+              </div>
             </div>
           </div>
-
           <div className="ob3-actions">
             <button className="ob3-btn-ghost" onClick={() => setStep(0)}>Back</button>
-            <button
-              className="ob3-btn-primary"
-              disabled={!canContinue}
-              onClick={() => setStep(2)}
-            >
+            <button className="ob3-btn-primary" disabled={!canContinue} onClick={() => setStep(2)}>
               Continue →
             </button>
           </div>
@@ -350,77 +694,75 @@ export default function Onboarding() {
     )
   }
 
-  // ── Step 2: Venue + Budget + Vibe ─────────────────────────────
+  if (step === 2) {
+    return (
+      <div className="ob3-shell">
+        <div className="ob3-card-wrap ob3-card-wide" key="ot-2">
+          <div className="ob3-progress">
+            <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '66%' }} /></div>
+            <span className="ob3-prog-label">Step 2 of 3</span>
+          </div>
+          <div className="ob3-eyebrow" style={{ marginTop: 24 }}>Your involvement</div>
+          <h2 className="ob3-card-heading serif">Events & travel</h2>
+          <div className="ob3-field" style={{ marginTop: 8 }}>
+            <label className="ob3-label">Which events are you attending?</label>
+            <div className="ob3-chip-row ob3-chip-wrap" style={{ marginTop: 8 }}>
+              {EVENTS_LIST.map(ev => (
+                <button key={ev} className={`ob3-chip${attendingEvents.includes(ev) ? ' on' : ''}`}
+                  onClick={() => toggleAttendingEvent(ev)}>{ev}</button>
+              ))}
+            </div>
+          </div>
+          <div className="ob3-field" style={{ marginTop: 24 }}>
+            <label className="ob3-label">Travelling outstation?</label>
+            <div className="ob3-yn-row">
+              <button className={`ob3-yn-btn${travelOutstation === true ? ' on' : ''}`}
+                onClick={() => setTravelOutstation(true)}>Yes</button>
+              <button className={`ob3-yn-btn${travelOutstation === false ? ' on' : ''}`}
+                onClick={() => setTravelOutstation(false)}>No</button>
+            </div>
+          </div>
+          <div className="ob3-actions">
+            <button className="ob3-btn-ghost" onClick={() => setStep(1)}>Back</button>
+            <button className="ob3-btn-primary" onClick={() => setStep(3)}>Continue →</button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  // Other/Family step 3: Help areas + notif prefs
   return (
     <div className="ob3-shell">
-      <div className="ob3-card-wrap ob3-card-wide" key="step-2">
+      <div className="ob3-card-wrap ob3-card-wide" key="ot-3">
         <div className="ob3-progress">
-          <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '66%' }} /></div>
+          <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '100%' }} /></div>
           <span className="ob3-prog-label">Step 3 of 3</span>
         </div>
-
-        <div className="ob3-eyebrow" style={{ marginTop: 24 }}>Almost there</div>
-        <h2 className="ob3-card-heading serif">The details</h2>
-        <p className="ob3-card-sub">All fields here are optional — skip anything you don't know yet.</p>
-
-        <div className="ob3-two-col">
-          <div className="ob3-field">
-            <label className="ob3-label">Venue</label>
-            <input
-              className="ob3-input"
-              placeholder="e.g. Grand Hyatt Mumbai"
-              value={venue}
-              onChange={e => setVenue(e.target.value)}
-            />
-          </div>
-          <div className="ob3-field">
-            <label className="ob3-label">City</label>
-            <input
-              className="ob3-input"
-              placeholder="e.g. Mumbai"
-              value={city}
-              onChange={e => setCity(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="ob3-field" style={{ marginTop: 20 }}>
-          <label className="ob3-label">Approximate budget</label>
-          <div className="ob3-chip-row">
-            {BUDGETS.map(b => (
-              <button
-                key={b.value}
-                className={`ob3-chip${budget === b.value ? ' on' : ''}`}
-                onClick={() => setBudget(budget === b.value ? 0 : b.value)}
-              >
-                {b.label}
-              </button>
+        <div className="ob3-eyebrow" style={{ marginTop: 24 }}>Almost done</div>
+        <h2 className="ob3-card-heading serif">How can you help?</h2>
+        <div className="ob3-field" style={{ marginTop: 8 }}>
+          <label className="ob3-label">Areas you can help with <span className="ob3-opt">(pick any)</span></label>
+          <div className="ob3-chip-row ob3-chip-wrap" style={{ marginTop: 8 }}>
+            {HELP_AREAS.map(a => (
+              <button key={a} className={`ob3-chip${helpAreas.includes(a) ? ' on' : ''}`}
+                onClick={() => toggleHelpArea(a)}>{a}</button>
             ))}
           </div>
         </div>
-
         <div className="ob3-field" style={{ marginTop: 20 }}>
-          <label className="ob3-label">Wedding vibe <span className="ob3-opt">(pick any)</span></label>
-          <div className="ob3-chip-row ob3-chip-wrap">
-            {VIBES.map(v => (
-              <button
-                key={v}
-                className={`ob3-chip${vibes.includes(v) ? ' on' : ''}`}
-                onClick={() => toggleVibe(v)}
-              >
-                {v}
-              </button>
+          <label className="ob3-label">Notification preferences <span className="ob3-opt">(pick any)</span></label>
+          <div className="ob3-chip-row ob3-chip-wrap" style={{ marginTop: 8 }}>
+            {NOTIF_PREFS.map(n => (
+              <button key={n} className={`ob3-chip${notifPrefs.includes(n) ? ' on' : ''}`}
+                onClick={() => toggleNotifPref(n)}>{n}</button>
             ))}
           </div>
         </div>
-
         <div className="ob3-actions" style={{ marginTop: 32 }}>
-          <button className="ob3-btn-ghost" onClick={() => setStep(1)}>Back</button>
-          <button className="ob3-btn-primary ob3-btn-finish" onClick={finish}>
-            Start planning ✨
-          </button>
+          <button className="ob3-btn-ghost" onClick={() => setStep(2)}>Back</button>
+          <button className="ob3-btn-primary ob3-btn-finish" onClick={finish}>Let's go ✨</button>
         </div>
-
         <p className="ob3-skip" onClick={finish}>Skip and go to dashboard →</p>
       </div>
     </div>
