@@ -797,6 +797,36 @@ textarea.input { resize: vertical; min-height: 80px; }
 .task-sub { font-size: 11px; color: var(--ink3); margin-top: 2px; }
 .task-meta { display: flex; gap: 6px; align-items: center; margin-top: 5px; flex-wrap: wrap; }
 
+/* ── DASH OVERVIEW GRID ────────────────────────────────────────── */
+.dash-overview-grid { display: grid; grid-template-columns: 280px 1fr; gap: 20px; align-items: start; }
+
+/* ── MOBILE NAV ────────────────────────────────────────────────── */
+:root { --mob-nav-h: 62px; }
+
+.mobile-nav {
+  display: none;
+  position: fixed;
+  bottom: 0; left: 0; right: 0;
+  z-index: 100;
+  background: var(--surface);
+  border-top: 1px solid var(--border);
+  box-shadow: 0 -2px 16px rgba(42,26,32,0.08);
+  padding: 4px 0 calc(4px + env(safe-area-inset-bottom));
+  justify-content: stretch;
+  align-items: stretch;
+}
+.mob-nav-item {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  gap: 3px; flex: 1; padding: 4px 2px;
+  border: none; background: none; cursor: pointer;
+  font-family: var(--sans); font-size: 10px; font-weight: 600;
+  color: var(--ink3); transition: color 0.15s;
+  -webkit-tap-highlight-color: transparent;
+}
+.mob-nav-item svg { width: 20px; height: 20px; flex-shrink: 0; }
+.mob-nav-item.active { color: var(--rose-dark); }
+.mob-nav-item span { line-height: 1; }
+
 /* ── PHASE PILLS ───────────────────────────────────────────────── */
 .phase-pills { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 2px; margin-bottom: 20px; scrollbar-width: none; }
 .phase-pills::-webkit-scrollbar { display: none; }
@@ -812,18 +842,56 @@ textarea.input { resize: vertical; min-height: 80px; }
 @media (max-width: 900px) {
   :root { --sidebar-w: 0px; }
   .sidebar { display: none; }
+  .mobile-nav { display: flex; }
   .stat-grid, .comm-grid, .g4 { grid-template-columns: repeat(2,1fr); }
   .role-cards { grid-template-columns: repeat(2,1fr); }
+  /* Topbar: show logo, hide user text */
+  .topbar-logo-zone { width: auto; padding: 0 16px; border-right: none; flex: 1; }
+  .topbar-nav { display: none; }
+  .user-name, .user-email { display: none; }
+  /* Bottom clearance for mobile nav */
+  .main-panel { padding-bottom: calc(var(--mob-nav-h) + 8px); }
+  /* Dash overview grid collapses to single column */
+  .dash-overview-grid { grid-template-columns: 1fr; }
+  /* Landing hero tweaks */
+  .hero-text-layer { padding-top: 52px; }
+  .hero-sub { font-size: 15px; }
+}
+@media (max-width: 768px) {
+  /* Guests / tables: allow horizontal scroll */
+  .card:has(> .tbl), .card:has(> * > .tbl) { overflow-x: auto !important; }
+  /* Landing section spacing */
+  .landing-section { padding: 60px 0; }
+  .hero-scroll-scene { height: 220vh; }
 }
 @media (max-width: 600px) {
   .stat-grid, .g2, .g3 { grid-template-columns: 1fr; }
   .page-head { padding: 16px 16px 0; }
   .page-body { padding: 16px 16px 28px; }
   .feat-grid { grid-template-columns: 1fr !important; }
-  .landing-nav { padding: 0 20px; }
+  .landing-nav { padding: 0 16px; }
   .hero-scroll-cue { display: none; }
   .role-cards { grid-template-columns: 1fr 1fr; }
   .ob-back-link { top: 16px; left: 16px; }
+  /* Budget hero font reduce */
+  .bh-total { font-size: 32px !important; letter-spacing: -1px; }
+  .bh-meta { gap: 14px; }
+  /* Onboarding 2-col form collapse */
+  .ob3-two-col { grid-template-columns: 1fr; }
+  /* Modal full width */
+  .modal-box { padding: 20px; }
+  /* Section headings */
+  .section-title { font-size: 28px; }
+  /* Checklist summary bar wrap */
+  .cl-summary-bar { flex-wrap: wrap; gap: 12px; padding: 12px 16px; }
+  .cl-overall-prog { padding-left: 0; width: 100%; }
+  .cl-overall-track { max-width: none; }
+  /* Moodboard 2 columns on very small screens */
+  .mood-grid { columns: 2 140px; }
+  /* Itinerary time column narrower */
+  .itinerary-row { grid-template-columns: 72px 24px 1fr; }
+  .itin-time-col { padding-left: 12px; }
+  .itin-event-col { padding-right: 12px; }
 }
 
 /* ══════════════════════════════════════════════════════════════

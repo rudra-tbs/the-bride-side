@@ -85,7 +85,7 @@ export default function Guests() {
         ))}
         <input
           className="input"
-          style={{ marginLeft: 'auto', width: '200px', padding: '6px 12px' }}
+          style={{ marginLeft: 'auto', width: 'min(200px, 100%)', padding: '6px 12px' }}
           placeholder="Search by name or phone..."
           value={search}
           onChange={e => setSearch(e.target.value)}
@@ -93,8 +93,8 @@ export default function Guests() {
       </div>
 
       <div className="page-body">
-        <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
-          <table className="tbl">
+        <div className="card" style={{ padding: 0, overflowX: 'auto' }}>
+          <table className="tbl" style={{ minWidth: '540px' }}>
             <thead>
               <tr>
                 <th>Guest</th>

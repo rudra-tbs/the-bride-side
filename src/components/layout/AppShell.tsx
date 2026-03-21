@@ -87,6 +87,20 @@ export default function AppShell({ children }: { children: ReactNode }) {
       <main className="main-wrapper">
         {children}
       </main>
+
+      {/* Mobile bottom navigation */}
+      <nav className="mobile-nav">
+        {NAV_ITEMS.map(item => (
+          <button
+            key={item.screen}
+            className={`mob-nav-item${screen === item.screen ? ' active' : ''}`}
+            onClick={() => setScreen(item.screen)}
+          >
+            {item.icon}
+            <span>{item.label}</span>
+          </button>
+        ))}
+      </nav>
     </div>
   )
 }
