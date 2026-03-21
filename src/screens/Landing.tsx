@@ -45,20 +45,22 @@ export default function Landing() {
     setGuests, setVendors, setBudgetCategories, setExpenses,
     setClCategories, setClTasks, setPins, setNotes } = useAppStore()
   const [signingIn, setSigningIn] = useState(false)
+  const pageRef = useRef<HTMLDivElement>(null)
   const scrollSceneRef = useRef<HTMLElement>(null)
   const textLayerRef = useRef<HTMLDivElement>(null)
   const previewLayerRef = useRef<HTMLDivElement>(null)
 
   useEffect(() => {
+    const page = pageRef.current
     const scene = scrollSceneRef.current
     const text = textLayerRef.current
     const preview = previewLayerRef.current
-    if (!scene || !text || !preview) return
+    if (!page || !scene || !text || !preview) return
 
     function update() {
       const rect = scene!.getBoundingClientRect()
       const scrolled = -rect.top
-      const total = scene!.offsetHeight - window.innerHeight
+      const total = scene!.offsetHeight - page!.clientHeight
       if (total <= 0) return
       const p = Math.max(0, Math.min(1, scrolled / total))
 
@@ -76,9 +78,10 @@ export default function Landing() {
         `translateX(-50%) perspective(1200px) translateY(${ty}px) scale(${scale}) rotateX(${rx}deg)`
     }
 
-    window.addEventListener('scroll', update, { passive: true })
+    // .landing-page has overflow-y:auto — scroll fires on it, not window
+    page.addEventListener('scroll', update, { passive: true })
     update()
-    return () => window.removeEventListener('scroll', update)
+    return () => page.removeEventListener('scroll', update)
   }, [])
 
   async function handleGoogleSignIn() {
@@ -116,7 +119,7 @@ export default function Landing() {
   }
 
   return (
-    <div className="landing-page">
+    <div className="landing-page" ref={pageRef}>
       {/* Nav */}
       <nav className="landing-nav">
         <span className="landing-logo">The Bride Side</span>
