@@ -545,7 +545,9 @@ textarea.input { resize: vertical; min-height: 80px; }
 .hero-h1 { font-family: var(--serif); font-size: clamp(38px,5.5vw,64px); font-weight: 500; letter-spacing: -0.5px; line-height: 1.08; color: var(--ink); }
 .hero-h1 em { font-style: italic; color: var(--rose-dark); }
 .hero-sub { font-size: 17px; color: var(--ink2); max-width: 480px; line-height: 1.7; margin-top: 20px; }
-.hero-btns { display: flex; gap: 10px; margin-top: 34px; flex-wrap: wrap; }
+.hero-btns { display: flex; flex-direction: column; align-items: flex-start; gap: 10px; margin-top: 34px; }
+.hero-btns-center { align-items: center; justify-content: center; }
+.hero-btn-note { margin: 0; font-size: 13px; color: var(--ink3); letter-spacing: 0.01em; }
 @keyframes hero-btn-shine {
   0%   { transform: translateX(-120%) skewX(-20deg); }
   100% { transform: translateX(320%)  skewX(-20deg); }
@@ -586,7 +588,6 @@ textarea.input { resize: vertical; min-height: 80px; }
 .hero-center-container { text-align: center; display: flex; flex-direction: column; align-items: center; }
 .hero-h1-center { text-align: center; }
 .hero-sub-center { text-align: center; margin-left: auto; margin-right: auto; }
-.hero-btns-center { justify-content: center; }
 .hero-stats-center { justify-content: center; max-width: 520px; }
 
 /* ── LANDING SECTIONS ──────────────────────────────────────────── */
