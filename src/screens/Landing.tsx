@@ -1,7 +1,5 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAppStore } from '@/store/app'
-import { signInWithGoogle } from '@/lib/supabase'
-import toast from 'react-hot-toast'
 import {
   mockWedding, mockEvents, mockItinerary, mockGuests,
   mockVendors, mockBudgetCategories, mockExpenses,
@@ -44,7 +42,6 @@ export default function Landing() {
   const { setScreen, setUserId, setWedding, setEvents, setItinerary,
     setGuests, setVendors, setBudgetCategories, setExpenses,
     setClCategories, setClTasks, setPins, setNotes } = useAppStore()
-  const [signingIn, setSigningIn] = useState(false)
   const pageRef = useRef<HTMLDivElement>(null)
   const scrollSceneRef = useRef<HTMLElement>(null)
   const textLayerRef = useRef<HTMLDivElement>(null)
@@ -84,22 +81,8 @@ export default function Landing() {
     return () => page.removeEventListener('scroll', update)
   }, [])
 
-  async function handleGoogleSignIn() {
-    const hasSupabase = !!(
-      import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY
-    )
-    if (!hasSupabase) {
-      // No Supabase configured — go straight to onboarding
-      setScreen('onboarding')
-      return
-    }
-    try {
-      setSigningIn(true)
-      await signInWithGoogle()
-    } catch {
-      setSigningIn(false)
-      toast.error('Sign-in failed. Please try again.')
-    }
+  function handleGoogleSignIn() {
+    setScreen('onboarding')
   }
 
   function viewDemo() {
@@ -128,8 +111,8 @@ export default function Landing() {
         </span>
         <div className="landing-links">
           <button className="landing-link" onClick={viewDemo}>View demo</button>
-          <button className="landing-nav-cta" onClick={handleGoogleSignIn} disabled={signingIn}>
-            {signingIn ? 'Redirecting…' : 'Get started free'}
+          <button className="landing-nav-cta" onClick={handleGoogleSignIn} disabled={false}>
+            Get started free
           </button>
         </div>
       </nav>
@@ -152,8 +135,8 @@ export default function Landing() {
                 Guests, vendors, budget, timeline — everything for your big day in one place. Built for the magic and madness of Indian weddings.
               </p>
               <div className="hero-btns hero-btns-center">
-                <button className="hero-btn-primary" onClick={handleGoogleSignIn} disabled={signingIn}>
-                  {signingIn ? 'Redirecting…' : 'Start planning free →'}
+                <button className="hero-btn-primary" onClick={handleGoogleSignIn} disabled={false}>
+                  Start planning free →
                 </button>
                 <button className="hero-btn-ghost" onClick={viewDemo}>
                   See a live demo
@@ -342,8 +325,8 @@ export default function Landing() {
           <p className="cta-subtitle">
             Join thousands of couples who turned wedding chaos into calm with The Bride Side.
           </p>
-          <button className="cta-btn" onClick={handleGoogleSignIn} disabled={signingIn}>
-            {signingIn ? 'Redirecting…' : 'Start planning — it\'s free'}
+          <button className="cta-btn" onClick={handleGoogleSignIn} disabled={false}>
+            Start planning — it's free
           </button>
           <div className="cta-note">No credit card needed · Setup in 2 minutes</div>
         </div>
