@@ -132,6 +132,17 @@ export default function Landing() {
     resetCenterTilt()
   }
 
+  // Clicking left half of stage → prev, right half → next
+  function handleStageClick(e: React.MouseEvent<HTMLDivElement>) {
+    const rect = e.currentTarget.getBoundingClientRect()
+    const cx = rect.left + rect.width / 2
+    if (e.clientX < cx) {
+      goTo((activeTest - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)
+    } else {
+      goTo((activeTest + 1) % TESTIMONIALS.length)
+    }
+  }
+
   return (
     <div className="landing-page" ref={pageRef}>
       {/* Nav */}
@@ -324,7 +335,7 @@ export default function Landing() {
               Real stories from couples who planned their dream wedding with The Bride Side.
             </p>
           </div>
-          <div className="t-stage-outer" onMouseMove={handleStageMouseMove} onMouseLeave={handleStageMouseLeave}>
+          <div className="t-stage-outer" onMouseMove={handleStageMouseMove} onMouseLeave={handleStageMouseLeave} onClick={handleStageClick}>
             <div className="t-stage">
               {TESTIMONIALS.map((t, i) => {
                 const pos = getPos(i)
@@ -332,7 +343,7 @@ export default function Landing() {
                   <div
                     key={t.name}
                     className={`t-positioner t-pos-${pos}`}
-                    onClick={() => pos !== 'center' && goTo(i)}
+                    onClick={(e) => { if (pos !== 'center') { e.stopPropagation(); goTo(i) } }}
                   >
                     <div
                       className="testimonial-card"
@@ -352,20 +363,6 @@ export default function Landing() {
                           </div>
                         </div>
                       </div>
-                      {pos === 'center' && (
-                        <>
-                          <button
-                            className="t-nav-zone t-nav-prev"
-                            onClick={() => goTo((activeTest - 1 + TESTIMONIALS.length) % TESTIMONIALS.length)}
-                            aria-label="Previous testimonial"
-                          />
-                          <button
-                            className="t-nav-zone t-nav-next"
-                            onClick={() => goTo((activeTest + 1) % TESTIMONIALS.length)}
-                            aria-label="Next testimonial"
-                          />
-                        </>
-                      )}
                     </div>
                   </div>
                 )

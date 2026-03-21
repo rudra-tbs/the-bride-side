@@ -726,6 +726,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   height: 330px;
   margin-bottom: 28px;
   overflow: visible;
+  cursor: pointer;
 }
 .t-stage {
   position: relative;
@@ -749,7 +750,6 @@ textarea.input { resize: vertical; min-height: 80px; }
   transform: translateX(-50%);
   opacity: 1;
   z-index: 3;
-  cursor: default;
 }
 .t-pos-left {
   transform: translateX(calc(-50% - 380px)) translateZ(-160px) rotateY(42deg) scale(0.82);
@@ -805,26 +805,6 @@ textarea.input { resize: vertical; min-height: 80px; }
 .testimonial-name { font-size: 13px; font-weight: 600; color: #fff; }
 .testimonial-loc { font-size: 11px; color: rgba(255,255,255,0.48); margin-top: 1px; }
 
-/* ── NAV ZONES (left/right halves of center card) ─────────────────── */
-.t-nav-zone {
-  position: absolute; top: 0; width: 42%; height: 100%;
-  z-index: 4; border: none; background: transparent;
-  display: flex; align-items: center;
-  cursor: pointer; opacity: 0;
-  transition: opacity 0.22s ease;
-  padding: 0 18px;
-}
-.t-nav-prev { left: 0; justify-content: flex-start; }
-.t-nav-next { right: 0; justify-content: flex-end; }
-.t-nav-zone::after {
-  font-size: 38px; font-weight: 200;
-  color: rgba(255,255,255,0.9);
-  text-shadow: 0 2px 16px rgba(0,0,0,0.55);
-  line-height: 1; pointer-events: none;
-}
-.t-nav-prev::after { content: '‹'; }
-.t-nav-next::after { content: '›'; }
-.t-pos-center:hover .t-nav-zone { opacity: 1; }
 
 .testimonial-dots { display: flex; justify-content: center; align-items: center; gap: 8px; }
 .testimonial-dot { width: 8px; height: 8px; border-radius: 4px; border: none; padding: 0; cursor: pointer; background: var(--border2); transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); }
