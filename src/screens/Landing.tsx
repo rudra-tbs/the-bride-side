@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from 'react'
 import { useAppStore } from '@/store/app'
 import { signInWithGoogle } from '@/lib/supabase'
+import toast from 'react-hot-toast'
 import {
   mockWedding, mockEvents, mockItinerary, mockGuests,
   mockVendors, mockBudgetCategories, mockExpenses,
@@ -63,11 +64,20 @@ export default function Landing() {
   }, [])
 
   async function handleGoogleSignIn() {
+    const hasSupabase = !!(
+      import.meta.env.VITE_SUPABASE_URL && import.meta.env.VITE_SUPABASE_ANON_KEY
+    )
+    if (!hasSupabase) {
+      // No Supabase configured — go straight to onboarding
+      setScreen('onboarding')
+      return
+    }
     try {
       setSigningIn(true)
       await signInWithGoogle()
     } catch {
       setSigningIn(false)
+      toast.error('Sign-in failed. Please try again.')
     }
   }
 
