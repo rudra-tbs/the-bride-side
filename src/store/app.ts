@@ -157,12 +157,21 @@ export const useAppStore = create<AppState>()(
     }),
     {
       name: 'tbs-app-store',
-      // Only persist navigation + wedding basics; rest is fetched from Supabase
       partialize: (state) => ({
         userId: state.userId,
         screen: state.screen,
         dashTab: state.dashTab,
         wedding: state.wedding,
+        events: state.events,
+        itinerary: state.itinerary,
+        guests: state.guests,
+        vendors: state.vendors,
+        budgetCategories: state.budgetCategories,
+        expenses: state.expenses,
+        clCategories: state.clCategories,
+        clTasks: state.clTasks,
+        pins: state.pins,
+        notes: state.notes,
       }),
     }
   )

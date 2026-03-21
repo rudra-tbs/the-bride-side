@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useAppStore } from '@/store/app'
-import { supabase } from '@/lib/supabase'
+import { supabase, dbFetchWedding, dbFetchGuests, dbFetchVendors, dbFetchBudget, dbFetchChecklist, dbFetchPins, dbFetchNotes, dbFetchEvents } from '@/lib/supabase'
 import type { Screen } from '@/types'
 import {
   mockEvents, mockItinerary, mockGuests,
@@ -130,6 +130,53 @@ export default function App() {
 
     return () => subscription.unsubscribe()
   }, [setUserId, setScreen])
+
+  // Load real data from Supabase when userId is set
+  useEffect(() => {
+    if (!userId || userId === MOCK_USER_ID) return
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    async function loadFromSupabase() {
+      try {
+        const w = await dbFetchWedding(userId!)
+        if (!w) return
+        const s = useAppStore.getState()
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        s.setWedding(w as any)
+        const [guests, vendors, budget, checklist, pins, notes, evData] = await Promise.all([
+          dbFetchGuests(w.id),
+          dbFetchVendors(w.id),
+          dbFetchBudget(w.id),
+          dbFetchChecklist(w.id),
+          dbFetchPins(w.id),
+          dbFetchNotes(w.id),
+          dbFetchEvents(w.id),
+        ])
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        s.setGuests(guests as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        s.setVendors(vendors as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        s.setBudgetCategories(budget.categories as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        s.setExpenses(budget.expenses as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        s.setClCategories(checklist.categories as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        s.setClTasks(checklist.tasks as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        s.setPins(pins as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        s.setNotes(notes as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        s.setEvents(evData.events as any)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        s.setItinerary(evData.itinerary as any)
+      } catch {
+        // Supabase not configured or no data — local storage data is used
+      }
+    }
+    loadFromSupabase()
+  }, [userId])
 
   // Seed mock data for authenticated users who are on app screens without data
   useEffect(() => {

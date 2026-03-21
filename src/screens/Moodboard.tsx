@@ -39,6 +39,7 @@ export default function Moodboard() {
   const [catFilter, setCatFilter] = useState<PinCategory | 'all'>('all')
   const [showAdd, setShowAdd] = useState(false)
   const [caption, setCaption] = useState('')
+  const [imageUrl, setImageUrl] = useState('')
   const [category, setCategory] = useState<PinCategory>('decor')
 
   const filtered = pins.filter(p => catFilter === 'all' || p.category === catFilter)
@@ -49,7 +50,7 @@ export default function Moodboard() {
     addPin({
       id: uuid(),
       wedding_id: wedding?.id ?? 'w1',
-      image_url: '',
+      image_url: imageUrl.trim(),
       storage_path: null,
       caption: caption.trim(),
       category,
@@ -57,7 +58,7 @@ export default function Moodboard() {
       color_palette: [],
       created_at: new Date().toISOString(),
     })
-    setCaption(''); setCategory('decor')
+    setCaption(''); setImageUrl(''); setCategory('decor')
     setShowAdd(false)
     toast.success('Pin added to moodboard!')
   }
@@ -96,9 +97,17 @@ export default function Moodboard() {
                 <div className="mood-pin" key={pin.id}>
                   <div
                     className="mood-pin-img"
-                    style={{ background: bg, height: `${height}px`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px' }}
+                    style={{
+                      background: pin.image_url ? undefined : bg,
+                      height: `${height}px`,
+                      display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '48px',
+                      ...(pin.image_url ? {
+                        backgroundImage: `url(${pin.image_url})`,
+                        backgroundSize: 'cover', backgroundPosition: 'center',
+                      } : {}),
+                    }}
                   >
-                    {CAT_EMOJI[pin.category]}
+                    {!pin.image_url && CAT_EMOJI[pin.category]}
                     <div className="mood-pin-acts">
                       <button
                         className={`mood-pin-btn${pin.is_liked ? ' saved' : ''}`}
@@ -131,6 +140,10 @@ export default function Moodboard() {
         <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) setShowAdd(false) }}>
           <div className="modal-box">
             <div className="modal-title">Add Inspiration Pin</div>
+            <div className="modal-field">
+              <label className="modal-label">Image URL (optional)</label>
+              <input className="input" type="url" placeholder="https://..." value={imageUrl} onChange={e => setImageUrl(e.target.value)} />
+            </div>
             <div className="modal-field">
               <label className="modal-label">Caption</label>
               <input className="input" placeholder="Describe your inspiration..." value={caption} onChange={e => setCaption(e.target.value)} />

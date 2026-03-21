@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useAppStore } from '@/store/app'
 import type { Role } from '@/types'
 import { uuid } from '@/lib/utils'
+import { dbSaveWedding } from '@/lib/supabase'
 import {
   mockEvents, mockItinerary, mockGuests, mockVendors,
   mockBudgetCategories, mockExpenses, mockClCategories,
@@ -67,6 +68,19 @@ export default function Onboarding() {
     }
     setUserId(currentUserId)
     setWedding(wedding)
+    // Persist to Supabase (fire-and-forget; local state is already set)
+    dbSaveWedding({
+      user_id: currentUserId,
+      couple_name: wedding.couple_name,
+      partner_name: wedding.partner_name,
+      self_name: wedding.self_name,
+      role: wedding.role,
+      wedding_date: wedding.wedding_date,
+      venue: wedding.venue,
+      city: wedding.city,
+      total_budget: wedding.total_budget,
+      vibe_tags: wedding.vibe_tags,
+    }).catch(() => null)
     setEvents(mockEvents)
     setItinerary(mockItinerary)
     setGuests(mockGuests)
