@@ -76,7 +76,7 @@ function GuestTab() {
 
   return (
     <div className="page-body">
-      <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '20px', alignItems: 'start' }}>
+      <div className="dash-overview-grid">
         {/* Left: Countdown */}
         <div>
           <Countdown date={wedding.wedding_date} coupleName={wedding.couple_name} venue={wedding.venue} />
