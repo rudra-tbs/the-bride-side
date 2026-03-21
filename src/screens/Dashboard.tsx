@@ -293,10 +293,11 @@ function DetailsTab() {
 
 // ── MOM Tab ──────────────────────────────────────────────────────────
 function MOMTab() {
-  const { notes, addNote, removeNote } = useAppStore()
+  const { wedding, notes, addNote, removeNote } = useAppStore()
   const [showAdd, setShowAdd] = useState(false)
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
+  const [noteType, setNoteType] = useState<'general' | 'mom' | 'vendor'>('general')
   const [filter, setFilter] = useState<'all' | 'mom' | 'general' | 'vendor'>('all')
 
   const filtered = notes.filter(n => filter === 'all' || n.type === filter)
@@ -305,15 +306,15 @@ function MOMTab() {
     if (!title.trim()) return
     addNote({
       id: uuid(),
-      wedding_id: notes[0]?.wedding_id ?? 'w1',
+      wedding_id: wedding?.id ?? notes[0]?.wedding_id ?? 'w1',
       title: title.trim(),
       body: body.trim(),
-      type: 'general',
+      type: noteType,
       vendor_id: null,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     })
-    setTitle(''); setBody(''); setShowAdd(false)
+    setTitle(''); setBody(''); setNoteType('general'); setShowAdd(false)
     toast.success('Note added')
   }
 
@@ -357,6 +358,14 @@ function MOMTab() {
           <div className="modal-box">
             <div className="modal-title">Add Note</div>
             <div className="modal-field">
+              <label className="modal-label">Type</label>
+              <select className="select" value={noteType} onChange={e => setNoteType(e.target.value as typeof noteType)}>
+                <option value="general">General</option>
+                <option value="mom">Meeting Notes (MOM)</option>
+                <option value="vendor">Vendor Note</option>
+              </select>
+            </div>
+            <div className="modal-field">
               <label className="modal-label">Title</label>
               <input className="input" placeholder="Note title..." value={title} onChange={e => setTitle(e.target.value)} />
             </div>
@@ -392,7 +401,12 @@ export default function Dashboard() {
           </div>
           <div className="page-date">{formatDate(wedding.wedding_date, 'EEEE, d MMMM yyyy')} · {wedding.venue}</div>
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={() => toast('Coming soon — share link! 🔗')}>
+        <button className="btn btn-ghost btn-sm" onClick={() => {
+          navigator.clipboard.writeText(window.location.href).then(
+            () => toast.success('Link copied to clipboard!'),
+            () => toast('Share: ' + window.location.href),
+          )
+        }}>
           Share Dashboard
         </button>
       </div>
