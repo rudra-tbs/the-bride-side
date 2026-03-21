@@ -25,7 +25,7 @@ export interface Wedding {
 }
 
 // ── EVENTS ───────────────────────────────────────────────────────────────────
-export type EventType = 'wedding' | 'reception' | 'mehndi' | 'sangeet' | 'haldi' | 'other'
+export type EventType = 'wedding' | 'reception' | 'mehndi' | 'sangeet' | 'haldi' | 'engagement' | 'roka' | 'other'
 
 export interface WeddingEvent {
   id: string
