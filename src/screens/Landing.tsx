@@ -78,6 +78,15 @@ export default function Landing() {
     return () => page.removeEventListener('scroll', update)
   }, [])
 
+  function resetCenterTilt() {
+    const card = centerCardRef.current
+    if (!card) return
+    card.style.transition = 'transform 0.7s cubic-bezier(0.23, 1, 0.32, 1)'
+    card.style.transform = 'rotateX(0deg) rotateY(0deg) scale3d(1,1,1)'
+    const glare = card.querySelector('.t-glare') as HTMLElement | null
+    if (glare) glare.style.background = 'transparent'
+  }
+
   useEffect(() => {
     const t = setInterval(() => {
       resetCenterTilt()
@@ -88,15 +97,6 @@ export default function Landing() {
 
   function handleGoogleSignIn() {
     setScreen('onboarding')
-  }
-
-  function resetCenterTilt() {
-    const card = centerCardRef.current
-    if (!card) return
-    card.style.transition = 'transform 0.7s cubic-bezier(0.23, 1, 0.32, 1)'
-    card.style.transform = 'rotateX(0deg) rotateY(0deg) scale3d(1,1,1)'
-    const glare = card.querySelector('.t-glare') as HTMLElement | null
-    if (glare) glare.style.background = 'transparent'
   }
 
   function goTo(i: number) {

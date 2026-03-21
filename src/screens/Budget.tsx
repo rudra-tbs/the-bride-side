@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAppStore } from '@/store/app'
 import type { PaymentStatus } from '@/types'
 import { formatINR, budgetPct, uuid } from '@/lib/utils'
@@ -15,6 +15,11 @@ export default function Budget() {
   const { wedding, budgetCategories, expenses, addExpense } = useAppStore()
   const [openCats, setOpenCats] = useState<Set<string>>(new Set(['bc1', 'bc2']))
   const [showAdd, setShowAdd] = useState(false)
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    requestAnimationFrame(() => setMounted(true))
+  }, [])
 
   // Add expense form state
   const [vendor, setVendor] = useState('')
@@ -80,7 +85,7 @@ export default function Budget() {
             <span>Remaining: <strong>{formatINR(Math.max(0, totalBudget - totalSpent), true)}</strong></span>
           </div>
           <div className="bh-track">
-            <div className="bh-fill" style={{ width: `${budgetPct(totalSpent, totalBudget)}%` }} />
+            <div className="bh-fill" style={{ width: mounted ? `${budgetPct(totalSpent, totalBudget)}%` : '0%' }} />
           </div>
         </div>
 
@@ -102,7 +107,7 @@ export default function Budget() {
                       <div className="prog-bar" style={{ width: '180px' }}>
                         <div
                           className={`prog-fill ${pct > 90 ? 'prog-rose' : pct > 70 ? 'prog-amber' : 'prog-sage'}`}
-                          style={{ width: `${pct}%` }}
+                          style={{ width: mounted ? `${pct}%` : '0%' }}
                         />
                       </div>
                     </div>

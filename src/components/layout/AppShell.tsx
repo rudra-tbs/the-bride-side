@@ -41,6 +41,17 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </div>
         <nav className="topbar-nav" />
         <div className="topbar-right">
+          <button
+            className="btn btn-ghost btn-sm"
+            style={{ fontSize: '11px', gap: '5px' }}
+            onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
+          >
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+              <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+            </svg>
+            Search
+            <kbd style={{ fontSize: '9px', padding: '1px 4px', background: 'var(--border)', borderRadius: '3px', fontFamily: 'monospace' }}>⌘K</kbd>
+          </button>
           <div className="topbar-notif" title="Notifications">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 01-3.46 0" />
@@ -85,7 +96,9 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
       {/* Main */}
       <main className="main-wrapper">
-        {children}
+        <div key={screen} className="page-enter" style={{ height: '100%' }}>
+          {children}
+        </div>
       </main>
 
       {/* Mobile bottom navigation */}

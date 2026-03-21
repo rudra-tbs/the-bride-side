@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAppStore } from '@/store/app'
+import confetti from 'canvas-confetti'
 import { uuid } from '@/lib/utils'
 import toast from 'react-hot-toast'
 
@@ -28,6 +29,20 @@ export default function Checklist() {
       else next.add(id)
       return next
     })
+  }
+
+  function handleToggleTask(taskId: string, catId: string) {
+    toggleTask(taskId)
+    const catTasks = clTasks.filter(t => t.category_id === catId)
+    const doneAfter = catTasks.filter(t => t.id === taskId ? !t.is_done : t.is_done).length
+    if (doneAfter === catTasks.length) {
+      confetti({
+        particleCount: 80,
+        spread: 60,
+        origin: { y: 0.6 },
+        colors: ['#E8748A', '#7AAA90', '#D4956A', '#A06080', '#F4B8C2'],
+      })
+    }
   }
 
   function handleAddTask() {
@@ -118,7 +133,7 @@ export default function Checklist() {
                     <div
                       key={task.id}
                       className="cl-task-row"
-                      onClick={() => toggleTask(task.id)}
+                      onClick={() => handleToggleTask(task.id, cat.id)}
                     >
                       <div className={`cl-check${task.is_done ? ' checked' : ''}`} />
                       <div className={`cl-task-name${task.is_done ? ' done' : ''}`}>

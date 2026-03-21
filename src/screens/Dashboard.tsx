@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { useAppStore } from '@/store/app'
-import type { DashTab, ItineraryItem, WeddingEvent } from '@/types'
+import type { DashTab, ItineraryItem, Note, WeddingEvent } from '@/types'
 import { formatDate, daysUntil, formatINR } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import { uuid } from '@/lib/utils'
@@ -25,7 +25,7 @@ function Countdown({ date, coupleName, venue }: { date: string; coupleName: stri
 
   return (
     <div className="countdown-hero">
-      <div className="countdown-ring-wrap">
+      <div className={`countdown-ring-wrap${days <= 30 ? ' urgent' : ''}`}>
         <svg className="countdown-svg" viewBox="0 0 108 108">
           <circle className="countdown-track" cx="54" cy="54" r="46" />
           <circle
@@ -294,6 +294,22 @@ function DetailsTab() {
 // ── MOM Tab ──────────────────────────────────────────────────────────
 function MOMTab() {
   const { wedding, notes, addNote, removeNote } = useAppStore()
+
+  function handleRemoveNote(note: Note) {
+    const snapshot = { ...note }
+    removeNote(note.id)
+    toast((t) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span>Removed "{snapshot.title}"</span>
+        <button
+          onClick={() => { addNote(snapshot); toast.dismiss(t.id) }}
+          style={{ fontSize: '11px', fontWeight: 600, color: 'var(--rose-dark)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          Undo
+        </button>
+      </div>
+    ), { duration: 5000 })
+  }
   const [showAdd, setShowAdd] = useState(false)
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
@@ -342,7 +358,7 @@ function MOMTab() {
               <div className="note-title">{note.title}</div>
               <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
                 <span className={`badge ${typeBadge[note.type] ?? 'badge-muted'}`}>{note.type}</span>
-                <button className="btn btn-xs btn-ghost" onClick={() => removeNote(note.id)}>✕</button>
+                <button className="btn btn-xs btn-ghost" onClick={() => handleRemoveNote(note)}>✕</button>
               </div>
             </div>
             <div className="note-body">{note.body}</div>
