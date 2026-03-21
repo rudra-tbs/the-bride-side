@@ -1,4 +1,4 @@
-import { useRef, useEffect } from 'react'
+import { useRef, useEffect, useState } from 'react'
 import { useAppStore } from '@/store/app'
 import {
   mockWedding, mockEvents, mockItinerary, mockGuests,
@@ -8,12 +8,12 @@ import {
 } from '@/mock/data'
 
 const FEATURES = [
-  { emoji: '🗓️', color: '#FDE8EC', title: 'Smart Itinerary', desc: 'Timeline planner for every event — Mehendi, Sangeet, Wedding, Reception.' },
-  { emoji: '👥', color: '#E8F4EE', title: 'Guest Management', desc: 'Track RSVPs, dietary preferences, and seating across all your events.' },
-  { emoji: '🎥', color: '#FAF0E8', title: 'Vendor Tracker', desc: 'Shortlist, compare, and communicate with all your vendors in one place.' },
-  { emoji: '💰', color: '#E8F0F8', title: 'Budget Control', desc: 'Category-wise budget tracking with payment status and due date alerts.' },
-  { emoji: '🌸', color: '#F2E8F0', title: 'Moodboard', desc: 'Pin your vision — decor, outfits, makeup — and share with vendors.' },
-  { emoji: '✅', color: '#FDE8EC', title: 'Checklist', desc: 'Timeline-driven tasks from 6 months out to the morning of your big day.' },
+  { emoji: '🗒️', color: '#FDE8EC', title: 'Smart Itinerary', desc: 'Timeline planner for every event — Mehendi, Sangeet, Wedding, Reception.' },
+  { emoji: '🎟️', color: '#E8F4EE', title: 'Guest Management', desc: 'Track RSVPs, dietary preferences, and seating across all your events.' },
+  { emoji: '🤝', color: '#FAF0E8', title: 'Vendor Tracker', desc: 'Shortlist, compare, and communicate with all your vendors in one place.' },
+  { emoji: '📊', color: '#E8F0F8', title: 'Budget Control', desc: 'Category-wise budget tracking with payment status and due date alerts.' },
+  { emoji: '🎨', color: '#F2E8F0', title: 'Moodboard', desc: 'Pin your vision — decor, outfits, makeup — and share with vendors.' },
+  { emoji: '🔖', color: '#FDE8EC', title: 'Checklist', desc: 'Timeline-driven tasks from 6 months out to the morning of your big day.' },
 ]
 
 const TESTIMONIALS = [
@@ -46,6 +46,7 @@ export default function Landing() {
   const scrollSceneRef = useRef<HTMLElement>(null)
   const textLayerRef = useRef<HTMLDivElement>(null)
   const previewLayerRef = useRef<HTMLDivElement>(null)
+  const [activeTest, setActiveTest] = useState(0)
 
   useEffect(() => {
     const page = pageRef.current
@@ -81,6 +82,11 @@ export default function Landing() {
     return () => page.removeEventListener('scroll', update)
   }, [])
 
+  useEffect(() => {
+    const t = setInterval(() => setActiveTest(i => (i + 1) % TESTIMONIALS.length), 5000)
+    return () => clearInterval(t)
+  }, [])
+
   function handleGoogleSignIn() {
     setScreen('onboarding')
   }
@@ -110,7 +116,6 @@ export default function Landing() {
           The Bride Side
         </span>
         <div className="landing-links">
-          <button className="landing-link" onClick={viewDemo}>View demo</button>
           <button className="landing-nav-cta" onClick={handleGoogleSignIn} disabled={false}>
             Get started free
           </button>
@@ -126,7 +131,7 @@ export default function Landing() {
           {/* Text layer — fades & slides up as you scroll */}
           <div className="hero-text-layer" ref={textLayerRef}>
             <div className="container hero-center-container">
-              <div className="hero-eyebrow">✦ India's smartest wedding planner</div>
+              <div className="hero-eyebrow">Made for Indian weddings</div>
               <h1 className="hero-h1 hero-h1-center">
                 Your dream wedding,<br />
                 <em>beautifully organised.</em>
@@ -137,9 +142,6 @@ export default function Landing() {
               <div className="hero-btns hero-btns-center">
                 <button className="hero-btn-primary" onClick={handleGoogleSignIn} disabled={false}>
                   Start planning free →
-                </button>
-                <button className="hero-btn-ghost" onClick={viewDemo}>
-                  See a live demo
                 </button>
               </div>
               <div className="hero-trust">
@@ -297,20 +299,39 @@ export default function Landing() {
               Real stories from couples who planned their dream wedding with The Bride Side.
             </p>
           </div>
-          <div className="testimonial-grid">
-            {TESTIMONIALS.map(t => (
-              <div className="testimonial-card" key={t.name}>
-                <div className="testimonial-stars">★★★★★</div>
-                <p className="testimonial-text">"{t.text}"</p>
-                <div className="testimonial-author">
-                  <div className="testimonial-avatar">{t.avatar}</div>
-                  <div>
-                    <div className="testimonial-name">{t.name}</div>
-                    <div className="testimonial-loc">{t.location}</div>
+          <div className="testimonial-carousel">
+            <div className="testimonial-track-wrap">
+              <div
+                className="testimonial-track"
+                style={{ transform: `translateX(${-activeTest * 100}%)` }}
+              >
+                {TESTIMONIALS.map(t => (
+                  <div className="testimonial-slide" key={t.name}>
+                    <div className="testimonial-card">
+                      <div className="testimonial-stars">★★★★★</div>
+                      <p className="testimonial-text">"{t.text}"</p>
+                      <div className="testimonial-author">
+                        <div className="testimonial-avatar">{t.avatar}</div>
+                        <div>
+                          <div className="testimonial-name">{t.name}</div>
+                          <div className="testimonial-loc">{t.location}</div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                ))}
               </div>
-            ))}
+            </div>
+            <div className="testimonial-dots">
+              {TESTIMONIALS.map((_, i) => (
+                <button
+                  key={i}
+                  className={`testimonial-dot${i === activeTest ? ' active' : ''}`}
+                  onClick={() => setActiveTest(i)}
+                  aria-label={`View testimonial ${i + 1}`}
+                />
+              ))}
+            </div>
           </div>
         </div>
       </section>
