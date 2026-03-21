@@ -402,15 +402,21 @@ export default function Landing() {
 
       {/* Footer */}
       <footer className="landing-footer">
-        <div className="container" style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
-          <div>
-            <div className="foot-logo">The Bride Side</div>
-            <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', marginTop: '6px' }}>
-              © 2026 The Bride Side. All rights reserved.
+        <div className="container foot-inner">
+          <div className="foot-top">
+            <div className="foot-brand">
+              <div className="foot-logo">The Bride Side</div>
+              <p className="foot-tagline">Your all-in-one planner for the perfect Indian wedding.</p>
+            </div>
+            <div className="foot-links">
+              <span className="foot-link-head">Product</span>
+              <a className="foot-link" onClick={handleGoogleSignIn}>Get started</a>
+              <a className="foot-link" onClick={handleGoogleSignIn}>Sign in</a>
             </div>
           </div>
-          <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>
-            Made with love for Indian weddings
+          <div className="foot-bottom">
+            <span className="foot-copy">© 2026 The Bride Side. All rights reserved.</span>
+            <span className="foot-love">Made with love for Indian weddings ♡</span>
           </div>
         </div>
       </footer>

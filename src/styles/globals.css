@@ -758,14 +758,14 @@ textarea.input { resize: vertical; min-height: 80px; }
   z-index: 3;
 }
 .t-pos-left {
-  transform: translateX(calc(-50% - 380px)) translateZ(-160px) rotateY(42deg) scale(0.82);
-  opacity: 0.5;
+  transform: translateX(calc(-50% - 380px)) translateZ(-160px) rotateY(42deg) scale(0.74);
+  opacity: 0.45;
   z-index: 1;
   filter: brightness(0.8) saturate(0.7);
 }
 .t-pos-right {
-  transform: translateX(calc(-50% + 380px)) translateZ(-160px) rotateY(-42deg) scale(0.82);
-  opacity: 0.5;
+  transform: translateX(calc(-50% + 380px)) translateZ(-160px) rotateY(-42deg) scale(0.74);
+  opacity: 0.45;
   z-index: 1;
   filter: brightness(0.8) saturate(0.7);
 }
@@ -828,8 +828,19 @@ textarea.input { resize: vertical; min-height: 80px; }
 .cta-btn:disabled { opacity: 0.65; cursor: not-allowed; }
 .cta-note { margin-top: 14px; color: rgba(255,255,255,0.5); font-size: 12px; letter-spacing: 0.2px; }
 
-.landing-footer { background: var(--ink); padding: 48px 0; }
-.foot-logo { font-family: var(--serif); font-size: 26px; font-weight: 500; color: white; }
+.landing-footer { background: var(--ink); border-top: 1px solid rgba(232,116,138,0.18); padding: 52px 0 32px; }
+.foot-inner { display: flex; flex-direction: column; gap: 40px; }
+.foot-top { display: flex; justify-content: space-between; align-items: flex-start; gap: 32px; }
+.foot-brand { max-width: 320px; }
+.foot-logo { font-family: var(--serif); font-size: 26px; font-weight: 500; color: white; letter-spacing: -0.3px; }
+.foot-tagline { margin: 10px 0 0; font-size: 13px; color: var(--ink4); line-height: 1.7; }
+.foot-links { display: flex; flex-direction: column; gap: 10px; }
+.foot-link-head { font-size: 11px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase; color: var(--ink3); margin-bottom: 2px; }
+.foot-link { font-size: 13px; color: var(--ink4); cursor: pointer; transition: color 0.18s; }
+.foot-link:hover { color: var(--rose-mid); }
+.foot-bottom { display: flex; justify-content: space-between; align-items: center; gap: 16px; flex-wrap: wrap; padding-top: 24px; border-top: 1px solid rgba(255,255,255,0.07); }
+.foot-copy { font-size: 12px; color: var(--ink3); }
+.foot-love { font-size: 12px; color: var(--ink4); }
 
 /* ── RESPONSIVE — LANDING ──────────────────────────────────────── */
 @media (max-width: 768px) {
