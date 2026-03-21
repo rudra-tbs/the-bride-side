@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { useAppStore } from '@/store/app'
 import { signInWithGoogle } from '@/lib/supabase'
 import {
@@ -38,18 +38,29 @@ const TESTIMONIALS = [
   },
 ]
 
-const DASHBOARD_FEATURES = [
-  { icon: '📊', title: 'RSVP Dashboard', desc: 'Real-time guest confirmations, dietary counts, and per-event headcounts at a glance.' },
-  { icon: '📅', title: 'Day-of Timeline', desc: 'Minute-by-minute itinerary for your wedding day with milestone tracking.' },
-  { icon: '💳', title: 'Payment Tracker', desc: 'Track vendor payments, due dates, and remaining balances across categories.' },
-  { icon: '📝', title: 'Meeting Notes', desc: 'Keep minutes of every vendor meeting and planning session organized.' },
-]
 
 export default function Landing() {
   const { setScreen, setUserId, setWedding, setEvents, setItinerary,
     setGuests, setVendors, setBudgetCategories, setExpenses,
     setClCategories, setClTasks, setPins, setNotes } = useAppStore()
   const [signingIn, setSigningIn] = useState(false)
+  const previewRef = useRef<HTMLDivElement>(null)
+
+  useEffect(() => {
+    const el = previewRef.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          el.classList.add('visible')
+          observer.disconnect()
+        }
+      },
+      { threshold: 0.12 }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [])
 
   async function handleGoogleSignIn() {
     try {
@@ -91,6 +102,8 @@ export default function Landing() {
 
       {/* Hero — Centered */}
       <section className="hero-section hero-centered">
+        <div className="hero-blob hero-blob-1" aria-hidden="true" />
+        <div className="hero-blob hero-blob-2" aria-hidden="true" />
         <div className="container hero-center-container">
           <div className="hero-eyebrow">India's smartest wedding planner</div>
           <h1 className="hero-h1 hero-h1-center">
@@ -126,7 +139,7 @@ export default function Landing() {
       </section>
 
       {/* Dashboard Preview */}
-      <section className="landing-section">
+      <section className="app-preview-section">
         <div className="container">
           <div className="section-header-center">
             <h2 className="serif section-title">
@@ -136,55 +149,113 @@ export default function Landing() {
               Everything you need to plan, track, and manage — all in one beautiful dashboard.
             </p>
           </div>
-          <div className="dashboard-preview">
-            <div className="dash-preview-grid">
-              {DASHBOARD_FEATURES.map(f => (
-                <div className="dash-preview-card" key={f.title}>
-                  <div className="dash-preview-icon">{f.icon}</div>
-                  <div className="dash-preview-title">{f.title}</div>
-                  <div className="dash-preview-desc">{f.desc}</div>
-                </div>
-              ))}
-            </div>
-            <div className="dash-preview-mockup">
-              <div className="mockup-bar">
-                <div className="mockup-dots">
-                  <span /><span /><span />
-                </div>
-                <div className="mockup-title">Dashboard — Priya & Arjun's Wedding</div>
+        </div>
+
+        {/* Animated app mockup */}
+        <div className="app-preview-outer" ref={previewRef}>
+          <div className="app-preview-float">
+            <div className="preview-browser">
+              {/* Browser chrome */}
+              <div className="preview-browser-bar">
+                <div className="preview-dots"><span /><span /><span /></div>
+                <div className="preview-address-bar">thebrideside.app/dashboard</div>
               </div>
-              <div className="mockup-body">
-                <div className="mockup-stat-row">
-                  <div className="mockup-stat">
-                    <div className="mockup-stat-n">239</div>
-                    <div className="mockup-stat-l">Days to go</div>
-                  </div>
-                  <div className="mockup-stat">
-                    <div className="mockup-stat-n" style={{ color: 'var(--sage)' }}>87</div>
-                    <div className="mockup-stat-l">Confirmed</div>
-                  </div>
-                  <div className="mockup-stat">
-                    <div className="mockup-stat-n" style={{ color: 'var(--amber)' }}>24</div>
-                    <div className="mockup-stat-l">Pending</div>
-                  </div>
-                  <div className="mockup-stat">
-                    <div className="mockup-stat-n" style={{ color: 'var(--rose)' }}>₹18.5L</div>
-                    <div className="mockup-stat-l">Budget left</div>
+
+              {/* App UI */}
+              <div className="preview-app-ui">
+                {/* Topbar */}
+                <div className="preview-topbar">
+                  <div className="preview-topbar-logo">The Bride Side</div>
+                  <div className="preview-topbar-right">
+                    <div className="preview-notif">🔔</div>
+                    <div className="preview-userav">PA</div>
                   </div>
                 </div>
-                <div className="mockup-progress-row">
-                  <div className="mockup-progress-label">Budget used</div>
-                  <div className="mockup-progress-bar">
-                    <div className="mockup-progress-fill" style={{ width: '42%' }} />
+
+                {/* App body */}
+                <div className="preview-app-body">
+                  {/* Sidebar */}
+                  <div className="preview-sidebar">
+                    <div className="preview-sb active">📊 Dashboard</div>
+                    <div className="preview-sb">👥 Guests</div>
+                    <div className="preview-sb">🎥 Vendors</div>
+                    <div className="preview-sb">💰 Budget</div>
+                    <div className="preview-sb">✅ Checklist</div>
+                    <div className="preview-sb">🌸 Moodboard</div>
                   </div>
-                  <div className="mockup-progress-pct">42%</div>
-                </div>
-                <div className="mockup-progress-row">
-                  <div className="mockup-progress-label">Tasks done</div>
-                  <div className="mockup-progress-bar">
-                    <div className="mockup-progress-fill mockup-fill-sage" style={{ width: '68%' }} />
+
+                  {/* Main content */}
+                  <div className="preview-main">
+                    <div className="preview-page-head">
+                      <div className="preview-page-title">Priya &amp; Arjun's Wedding</div>
+                      <div className="preview-page-date">Tuesday, 2 December 2026</div>
+                    </div>
+
+                    {/* Stat tiles */}
+                    <div className="preview-tiles">
+                      <div className="preview-tile preview-tile-rose">
+                        <div className="preview-tile-n">239</div>
+                        <div className="preview-tile-l">Days to go</div>
+                      </div>
+                      <div className="preview-tile preview-tile-sage">
+                        <div className="preview-tile-n">87</div>
+                        <div className="preview-tile-l">Confirmed</div>
+                      </div>
+                      <div className="preview-tile preview-tile-amber">
+                        <div className="preview-tile-n">₹18.5L</div>
+                        <div className="preview-tile-l">Budget left</div>
+                      </div>
+                      <div className="preview-tile preview-tile-mauve">
+                        <div className="preview-tile-n">68%</div>
+                        <div className="preview-tile-l">Tasks done</div>
+                      </div>
+                    </div>
+
+                    {/* Content grid */}
+                    <div className="preview-content-grid">
+                      {/* Tasks */}
+                      <div className="preview-card">
+                        <div className="preview-card-title">Pending Tasks</div>
+                        <div className="preview-task-list">
+                          <div className="preview-task"><span className="preview-check" />Book final photographer</div>
+                          <div className="preview-task"><span className="preview-check" />Order wedding cake</div>
+                          <div className="preview-task"><span className="preview-check" />Send Mehendi invites</div>
+                          <div className="preview-task done-task"><span className="preview-check done" />Finalise venue décor</div>
+                        </div>
+                      </div>
+
+                      {/* Guests */}
+                      <div className="preview-card">
+                        <div className="preview-card-title">Recent RSVPs</div>
+                        <div className="preview-guest-list">
+                          <div className="preview-guest">
+                            <div className="preview-gav">RS</div>
+                            <div className="preview-ginfo">
+                              <div className="preview-gname">Riya Sharma</div>
+                              <div className="preview-gevents">Wedding · Reception</div>
+                            </div>
+                            <div className="preview-gbadge conf">Confirmed</div>
+                          </div>
+                          <div className="preview-guest">
+                            <div className="preview-gav">AK</div>
+                            <div className="preview-ginfo">
+                              <div className="preview-gname">Aarav Kapoor</div>
+                              <div className="preview-gevents">All events</div>
+                            </div>
+                            <div className="preview-gbadge pend">Pending</div>
+                          </div>
+                          <div className="preview-guest">
+                            <div className="preview-gav">MP</div>
+                            <div className="preview-ginfo">
+                              <div className="preview-gname">Meera Patel</div>
+                              <div className="preview-gevents">Sangeet · Wedding</div>
+                            </div>
+                            <div className="preview-gbadge conf">Confirmed</div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
                   </div>
-                  <div className="mockup-progress-pct">68%</div>
                 </div>
               </div>
             </div>
