@@ -1,4 +1,4 @@
-import { useState, useRef, useEffect } from 'react'
+import { useRef, useEffect } from 'react'
 import { useAppStore } from '@/store/app'
 import {
   mockWedding, mockEvents, mockItinerary, mockGuests,

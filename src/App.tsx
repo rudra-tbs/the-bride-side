@@ -94,15 +94,12 @@ export default function App() {
   const userId = useAppStore(s => s.userId)
   const setScreen = useAppStore(s => s.setScreen)
 
-  // On mount, route to the right screen based on persisted data.
-  // screen is not persisted so this always runs fresh on load.
+  // On mount: if the user already has data, send them straight to the dashboard.
+  // screen is not persisted so it always resets to 'landing' (the store default) —
+  // we only override it here when they have an existing wedding to return to.
   useEffect(() => {
     const { userId: uid, wedding: w } = useAppStore.getState()
-    if (uid && w) {
-      setScreen('dashboard')
-    } else {
-      setScreen('landing')
-    }
+    if (uid && w) setScreen('dashboard')
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
