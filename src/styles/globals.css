@@ -546,8 +546,13 @@ textarea.input { resize: vertical; min-height: 80px; }
 .hero-h1 em { font-style: italic; color: var(--rose-dark); }
 .hero-sub { font-size: 17px; color: var(--ink2); max-width: 480px; line-height: 1.7; margin-top: 20px; }
 .hero-btns { display: flex; gap: 10px; margin-top: 34px; flex-wrap: wrap; }
-.hero-btn-primary { display: inline-flex; align-items: center; white-space: nowrap; background: var(--rose); color: white; border: none; font-family: var(--sans); font-weight: 600; font-size: 15px; padding: 14px 32px; border-radius: 100px; cursor: pointer; transition: all 0.2s; box-shadow: 0 4px 14px rgba(232,116,138,0.25); }
-.hero-btn-primary:hover:not(:disabled) { background: var(--rose-dark); transform: translateY(-2px); box-shadow: 0 8px 24px rgba(232,116,138,0.35); }
+@keyframes hero-btn-shine {
+  0%   { transform: translateX(-120%) skewX(-20deg); }
+  100% { transform: translateX(320%)  skewX(-20deg); }
+}
+.hero-btn-primary { display: inline-flex; align-items: center; white-space: nowrap; background: var(--rose); color: white; border: none; font-family: var(--sans); font-weight: 600; font-size: 15px; padding: 14px 32px; border-radius: 100px; cursor: pointer; transition: transform 0.22s ease, box-shadow 0.22s ease; box-shadow: 0 4px 14px rgba(232,116,138,0.25); position: relative; overflow: hidden; }
+.hero-btn-primary::after { content: ''; position: absolute; top: -50%; left: 0; width: 45%; height: 200%; background: linear-gradient(to right, transparent, rgba(255,255,255,0.38), transparent); transform: translateX(-120%) skewX(-20deg); animation: hero-btn-shine 2.4s ease-in-out infinite; pointer-events: none; }
+.hero-btn-primary:hover:not(:disabled) { transform: scale(1.06); box-shadow: 0 8px 28px rgba(232,116,138,0.45); }
 .hero-btn-primary:disabled { opacity: 0.65; cursor: not-allowed; }
 .hero-btn-ghost { display: inline-flex; align-items: center; white-space: nowrap; background: transparent; color: var(--ink2); border: 1.5px solid var(--border2); font-family: var(--sans); font-weight: 600; font-size: 15px; padding: 14px 32px; border-radius: 100px; cursor: pointer; transition: all 0.2s; }
 .hero-btn-ghost:hover { background: var(--rose-light); border-color: var(--rose-mid); color: var(--rose-dark); }

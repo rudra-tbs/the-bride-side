@@ -177,7 +177,7 @@ export default function Landing() {
               </p>
               <div className="hero-btns hero-btns-center">
                 <button className="hero-btn-primary" onClick={handleGoogleSignIn} disabled={false}>
-                  Start planning free →
+                  Start planning →
                 </button>
               </div>
               <div className="hero-trust">
