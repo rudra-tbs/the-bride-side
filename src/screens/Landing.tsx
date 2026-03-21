@@ -333,11 +333,11 @@ export default function Landing() {
           <div className="feat-grid">
             {FEATURES.map(f => (
               <div className="feat-card" key={f.title}>
-                <div className="feat-icon" style={{ background: f.color }}>
-                  {f.emoji}
+                <div className="feat-icon">{f.emoji}</div>
+                <div className="feat-body">
+                  <div className="feat-title">{f.title}</div>
+                  <div className="feat-desc">{f.desc}</div>
                 </div>
-                <div className="feat-title">{f.title}</div>
-                <div className="feat-desc">{f.desc}</div>
               </div>
             ))}
           </div>
