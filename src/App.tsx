@@ -1,6 +1,5 @@
-import { useEffect, useState } from 'react'
+import { useEffect } from 'react'
 import { useAppStore } from '@/store/app'
-import { supabase, dbFetchWedding, dbFetchGuests, dbFetchVendors, dbFetchBudget, dbFetchChecklist, dbFetchPins, dbFetchNotes, dbFetchEvents } from '@/lib/supabase'
 import type { Screen } from '@/types'
 import {
   mockEvents, mockItinerary, mockGuests,
@@ -93,135 +92,14 @@ export default function App() {
   const screen = useAppStore(s => s.screen)
   const wedding = useAppStore(s => s.wedding)
   const userId = useAppStore(s => s.userId)
-  const setUserId = useAppStore(s => s.setUserId)
   const setScreen = useAppStore(s => s.setScreen)
-  const [authLoading, setAuthLoading] = useState(true)
 
-  // Listen to Supabase auth state changes
-  useEffect(() => {
-    // Check current session on mount
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session?.user) {
-        setUserId(session.user.id)
-        // If user just logged in and is on landing, send to dashboard or onboarding.
-        // Validate the cached wedding belongs to THIS user — stale mock/demo data
-        // from a previous session must not be used to skip onboarding.
-        const currentScreen = useAppStore.getState().screen
-        if (currentScreen === 'landing') {
-          const storedWedding = useAppStore.getState().wedding
-          const weddingBelongsToUser = storedWedding?.user_id === session.user.id
-          setScreen(weddingBelongsToUser ? 'dashboard' : 'onboarding')
-        }
-      }
-      setAuthLoading(false)
-    })
-
-    // Subscribe to auth changes (login, logout, token refresh)
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session?.user) {
-        setUserId(session.user.id)
-        const currentScreen = useAppStore.getState().screen
-        if (currentScreen === 'landing') {
-          const storedWedding = useAppStore.getState().wedding
-          const weddingBelongsToUser = storedWedding?.user_id === session.user.id
-          setScreen(weddingBelongsToUser ? 'dashboard' : 'onboarding')
-        }
-      } else if (event === 'SIGNED_OUT') {
-        // Clear all persisted data so the next user starts clean
-        const s = useAppStore.getState()
-        s.setUserId(null)
-        s.setWedding(null)
-        s.setGuests([])
-        s.setVendors([])
-        s.setBudgetCategories([])
-        s.setExpenses([])
-        s.setClCategories([])
-        s.setClTasks([])
-        s.setPins([])
-        s.setNotes([])
-        s.setEvents([])
-        s.setItinerary([])
-        s.setScreen('landing')
-      }
-    })
-
-    return () => subscription.unsubscribe()
-  }, [setUserId, setScreen])
-
-  // Load real data from Supabase when userId is set
-  useEffect(() => {
-    if (!userId || userId === MOCK_USER_ID) return
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    async function loadFromSupabase() {
-      try {
-        const w = await dbFetchWedding(userId!)
-        if (!w) return
-        const s = useAppStore.getState()
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        s.setWedding(w as any)
-        // If the user was sent to onboarding because wedding hadn't loaded yet
-        // (race between onAuthStateChange and DB fetch), redirect to dashboard
-        if (useAppStore.getState().screen === 'onboarding') setScreen('dashboard')
-        const [guests, vendors, budget, checklist, pins, notes, evData] = await Promise.all([
-          dbFetchGuests(w.id),
-          dbFetchVendors(w.id),
-          dbFetchBudget(w.id),
-          dbFetchChecklist(w.id),
-          dbFetchPins(w.id),
-          dbFetchNotes(w.id),
-          dbFetchEvents(w.id),
-        ])
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        s.setGuests(guests as any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        s.setVendors(vendors as any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        s.setBudgetCategories(budget.categories as any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        s.setExpenses(budget.expenses as any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        s.setClCategories(checklist.categories as any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        s.setClTasks(checklist.tasks as any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        s.setPins(pins as any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        s.setNotes(notes as any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        s.setEvents(evData.events as any)
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        s.setItinerary(evData.itinerary as any)
-      } catch {
-        // Supabase not configured or no data — local storage data is used
-      }
-    }
-    loadFromSupabase()
-  }, [userId])
-
-  // Seed mock data for authenticated users who are on app screens without data
+  // Seed mock data if user lands on an app screen without any data
   useEffect(() => {
     if (!wedding && userId && APP_SCREENS.includes(screen)) {
       seedMockData()
     }
   }, [wedding, userId, screen])
-
-  // Auth guard: redirect unauthenticated users away from app screens
-  useEffect(() => {
-    if (!authLoading && !userId && APP_SCREENS.includes(screen)) {
-      setScreen('landing')
-    }
-  }, [authLoading, userId, screen, setScreen])
-
-  if (authLoading) {
-    return (
-      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100vh', background: 'var(--bg)' }}>
-        <div style={{ textAlign: 'center' }}>
-          <div className="logo" style={{ fontSize: '24px', marginBottom: '12px' }}>The Bride Side</div>
-          <div style={{ color: 'var(--ink3)', fontSize: '14px' }}>Loading...</div>
-        </div>
-      </div>
-    )
-  }
 
   const isAppScreen = APP_SCREENS.includes(screen)
 
