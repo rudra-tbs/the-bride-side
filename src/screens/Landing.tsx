@@ -164,6 +164,26 @@ export default function Landing() {
           <div className="hero-blob hero-blob-1" aria-hidden="true" />
           <div className="hero-blob hero-blob-2" aria-hidden="true" />
 
+          {/* Floating decorative elements */}
+          <div className="hero-deco-layer" aria-hidden="true">
+            {/* Ring — top left */}
+            <svg className="hd hd-1" viewBox="0 0 44 44" fill="none"><circle cx="22" cy="22" r="19" stroke="rgba(232,116,138,0.38)" strokeWidth="2.5"/><circle cx="22" cy="22" r="12" stroke="rgba(232,116,138,0.18)" strokeWidth="1.5"/></svg>
+            {/* Diamond gem — top right */}
+            <svg className="hd hd-2" viewBox="0 0 34 34" fill="none"><path d="M17 2 L32 13 L17 32 L2 13 Z" stroke="rgba(196,85,112,0.38)" strokeWidth="1.5"/><path d="M17 9 L25 14 L17 24 L9 14 Z" fill="rgba(232,116,138,0.14)"/></svg>
+            {/* Flower — left */}
+            <svg className="hd hd-3" viewBox="0 0 40 40" fill="none"><g transform="translate(20,20)"><ellipse cx="0" cy="-10" rx="5" ry="8" fill="rgba(244,184,194,0.5)"/><ellipse cx="0" cy="-10" rx="5" ry="8" fill="rgba(244,184,194,0.5)" transform="rotate(60)"/><ellipse cx="0" cy="-10" rx="5" ry="8" fill="rgba(244,184,194,0.5)" transform="rotate(120)"/><ellipse cx="0" cy="-10" rx="5" ry="8" fill="rgba(244,184,194,0.5)" transform="rotate(180)"/><ellipse cx="0" cy="-10" rx="5" ry="8" fill="rgba(244,184,194,0.5)" transform="rotate(240)"/><ellipse cx="0" cy="-10" rx="5" ry="8" fill="rgba(244,184,194,0.5)" transform="rotate(300)"/><circle cx="0" cy="0" r="5" fill="rgba(232,116,138,0.5)"/></g></svg>
+            {/* Sparkle ✦ — right */}
+            <svg className="hd hd-4" viewBox="0 0 28 28" fill="none"><path d="M14 2 L15.8 12.2 L26 14 L15.8 15.8 L14 26 L12.2 15.8 L2 14 L12.2 12.2 Z" fill="rgba(232,116,138,0.45)"/></svg>
+            {/* Small ring — bottom left */}
+            <svg className="hd hd-5" viewBox="0 0 32 32" fill="none"><circle cx="16" cy="16" r="13" stroke="rgba(160,96,128,0.32)" strokeWidth="2"/></svg>
+            {/* Dot cluster — right */}
+            <svg className="hd hd-6" viewBox="0 0 36 24" fill="none"><circle cx="6" cy="12" r="4" fill="rgba(232,116,138,0.38)"/><circle cx="18" cy="5" r="2.5" fill="rgba(244,184,194,0.5)"/><circle cx="30" cy="14" r="4.5" fill="rgba(232,116,138,0.26)"/><circle cx="17" cy="19" r="2" fill="rgba(196,85,112,0.32)"/></svg>
+            {/* Heart — lower left */}
+            <svg className="hd hd-7" viewBox="0 0 28 26" fill="none"><path d="M14 23 C14 23 2 15 2 8 C2 4.7 4.7 2 8 2 C10.3 2 12.3 3.3 14 5.3 C15.7 3.3 17.7 2 20 2 C23.3 2 26 4.7 26 8 C26 15 14 23 14 23Z" fill="rgba(232,116,138,0.32)"/></svg>
+            {/* Diamond small — upper left */}
+            <svg className="hd hd-8" viewBox="0 0 22 22" fill="none"><path d="M11 1 L21 11 L11 21 L1 11 Z" stroke="rgba(244,184,194,0.55)" strokeWidth="1.5"/></svg>
+          </div>
+
           {/* Text layer — fades & slides up as you scroll */}
           <div className="hero-text-layer" ref={textLayerRef}>
             <div className="container hero-center-container">
