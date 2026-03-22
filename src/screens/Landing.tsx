@@ -231,22 +231,124 @@ export default function Landing() {
                 <div className="preview-address-bar">thebrideside.app/dashboard</div>
               </div>
               <div className="preview-app-ui">
-                <div className="preview-topbar">
-                  <div className="preview-topbar-logo">The Bride Side</div>
+
+                {/* ── Topbar ── */}
+                <header className="preview-topbar">
+                  <div className="preview-logo-zone">
+                    <span className="preview-logo">
+                      <span>🌸</span>
+                      <span className="preview-logo-text">The Bride Side</span>
+                    </span>
+                    <div className="preview-toggle-btn">
+                      <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+                    </div>
+                  </div>
+                  <div style={{ flex: 1 }} />
                   <div className="preview-topbar-right">
-                    <div className="preview-notif">🔔</div>
-                    <div className="preview-userav">PA</div>
+                    <div className="preview-search-pill">
+                      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                      <span>Search</span>
+                      <kbd className="preview-kbd">⌘K</kbd>
+                    </div>
+                    <div className="preview-notif-btn">
+                      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9M13.73 21a2 2 0 01-3.46 0"/></svg>
+                      <span className="preview-notif-dot" />
+                    </div>
+                    <div className="preview-user-row">
+                      <div className="preview-user-av">PA</div>
+                      <div>
+                        <div className="preview-user-name">Priya</div>
+                        <div className="preview-user-sub">Priya &amp; Arjun</div>
+                      </div>
+                    </div>
                   </div>
-                </div>
+                </header>
+
+                {/* ── Body ── */}
                 <div className="preview-app-body">
-                  <div className="preview-sidebar">
-                    <div className="preview-sb active">📊 Dashboard</div>
-                    <div className="preview-sb">👥 Guests</div>
-                    <div className="preview-sb">🎥 Vendors</div>
-                    <div className="preview-sb">💰 Budget</div>
-                    <div className="preview-sb">✅ Checklist</div>
-                    <div className="preview-sb">🌸 Moodboard</div>
-                  </div>
+
+                  {/* ── Sidebar ── */}
+                  <aside className="preview-sidebar">
+                    <div className="preview-sidebar-inner">
+
+                      {/* Countdown card */}
+                      <div className="preview-countdown-card">
+                        <div className="preview-ring-wrap">
+                          <svg className="preview-ring-svg" viewBox="0 0 108 108">
+                            <circle className="preview-ring-track" cx="54" cy="54" r="46"/>
+                            <circle className="preview-ring-fill" cx="54" cy="54" r="46" style={{ strokeDashoffset: 205, stroke: 'var(--sage)' }}/>
+                          </svg>
+                          <div className="preview-ring-centre">
+                            <div className="preview-ring-num">238</div>
+                            <div className="preview-ring-unit">days</div>
+                          </div>
+                        </div>
+                        <div className="preview-cd-names">Priya &amp; Arjun</div>
+                        <div className="preview-cd-date">15 Nov 2026</div>
+                        <div className="preview-cd-venue">📍 Grand Hyatt Mumbai</div>
+                        <div className="preview-cd-stats">
+                          <div className="preview-cd-stat"><span className="preview-cd-n">34</span><span className="preview-cd-l">wks</span></div>
+                          <div className="preview-cd-div"/>
+                          <div className="preview-cd-stat"><span className="preview-cd-n">7</span><span className="preview-cd-l">mo</span></div>
+                        </div>
+                      </div>
+
+                      {/* Planning section */}
+                      <div className="preview-sb-label">Planning</div>
+
+                      <div className="preview-sb-item preview-sb-active">
+                        <span className="preview-sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z"/><path d="M9 22V12h6v10"/></svg></span>
+                        <span>Dashboard</span>
+                      </div>
+                      <div className="preview-sb-item">
+                        <span className="preview-sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg></span>
+                        <span>Guests</span>
+                      </div>
+                      <div className="preview-sb-item">
+                        <span className="preview-sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M20 7H4a2 2 0 00-2 2v6a2 2 0 002 2h16a2 2 0 002-2V9a2 2 0 00-2-2zM1 7l3-4h16l3 4M9 17v4M15 17v4"/></svg></span>
+                        <span>Vendors</span>
+                      </div>
+                      <div className="preview-sb-item">
+                        <span className="preview-sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></span>
+                        <span>Budget</span>
+                      </div>
+                      <div className="preview-sb-item">
+                        <span className="preview-sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg></span>
+                        <span>Checklist</span>
+                      </div>
+                      <div className="preview-sb-item">
+                        <span className="preview-sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1zM4 22v-7"/></svg></span>
+                        <span>Moodboard</span>
+                      </div>
+
+                      {/* Dashboard sub-nav */}
+                      <div className="preview-sb-sub">
+                        <div className="preview-sb-item preview-sb-sub-item">
+                          <span className="preview-sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01"/></svg></span>
+                          <span>Itinerary</span>
+                        </div>
+                        <div className="preview-sb-item preview-sb-sub-item">
+                          <span className="preview-sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4M16 2v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z"/></svg></span>
+                          <span>Event Details</span>
+                        </div>
+                        <div className="preview-sb-item preview-sb-sub-item">
+                          <span className="preview-sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8zM14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></span>
+                          <span>Notes</span>
+                        </div>
+                      </div>
+
+                      {/* Sign out */}
+                      <div className="preview-sb-bottom">
+                        <div className="preview-sb-item preview-sb-signout">
+                          <span className="preview-sb-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4M16 17l5-5-5-5M21 12H9"/></svg></span>
+                          <span>Sign Out</span>
+                        </div>
+                      </div>
+
+                    </div>
+                  </aside>
+
+                  {/* ── Main content ── */}
                   <div className="preview-main">
                     <div className="preview-page-head">
                       <div className="preview-page-title">Priya &amp; Arjun's Wedding</div>
@@ -284,22 +386,19 @@ export default function Landing() {
                     {/* Two-column content grid */}
                     <div className="preview-content-grid">
 
-                      {/* Left column — stacked cards */}
+                      {/* Left column */}
                       <div className="preview-left-col">
-                        {/* Headcount */}
                         <div className="preview-card preview-headcount-card">
                           <div className="preview-headcount-big">98</div>
                           <div className="preview-headcount-divider" />
                           <div className="preview-headcount-sub">final headcount · ₹3.4L est. per head</div>
                         </div>
-
-                        {/* Budget Snapshot */}
                         <div className="preview-card">
                           <div className="preview-card-row-between">
                             <div className="preview-card-title" style={{ marginBottom: 0 }}>Budget Snapshot</div>
                             <span className="preview-pct-label" style={{ color: 'var(--sage)' }}>34%</span>
                           </div>
-                          <div className="preview-card-row-between" style={{ marginTop: '6px' }}>
+                          <div className="preview-card-row-between" style={{ marginTop: '5px' }}>
                             <span className="preview-big-num">₹8.4L</span>
                             <span className="preview-of-label">of ₹25L</span>
                           </div>
@@ -308,8 +407,6 @@ export default function Landing() {
                           </div>
                           <div className="preview-sub-label">₹16.6L remaining</div>
                         </div>
-
-                        {/* Vendor Pipeline */}
                         <div className="preview-card">
                           <div className="preview-card-title">Vendor Pipeline</div>
                           <div className="preview-vend-grid">
@@ -331,11 +428,11 @@ export default function Landing() {
 
                       {/* Right column — tasks */}
                       <div className="preview-card">
-                        <div className="preview-card-row-between" style={{ marginBottom: '6px' }}>
+                        <div className="preview-card-row-between" style={{ marginBottom: '5px' }}>
                           <div className="preview-card-title" style={{ marginBottom: 0 }}>Upcoming Tasks</div>
                           <span className="preview-pct-label">67%</span>
                         </div>
-                        <div className="preview-prog-bar" style={{ marginBottom: '10px' }}>
+                        <div className="preview-prog-bar" style={{ marginBottom: '9px' }}>
                           <div className="preview-prog-fill" style={{ width: '67%', background: 'var(--sage)' }} />
                         </div>
                         <div className="preview-task-list">
@@ -349,6 +446,7 @@ export default function Landing() {
 
                     </div>
                   </div>
+
                 </div>
               </div>
             </div>
