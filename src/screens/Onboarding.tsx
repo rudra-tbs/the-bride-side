@@ -199,6 +199,20 @@ const HELP_AREAS = [
 
 const NOTIF_PREFS = ['WhatsApp', 'Email', 'Push Notifications']
 
+// ── Step dots indicator ──────────────────────────────────────────
+function StepDots({ current, total }: { current: number; total: number }) {
+  return (
+    <div className="ob3-step-dots">
+      {Array.from({ length: total }).map((_, i) => (
+        <div
+          key={i}
+          className={`ob3-step-dot${i + 1 === current ? ' current' : i + 1 < current ? ' done' : ''}`}
+        />
+      ))}
+    </div>
+  )
+}
+
 export default function Onboarding() {
   const {
     setScreen, setUserId, setWedding, setEvents, setItinerary,
@@ -207,6 +221,7 @@ export default function Onboarding() {
   } = useAppStore()
 
   const [step, setStep]                         = useState(0)
+  const [dir, setDir]                           = useState<'fwd' | 'bck'>('fwd')
   const [role, setRole]                         = useState<Role | null>(null)
   // Bride / Groom
   const [selfName, setSelfName]                 = useState('')
@@ -248,6 +263,15 @@ export default function Onboarding() {
   }
   function toggleNotifPref(n: string) {
     setNotifPrefs(prev => prev.includes(n) ? prev.filter(x => x !== n) : [...prev, n])
+  }
+
+  function goFwd(n: number) { setDir('fwd'); setStep(n) }
+  function goBck(n: number) { setDir('bck'); setStep(n) }
+
+  function enterKey(action: () => void, enabled = true) {
+    return (e: React.KeyboardEvent<HTMLInputElement>) => {
+      if (e.key === 'Enter' && enabled) action()
+    }
   }
 
   function finish() {
@@ -321,7 +345,7 @@ export default function Onboarding() {
         <button className="ob3-back-home" onClick={() => setScreen('landing')}>
           ← Home
         </button>
-        <div className="ob3-role-wrap" key="step-0">
+        <div className={`ob3-role-wrap ${dir}`}>
           <h1 className="ob3-heading serif">Who's planning<br />this wedding?</h1>
           <p className="ob3-sub">We'll personalise your experience based on your role.</p>
           <div className="ob3-role-grid">
@@ -329,7 +353,7 @@ export default function Onboarding() {
               <button
                 key={r.value}
                 className={`ob3-role-card${role === r.value ? ' selected' : ''}`}
-                onClick={() => { setRole(r.value); setStep(1) }}
+                onClick={() => { setRole(r.value); goFwd(1) }}
               >
                 {r.icon}
                 <div className="ob3-role-label-wrap">
@@ -350,33 +374,36 @@ export default function Onboarding() {
       const canContinue = selfName.trim().length > 0
       return (
         <div className="ob3-shell">
-          <div className="ob3-card-wrap" key="bg-1">
+          <div className={`ob3-card-wrap ${dir}`}>
             <div className="ob3-progress">
               <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '25%' }} /></div>
-              <span className="ob3-prog-label">Step 1 of 4</span>
+              <StepDots current={1} total={4} />
             </div>
-            <div className="ob3-eyebrow" style={{ marginTop: 24 }}>The couple</div>
+            <span className="ob3-eyebrow-pill">The couple</span>
             <h2 className="ob3-card-heading serif">Tell us your names</h2>
             <div className="ob3-fields">
               <div className="ob3-field">
                 <label className="ob3-label">Your name <span className="ob3-req">*</span></label>
                 <input className="ob3-input" placeholder="e.g. Priya" value={selfName}
-                  onChange={e => setSelfName(e.target.value)} autoFocus />
+                  onChange={e => setSelfName(e.target.value)} autoFocus
+                  onKeyDown={enterKey(() => goFwd(2), canContinue)} />
               </div>
               <div className="ob3-field">
                 <label className="ob3-label">Partner's name <span className="ob3-opt">(optional)</span></label>
                 <input className="ob3-input" placeholder="e.g. Arjun" value={partnerName}
-                  onChange={e => setPartnerName(e.target.value)} />
+                  onChange={e => setPartnerName(e.target.value)}
+                  onKeyDown={enterKey(() => goFwd(2), canContinue)} />
               </div>
               <div className="ob3-field">
                 <label className="ob3-label">WhatsApp number <span className="ob3-opt">(optional)</span></label>
                 <input className="ob3-input" type="tel" placeholder="e.g. +91 98765 43210"
-                  value={whatsapp} onChange={e => setWhatsapp(e.target.value)} />
+                  value={whatsapp} onChange={e => setWhatsapp(e.target.value)}
+                  onKeyDown={enterKey(() => goFwd(2), canContinue)} />
               </div>
             </div>
             <div className="ob3-actions">
-              <button className="ob3-btn-ghost" onClick={() => setStep(0)}>Back</button>
-              <button className="ob3-btn-primary" disabled={!canContinue} onClick={() => setStep(2)}>
+              <button className="ob3-btn-ghost" onClick={() => goBck(0)}>← Back</button>
+              <button className="ob3-btn-primary" disabled={!canContinue} onClick={() => goFwd(2)}>
                 Continue →
               </button>
             </div>
@@ -388,12 +415,12 @@ export default function Onboarding() {
     if (step === 2) {
       return (
         <div className="ob3-shell">
-          <div className="ob3-card-wrap ob3-card-wide" key="bg-2">
+          <div className={`ob3-card-wrap ob3-card-wide ${dir}`}>
             <div className="ob3-progress">
               <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '50%' }} /></div>
-              <span className="ob3-prog-label">Step 2 of 4</span>
+              <StepDots current={2} total={4} />
             </div>
-            <div className="ob3-eyebrow" style={{ marginTop: 24 }}>The events</div>
+            <span className="ob3-eyebrow-pill">The events</span>
             <h2 className="ob3-card-heading serif">What events are you planning?</h2>
             <div className="ob3-field" style={{ marginTop: 8 }}>
               <div className="ob3-chip-row ob3-chip-wrap">
@@ -407,22 +434,25 @@ export default function Onboarding() {
               <div className="ob3-field">
                 <label className="ob3-label">Wedding date <span className="ob3-opt">(optional)</span></label>
                 <input type="date" className="ob3-input" value={weddingDate}
-                  onChange={e => setWeddingDate(e.target.value)} />
+                  onChange={e => setWeddingDate(e.target.value)}
+                  onKeyDown={enterKey(() => goFwd(3))} />
               </div>
               <div className="ob3-field">
                 <label className="ob3-label">City</label>
                 <input className="ob3-input" placeholder="e.g. Mumbai" value={city}
-                  onChange={e => setCity(e.target.value)} />
+                  onChange={e => setCity(e.target.value)}
+                  onKeyDown={enterKey(() => goFwd(3))} />
               </div>
             </div>
             <div className="ob3-field" style={{ marginTop: 16 }}>
               <label className="ob3-label">Expected guest count <span className="ob3-opt">(optional)</span></label>
               <input className="ob3-input" type="number" placeholder="e.g. 300" value={guestCount}
-                onChange={e => setGuestCount(e.target.value)} />
+                onChange={e => setGuestCount(e.target.value)}
+                onKeyDown={enterKey(() => goFwd(3))} />
             </div>
             <div className="ob3-actions">
-              <button className="ob3-btn-ghost" onClick={() => setStep(1)}>Back</button>
-              <button className="ob3-btn-primary" onClick={() => setStep(3)}>Continue →</button>
+              <button className="ob3-btn-ghost" onClick={() => goBck(1)}>← Back</button>
+              <button className="ob3-btn-primary" onClick={() => goFwd(3)}>Continue →</button>
             </div>
           </div>
         </div>
@@ -432,18 +462,19 @@ export default function Onboarding() {
     if (step === 3) {
       return (
         <div className="ob3-shell">
-          <div className="ob3-card-wrap" key="bg-3">
+          <div className={`ob3-card-wrap ${dir}`}>
             <div className="ob3-progress">
               <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '75%' }} /></div>
-              <span className="ob3-prog-label">Step 3 of 4</span>
+              <StepDots current={3} total={4} />
             </div>
-            <div className="ob3-eyebrow" style={{ marginTop: 24 }}>The venue</div>
+            <span className="ob3-eyebrow-pill">The venue</span>
             <h2 className="ob3-card-heading serif">Where's the celebration?</h2>
             <div className="ob3-fields">
               <div className="ob3-field">
                 <label className="ob3-label">Venue name <span className="ob3-opt">(optional)</span></label>
                 <input className="ob3-input" placeholder="e.g. Grand Hyatt Mumbai" value={venue}
-                  onChange={e => setVenue(e.target.value)} autoFocus />
+                  onChange={e => setVenue(e.target.value)} autoFocus
+                  onKeyDown={enterKey(() => goFwd(4))} />
               </div>
             </div>
             <div className="ob3-field" style={{ marginTop: 20 }}>
@@ -456,8 +487,8 @@ export default function Onboarding() {
               </div>
             </div>
             <div className="ob3-actions">
-              <button className="ob3-btn-ghost" onClick={() => setStep(2)}>Back</button>
-              <button className="ob3-btn-primary" onClick={() => setStep(4)}>Continue →</button>
+              <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
+              <button className="ob3-btn-primary" onClick={() => goFwd(4)}>Continue →</button>
             </div>
           </div>
         </div>
@@ -467,13 +498,20 @@ export default function Onboarding() {
     // Bride/Groom step 4: Vibe
     return (
       <div className="ob3-shell">
-        <div className="ob3-card-wrap ob3-card-wide" key="bg-4">
+        <div className={`ob3-card-wrap ob3-card-wide ${dir}`}>
           <div className="ob3-progress">
             <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '100%' }} /></div>
-            <span className="ob3-prog-label">Step 4 of 4</span>
+            <StepDots current={4} total={4} />
           </div>
-          <div className="ob3-eyebrow" style={{ marginTop: 24 }}>Almost there</div>
+          <span className="ob3-eyebrow-pill">Almost there ✨</span>
           <h2 className="ob3-card-heading serif">What's the wedding vibe?</h2>
+          {/* Recap of what was entered */}
+          <div className="ob3-recap">
+            {selfName && <span className="ob3-recap-pill"><span>👤</span>{selfName}{partnerName ? ` & ${partnerName}` : ''}</span>}
+            {weddingDate && <span className="ob3-recap-pill"><span>📅</span>{new Date(weddingDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
+            {city && <span className="ob3-recap-pill"><span>📍</span>{city}</span>}
+            {venue && <span className="ob3-recap-pill"><span>🏛️</span>{venue}</span>}
+          </div>
           <p className="ob3-card-sub">Pick any that match your dream wedding.</p>
           <div className="ob3-field" style={{ marginTop: 8 }}>
             <div className="ob3-chip-row ob3-chip-wrap">
@@ -484,7 +522,7 @@ export default function Onboarding() {
             </div>
           </div>
           <div className="ob3-actions" style={{ marginTop: 32 }}>
-            <button className="ob3-btn-ghost" onClick={() => setStep(3)}>Back</button>
+            <button className="ob3-btn-ghost" onClick={() => goBck(3)}>← Back</button>
             <button className="ob3-btn-primary ob3-btn-finish" onClick={finish}>Start planning ✨</button>
           </div>
           <p className="ob3-skip" onClick={finish}>Skip and go to dashboard →</p>
@@ -499,33 +537,36 @@ export default function Onboarding() {
       const canContinue = selfName.trim().length > 0
       return (
         <div className="ob3-shell">
-          <div className="ob3-card-wrap" key="pl-1">
+          <div className={`ob3-card-wrap ${dir}`}>
             <div className="ob3-progress">
               <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '25%' }} /></div>
-              <span className="ob3-prog-label">Step 1 of 4</span>
+              <StepDots current={1} total={4} />
             </div>
-            <div className="ob3-eyebrow" style={{ marginTop: 24 }}>Your details</div>
+            <span className="ob3-eyebrow-pill">Your details</span>
             <h2 className="ob3-card-heading serif">Tell us about yourself</h2>
             <div className="ob3-fields">
               <div className="ob3-field">
                 <label className="ob3-label">Your name <span className="ob3-req">*</span></label>
                 <input className="ob3-input" placeholder="e.g. Kavya Sharma" value={selfName}
-                  onChange={e => setSelfName(e.target.value)} autoFocus />
+                  onChange={e => setSelfName(e.target.value)} autoFocus
+                  onKeyDown={enterKey(() => goFwd(2), canContinue)} />
               </div>
               <div className="ob3-field">
                 <label className="ob3-label">Agency / Studio name <span className="ob3-opt">(optional)</span></label>
                 <input className="ob3-input" placeholder="e.g. Dream Weddings Co." value={agencyName}
-                  onChange={e => setAgencyName(e.target.value)} />
+                  onChange={e => setAgencyName(e.target.value)}
+                  onKeyDown={enterKey(() => goFwd(2), canContinue)} />
               </div>
               <div className="ob3-field">
                 <label className="ob3-label">Work email <span className="ob3-opt">(optional)</span></label>
                 <input className="ob3-input" type="email" placeholder="e.g. kavya@dreamweddings.com"
-                  value={workEmail} onChange={e => setWorkEmail(e.target.value)} />
+                  value={workEmail} onChange={e => setWorkEmail(e.target.value)}
+                  onKeyDown={enterKey(() => goFwd(2), canContinue)} />
               </div>
             </div>
             <div className="ob3-actions">
-              <button className="ob3-btn-ghost" onClick={() => setStep(0)}>Back</button>
-              <button className="ob3-btn-primary" disabled={!canContinue} onClick={() => setStep(2)}>
+              <button className="ob3-btn-ghost" onClick={() => goBck(0)}>← Back</button>
+              <button className="ob3-btn-primary" disabled={!canContinue} onClick={() => goFwd(2)}>
                 Continue →
               </button>
             </div>
@@ -537,28 +578,30 @@ export default function Onboarding() {
     if (step === 2) {
       return (
         <div className="ob3-shell">
-          <div className="ob3-card-wrap" key="pl-2">
+          <div className={`ob3-card-wrap ${dir}`}>
             <div className="ob3-progress">
               <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '50%' }} /></div>
-              <span className="ob3-prog-label">Step 2 of 4</span>
+              <StepDots current={2} total={4} />
             </div>
-            <div className="ob3-eyebrow" style={{ marginTop: 24 }}>The couple</div>
+            <span className="ob3-eyebrow-pill">The couple</span>
             <h2 className="ob3-card-heading serif">Who are you planning for?</h2>
             <div className="ob3-fields">
               <div className="ob3-field">
                 <label className="ob3-label">Bride's name <span className="ob3-opt">(optional)</span></label>
                 <input className="ob3-input" placeholder="e.g. Priya" value={clientBrideName}
-                  onChange={e => setClientBrideName(e.target.value)} autoFocus />
+                  onChange={e => setClientBrideName(e.target.value)} autoFocus
+                  onKeyDown={enterKey(() => goFwd(3))} />
               </div>
               <div className="ob3-field">
                 <label className="ob3-label">Groom's name <span className="ob3-opt">(optional)</span></label>
                 <input className="ob3-input" placeholder="e.g. Arjun" value={clientGroomName}
-                  onChange={e => setClientGroomName(e.target.value)} />
+                  onChange={e => setClientGroomName(e.target.value)}
+                  onKeyDown={enterKey(() => goFwd(3))} />
               </div>
             </div>
             <div className="ob3-actions">
-              <button className="ob3-btn-ghost" onClick={() => setStep(1)}>Back</button>
-              <button className="ob3-btn-primary" onClick={() => setStep(3)}>Continue →</button>
+              <button className="ob3-btn-ghost" onClick={() => goBck(1)}>← Back</button>
+              <button className="ob3-btn-primary" onClick={() => goFwd(3)}>Continue →</button>
             </div>
           </div>
         </div>
@@ -568,12 +611,12 @@ export default function Onboarding() {
     if (step === 3) {
       return (
         <div className="ob3-shell">
-          <div className="ob3-card-wrap ob3-card-wide" key="pl-3">
+          <div className={`ob3-card-wrap ob3-card-wide ${dir}`}>
             <div className="ob3-progress">
               <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '75%' }} /></div>
-              <span className="ob3-prog-label">Step 3 of 4</span>
+              <StepDots current={3} total={4} />
             </div>
-            <div className="ob3-eyebrow" style={{ marginTop: 24 }}>The celebration</div>
+            <span className="ob3-eyebrow-pill">The celebration</span>
             <h2 className="ob3-card-heading serif">Events & logistics</h2>
             <div className="ob3-field" style={{ marginTop: 8 }}>
               <label className="ob3-label">Events to plan</label>
@@ -593,7 +636,8 @@ export default function Onboarding() {
               <div className="ob3-field">
                 <label className="ob3-label">City</label>
                 <input className="ob3-input" placeholder="e.g. Mumbai" value={city}
-                  onChange={e => setCity(e.target.value)} />
+                  onChange={e => setCity(e.target.value)}
+                  onKeyDown={enterKey(() => goFwd(4))} />
               </div>
             </div>
             <div className="ob3-two-col" style={{ marginTop: 16 }}>
@@ -605,12 +649,13 @@ export default function Onboarding() {
               <div className="ob3-field">
                 <label className="ob3-label">Guest count <span className="ob3-opt">(optional)</span></label>
                 <input className="ob3-input" type="number" placeholder="e.g. 300" value={guestCount}
-                  onChange={e => setGuestCount(e.target.value)} />
+                  onChange={e => setGuestCount(e.target.value)}
+                  onKeyDown={enterKey(() => goFwd(4))} />
               </div>
             </div>
             <div className="ob3-actions">
-              <button className="ob3-btn-ghost" onClick={() => setStep(2)}>Back</button>
-              <button className="ob3-btn-primary" onClick={() => setStep(4)}>Continue →</button>
+              <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
+              <button className="ob3-btn-primary" onClick={() => goFwd(4)}>Continue →</button>
             </div>
           </div>
         </div>
@@ -620,13 +665,20 @@ export default function Onboarding() {
     // Planner step 4: Budget + Vibe
     return (
       <div className="ob3-shell">
-        <div className="ob3-card-wrap ob3-card-wide" key="pl-4">
+        <div className={`ob3-card-wrap ob3-card-wide ${dir}`}>
           <div className="ob3-progress">
             <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '100%' }} /></div>
-            <span className="ob3-prog-label">Step 4 of 4</span>
+            <StepDots current={4} total={4} />
           </div>
-          <div className="ob3-eyebrow" style={{ marginTop: 24 }}>Almost there</div>
+          <span className="ob3-eyebrow-pill">Almost there ✨</span>
           <h2 className="ob3-card-heading serif">Budget & vibe</h2>
+          <div className="ob3-recap">
+            {selfName && <span className="ob3-recap-pill"><span>👤</span>{selfName}</span>}
+            {(clientBrideName || clientGroomName) && (
+              <span className="ob3-recap-pill"><span>💍</span>{[clientBrideName, clientGroomName].filter(Boolean).join(' & ')}</span>
+            )}
+            {city && <span className="ob3-recap-pill"><span>📍</span>{city}</span>}
+          </div>
           <div className="ob3-field" style={{ marginTop: 8 }}>
             <label className="ob3-label">Total budget</label>
             <div className="ob3-chip-row ob3-chip-wrap">
@@ -646,7 +698,7 @@ export default function Onboarding() {
             </div>
           </div>
           <div className="ob3-actions" style={{ marginTop: 32 }}>
-            <button className="ob3-btn-ghost" onClick={() => setStep(3)}>Back</button>
+            <button className="ob3-btn-ghost" onClick={() => goBck(3)}>← Back</button>
             <button className="ob3-btn-primary ob3-btn-finish" onClick={finish}>Start planning ✨</button>
           </div>
           <p className="ob3-skip" onClick={finish}>Skip and go to dashboard →</p>
@@ -660,18 +712,19 @@ export default function Onboarding() {
     const canContinue = selfName.trim().length > 0
     return (
       <div className="ob3-shell">
-        <div className="ob3-card-wrap" key="ot-1">
+        <div className={`ob3-card-wrap ${dir}`}>
           <div className="ob3-progress">
             <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '33%' }} /></div>
-            <span className="ob3-prog-label">Step 1 of 3</span>
+            <StepDots current={1} total={3} />
           </div>
-          <div className="ob3-eyebrow" style={{ marginTop: 24 }}>About you</div>
+          <span className="ob3-eyebrow-pill">About you</span>
           <h2 className="ob3-card-heading serif">Who are you?</h2>
           <div className="ob3-fields">
             <div className="ob3-field">
               <label className="ob3-label">Your name <span className="ob3-req">*</span></label>
               <input className="ob3-input" placeholder="e.g. Neha" value={selfName}
-                onChange={e => setSelfName(e.target.value)} autoFocus />
+                onChange={e => setSelfName(e.target.value)} autoFocus
+                onKeyDown={enterKey(() => goFwd(2), canContinue)} />
             </div>
             <div className="ob3-field">
               <label className="ob3-label">Relation to the couple <span className="ob3-opt">(optional)</span></label>
@@ -684,8 +737,8 @@ export default function Onboarding() {
             </div>
           </div>
           <div className="ob3-actions">
-            <button className="ob3-btn-ghost" onClick={() => setStep(0)}>Back</button>
-            <button className="ob3-btn-primary" disabled={!canContinue} onClick={() => setStep(2)}>
+            <button className="ob3-btn-ghost" onClick={() => goBck(0)}>← Back</button>
+            <button className="ob3-btn-primary" disabled={!canContinue} onClick={() => goFwd(2)}>
               Continue →
             </button>
           </div>
@@ -697,12 +750,12 @@ export default function Onboarding() {
   if (step === 2) {
     return (
       <div className="ob3-shell">
-        <div className="ob3-card-wrap ob3-card-wide" key="ot-2">
+        <div className={`ob3-card-wrap ob3-card-wide ${dir}`}>
           <div className="ob3-progress">
             <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '66%' }} /></div>
-            <span className="ob3-prog-label">Step 2 of 3</span>
+            <StepDots current={2} total={3} />
           </div>
-          <div className="ob3-eyebrow" style={{ marginTop: 24 }}>Your involvement</div>
+          <span className="ob3-eyebrow-pill">Your involvement</span>
           <h2 className="ob3-card-heading serif">Events & travel</h2>
           <div className="ob3-field" style={{ marginTop: 8 }}>
             <label className="ob3-label">Which events are you attending?</label>
@@ -723,8 +776,8 @@ export default function Onboarding() {
             </div>
           </div>
           <div className="ob3-actions">
-            <button className="ob3-btn-ghost" onClick={() => setStep(1)}>Back</button>
-            <button className="ob3-btn-primary" onClick={() => setStep(3)}>Continue →</button>
+            <button className="ob3-btn-ghost" onClick={() => goBck(1)}>← Back</button>
+            <button className="ob3-btn-primary" onClick={() => goFwd(3)}>Continue →</button>
           </div>
         </div>
       </div>
@@ -734,13 +787,21 @@ export default function Onboarding() {
   // Other/Family step 3: Help areas + notif prefs
   return (
     <div className="ob3-shell">
-      <div className="ob3-card-wrap ob3-card-wide" key="ot-3">
+      <div className={`ob3-card-wrap ob3-card-wide ${dir}`}>
         <div className="ob3-progress">
           <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '100%' }} /></div>
-          <span className="ob3-prog-label">Step 3 of 3</span>
+          <StepDots current={3} total={3} />
         </div>
-        <div className="ob3-eyebrow" style={{ marginTop: 24 }}>Almost done</div>
+        <span className="ob3-eyebrow-pill">Almost done ✨</span>
         <h2 className="ob3-card-heading serif">How can you help?</h2>
+        {selfName && (
+          <div className="ob3-recap">
+            <span className="ob3-recap-pill"><span>👤</span>{selfName}{relation ? ` · ${relation}` : ''}</span>
+            {attendingEvents.length > 0 && (
+              <span className="ob3-recap-pill"><span>🎉</span>{attendingEvents.slice(0, 2).join(', ')}{attendingEvents.length > 2 ? ` +${attendingEvents.length - 2}` : ''}</span>
+            )}
+          </div>
+        )}
         <div className="ob3-field" style={{ marginTop: 8 }}>
           <label className="ob3-label">Areas you can help with <span className="ob3-opt">(pick any)</span></label>
           <div className="ob3-chip-row ob3-chip-wrap" style={{ marginTop: 8 }}>
@@ -760,7 +821,7 @@ export default function Onboarding() {
           </div>
         </div>
         <div className="ob3-actions" style={{ marginTop: 32 }}>
-          <button className="ob3-btn-ghost" onClick={() => setStep(2)}>Back</button>
+          <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
           <button className="ob3-btn-primary ob3-btn-finish" onClick={finish}>Let's go ✨</button>
         </div>
         <p className="ob3-skip" onClick={finish}>Skip and go to dashboard →</p>

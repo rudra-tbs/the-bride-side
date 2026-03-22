@@ -1088,6 +1088,14 @@ textarea.input { resize: vertical; min-height: 80px; }
   from { opacity: 0; transform: translateY(20px); }
   to   { opacity: 1; transform: translateY(0); }
 }
+@keyframes ob3Fwd {
+  from { opacity: 0; transform: translateX(28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes ob3Bck {
+  from { opacity: 0; transform: translateX(-28px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
 
 /* ── Shell ─────────────────────────────────────────────────────── */
 .ob3-shell {
@@ -1099,6 +1107,21 @@ textarea.input { resize: vertical; min-height: 80px; }
   padding: 40px 20px;
   background: linear-gradient(150deg, #FDF5F7 0%, #F8F0F8 50%, #F0F4F8 100%);
   position: relative;
+  overflow: hidden;
+}
+.ob3-shell::before {
+  content: '';
+  position: absolute; top: -140px; right: -140px;
+  width: 560px; height: 560px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(232,116,138,0.10) 0%, transparent 68%);
+  pointer-events: none;
+}
+.ob3-shell::after {
+  content: '';
+  position: absolute; bottom: -120px; left: -120px;
+  width: 440px; height: 440px; border-radius: 50%;
+  background: radial-gradient(circle, rgba(122,170,144,0.08) 0%, transparent 68%);
+  pointer-events: none;
 }
 
 .ob3-back-home {
@@ -1132,9 +1155,10 @@ textarea.input { resize: vertical; min-height: 80px; }
 /* ── Role step ─────────────────────────────────────────────────── */
 .ob3-role-wrap {
   text-align: center;
-  animation: ob3In 0.4s ease both;
   width: 100%; max-width: 920px;
 }
+.ob3-role-wrap.fwd { animation: ob3Fwd 0.28s ease both; }
+.ob3-role-wrap.bck { animation: ob3Bck 0.28s ease both; }
 
 .ob3-role-grid {
   display: grid;
@@ -1155,7 +1179,13 @@ textarea.input { resize: vertical; min-height: 80px; }
   box-shadow: 0 2px 8px rgba(42,26,32,0.06);
   font-family: var(--sans);
   justify-content: space-between;
+  position: relative;
+  animation: ob3Fwd 0.35s ease both;
 }
+.ob3-role-card:nth-child(1) { animation-delay: 0.00s; }
+.ob3-role-card:nth-child(2) { animation-delay: 0.06s; }
+.ob3-role-card:nth-child(3) { animation-delay: 0.12s; }
+.ob3-role-card:nth-child(4) { animation-delay: 0.18s; }
 .ob3-role-card:hover {
   border-color: var(--rose-mid);
   transform: translateY(-6px);
@@ -1167,6 +1197,15 @@ textarea.input { resize: vertical; min-height: 80px; }
   background: var(--rose-light);
   transform: translateY(-6px);
   box-shadow: 0 0 0 3px rgba(232,116,138,0.18), 0 14px 36px rgba(232,116,138,0.18);
+}
+.ob3-role-card.selected::after {
+  content: '✓';
+  position: absolute; top: 12px; right: 12px;
+  width: 22px; height: 22px; border-radius: 50%;
+  background: var(--rose); color: white;
+  font-size: 11px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  line-height: 1;
 }
 .ob3-role-svg { width: auto; height: 200px; flex-shrink: 0; }
 .ob3-role-label-wrap { padding-top: 14px; text-align: center; }
@@ -1184,8 +1223,9 @@ textarea.input { resize: vertical; min-height: 80px; }
   padding: 36px 40px 32px;
   width: 100%; max-width: 480px;
   box-shadow: var(--shadow-lg);
-  animation: ob3In 0.35s ease both;
 }
+.ob3-card-wrap.fwd { animation: ob3Fwd 0.22s ease both; }
+.ob3-card-wrap.bck { animation: ob3Bck 0.22s ease both; }
 .ob3-card-wide { max-width: 580px; }
 
 .ob3-card-heading {
@@ -1194,7 +1234,7 @@ textarea.input { resize: vertical; min-height: 80px; }
 }
 .ob3-card-sub { font-size: 13px; color: var(--ink3); line-height: 1.5; margin-bottom: 4px; }
 
-/* ── Progress bar ──────────────────────────────────────────────── */
+/* ── Progress bar + dots ───────────────────────────────────────── */
 .ob3-progress {
   display: flex; align-items: center; gap: 12px;
 }
@@ -1211,6 +1251,38 @@ textarea.input { resize: vertical; min-height: 80px; }
   font-size: 11px; font-weight: 600; color: var(--ink3);
   white-space: nowrap; letter-spacing: 0.3px;
 }
+/* Step dots */
+.ob3-step-dots { display: flex; align-items: center; gap: 6px; }
+.ob3-step-dot {
+  height: 7px; border-radius: 100px; background: var(--border2);
+  transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+  width: 7px;
+}
+.ob3-step-dot.done { background: var(--rose-mid); width: 7px; }
+.ob3-step-dot.current { background: var(--rose); width: 20px; }
+
+/* Eyebrow pill */
+.ob3-eyebrow-pill {
+  display: inline-flex; align-items: center;
+  padding: 3px 10px; border-radius: 100px;
+  background: var(--rose-light); color: var(--rose-dark);
+  font-size: 10px; font-weight: 700; letter-spacing: 0.8px; text-transform: uppercase;
+  margin-top: 20px; margin-bottom: 4px;
+  border: 1px solid var(--rose-mid);
+}
+
+/* Step recap pills */
+.ob3-recap {
+  display: flex; flex-wrap: wrap; gap: 6px;
+  margin-bottom: 20px;
+}
+.ob3-recap-pill {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 4px 10px; border-radius: 100px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  font-size: 11px; color: var(--ink2);
+}
+.ob3-recap-pill span { font-size: 13px; }
 
 /* ── Form fields ───────────────────────────────────────────────── */
 .ob3-fields { display: flex; flex-direction: column; gap: 16px; margin-top: 24px; }
@@ -1308,8 +1380,10 @@ textarea.input { resize: vertical; min-height: 80px; }
   text-align: center; margin-top: 16px;
   font-size: 12px; color: var(--ink4); cursor: pointer;
   transition: color 0.15s;
+  display: flex; align-items: center; justify-content: center; gap: 4px;
+  text-decoration: underline; text-decoration-color: transparent;
 }
-.ob3-skip:hover { color: var(--rose); }
+.ob3-skip:hover { color: var(--rose); text-decoration-color: var(--rose-mid); }
 
 /* ── Responsive ────────────────────────────────────────────────── */
 @media (max-width: 640px) {
