@@ -175,18 +175,30 @@ const ROLES: { value: Role; label: string; icon: React.ReactNode; sub: string }[
   { value: 'other',   label: 'Family',  icon: <FamilyIcon />,  sub: 'Helping a loved one' },
 ]
 
-const BUDGETS = [
-  { label: 'Under ₹5L',    value: 500000 },
-  { label: '₹5L – ₹15L',  value: 1000000 },
-  { label: '₹15L – ₹30L', value: 2000000 },
-  { label: '₹30L – ₹1Cr', value: 5000000 },
-  { label: '₹1Cr+',        value: 10000000 },
+const VIBES_WITH_EMOJI = [
+  { label: 'Romantic',    emoji: '💕', desc: 'Soft & dreamy' },
+  { label: 'Floral',      emoji: '🌸', desc: 'Blooms everywhere' },
+  { label: 'Elegant',     emoji: '✨', desc: 'Refined & timeless' },
+  { label: 'Traditional', emoji: '🪔', desc: 'Heritage & rituals' },
+  { label: 'Modern',      emoji: '🖤', desc: 'Clean & bold' },
+  { label: 'Minimal',     emoji: '🤍', desc: 'Less is more' },
+  { label: 'Bohemian',    emoji: '🌿', desc: 'Free-spirited & earthy' },
+  { label: 'Vintage',     emoji: '🎞️', desc: 'Old-world charm' },
+  { label: 'Grand',       emoji: '🏰', desc: 'Opulent & show-stopping' },
+  { label: 'Intimate',    emoji: '🕯️', desc: 'Warm & personal' },
 ]
 
-const VIBES = [
-  'Romantic', 'Floral', 'Elegant', 'Traditional',
-  'Modern', 'Minimal', 'Bohemian', 'Vintage', 'Grand', 'Intimate',
-]
+function sliderLabel(v: number): string {
+  if (v === 37) return '₹2Cr+'
+  const lakhs = 20 + v * 5
+  if (lakhs < 100) return `₹${lakhs}L`
+  return `₹${Number((lakhs / 100).toFixed(2)).toString()}Cr`
+}
+
+function sliderToBudget(v: number): number {
+  if (v === 37) return 25000000
+  return (20 + v * 5) * 100000
+}
 
 const EVENTS_LIST = ['Wedding', 'Reception', 'Mehndi', 'Sangeet', 'Haldi', 'Engagement', 'Roka']
 
@@ -232,7 +244,8 @@ export default function Onboarding() {
   const [guestCount, setGuestCount]             = useState('')
   const [selectedEvents, setSelectedEvents]     = useState<string[]>(['Wedding'])
   const [venue, setVenue]                       = useState('')
-  const [budget, setBudget]                     = useState(0)
+  const [budgetSlider, setBudgetSlider]         = useState(10) // default ~₹70L
+  const [budgetEvents, setBudgetEvents]         = useState<string[]>([])
   const [vibes, setVibes]                       = useState<string[]>([])
   // Planner
   const [agencyName, setAgencyName]             = useState('')
@@ -251,6 +264,9 @@ export default function Onboarding() {
 
   function toggleVibe(v: string) {
     setVibes(prev => prev.includes(v) ? prev.filter(x => x !== v) : [...prev, v])
+  }
+  function toggleBudgetEvent(ev: string) {
+    setBudgetEvents(prev => prev.includes(ev) ? prev.filter(x => x !== ev) : [...prev, ev])
   }
   function toggleSelectedEvent(ev: string) {
     setSelectedEvents(prev => prev.includes(ev) ? prev.filter(x => x !== ev) : [...prev, ev])
@@ -306,7 +322,7 @@ export default function Onboarding() {
       wedding_date: weddingDate || '2026-12-01',
       venue: venue || 'TBD',
       city: city || 'Mumbai',
-      total_budget: budget || 1000000,
+      total_budget: sliderToBudget(budgetSlider),
       vibe_tags: vibes,
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
@@ -462,12 +478,12 @@ export default function Onboarding() {
     if (step === 3) {
       return (
         <div className="ob3-shell">
-          <div className={`ob3-card-wrap ${dir}`}>
+          <div className={`ob3-card-wrap ob3-card-wide ${dir}`}>
             <div className="ob3-progress">
               <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '75%' }} /></div>
               <StepDots current={3} total={4} />
             </div>
-            <span className="ob3-eyebrow-pill">The venue</span>
+            <span className="ob3-eyebrow-pill">The venue & budget</span>
             <h2 className="ob3-card-heading serif">Where's the celebration?</h2>
             <div className="ob3-fields">
               <div className="ob3-field">
@@ -477,12 +493,22 @@ export default function Onboarding() {
                   onKeyDown={enterKey(() => goFwd(4))} />
               </div>
             </div>
-            <div className="ob3-field" style={{ marginTop: 20 }}>
+            <div className="ob3-field" style={{ marginTop: 24 }}>
               <label className="ob3-label">Approximate budget</label>
-              <div className="ob3-chip-row ob3-chip-wrap">
-                {BUDGETS.map(b => (
-                  <button key={b.value} className={`ob3-chip${budget === b.value ? ' on' : ''}`}
-                    onClick={() => setBudget(budget === b.value ? 0 : b.value)}>{b.label}</button>
+              <div className="ob3-budget-slider-wrap">
+                <div className="ob3-budget-amount">{sliderLabel(budgetSlider)}</div>
+                <input type="range" className="ob3-range" min={0} max={37} step={1}
+                  value={budgetSlider} onChange={e => setBudgetSlider(Number(e.target.value))}
+                  style={{ '--slider-pct': `${(budgetSlider / 37) * 100}%` } as React.CSSProperties} />
+                <div className="ob3-range-bounds"><span>₹20L</span><span>₹2Cr+</span></div>
+              </div>
+            </div>
+            <div className="ob3-field" style={{ marginTop: 20 }}>
+              <label className="ob3-label">What events does this budget cover? <span className="ob3-opt">(pick any)</span></label>
+              <div className="ob3-chip-row ob3-chip-wrap" style={{ marginTop: 8 }}>
+                {EVENTS_LIST.map(ev => (
+                  <button key={ev} className={`ob3-chip${budgetEvents.includes(ev) ? ' on' : ''}`}
+                    onClick={() => toggleBudgetEvent(ev)}>{ev}</button>
                 ))}
               </div>
             </div>
@@ -512,14 +538,16 @@ export default function Onboarding() {
             {city && <span className="ob3-recap-pill"><span>📍</span>{city}</span>}
             {venue && <span className="ob3-recap-pill"><span>🏛️</span>{venue}</span>}
           </div>
-          <p className="ob3-card-sub">Pick any that match your dream wedding.</p>
-          <div className="ob3-field" style={{ marginTop: 8 }}>
-            <div className="ob3-chip-row ob3-chip-wrap">
-              {VIBES.map(v => (
-                <button key={v} className={`ob3-chip${vibes.includes(v) ? ' on' : ''}`}
-                  onClick={() => toggleVibe(v)}>{v}</button>
-              ))}
-            </div>
+          <p className="ob3-card-sub">Pick all that match your dream wedding — we'll personalise everything.</p>
+          <div className="ob3-vibe-grid" style={{ marginTop: 16 }}>
+            {VIBES_WITH_EMOJI.map(v => (
+              <button key={v.label} className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
+                onClick={() => toggleVibe(v.label)}>
+                <span className="ob3-vibe-emoji">{v.emoji}</span>
+                <span className="ob3-vibe-label">{v.label}</span>
+                <span className="ob3-vibe-desc">{v.desc}</span>
+              </button>
+            ))}
           </div>
           <div className="ob3-actions" style={{ marginTop: 32 }}>
             <button className="ob3-btn-ghost" onClick={() => goBck(3)}>← Back</button>
@@ -681,19 +709,32 @@ export default function Onboarding() {
           </div>
           <div className="ob3-field" style={{ marginTop: 8 }}>
             <label className="ob3-label">Total budget</label>
-            <div className="ob3-chip-row ob3-chip-wrap">
-              {BUDGETS.map(b => (
-                <button key={b.value} className={`ob3-chip${budget === b.value ? ' on' : ''}`}
-                  onClick={() => setBudget(budget === b.value ? 0 : b.value)}>{b.label}</button>
-              ))}
+            <div className="ob3-budget-slider-wrap">
+              <div className="ob3-budget-amount">{sliderLabel(budgetSlider)}</div>
+              <input type="range" className="ob3-range" min={0} max={37} step={1}
+                value={budgetSlider} onChange={e => setBudgetSlider(Number(e.target.value))} />
+              <div className="ob3-range-bounds"><span>₹20L</span><span>₹2Cr+</span></div>
             </div>
           </div>
           <div className="ob3-field" style={{ marginTop: 20 }}>
+            <label className="ob3-label">What events does this budget cover? <span className="ob3-opt">(pick any)</span></label>
+            <div className="ob3-chip-row ob3-chip-wrap" style={{ marginTop: 8 }}>
+              {EVENTS_LIST.map(ev => (
+                <button key={ev} className={`ob3-chip${budgetEvents.includes(ev) ? ' on' : ''}`}
+                  onClick={() => toggleBudgetEvent(ev)}>{ev}</button>
+              ))}
+            </div>
+          </div>
+          <div className="ob3-field" style={{ marginTop: 24 }}>
             <label className="ob3-label">Wedding vibe <span className="ob3-opt">(pick any)</span></label>
-            <div className="ob3-chip-row ob3-chip-wrap">
-              {VIBES.map(v => (
-                <button key={v} className={`ob3-chip${vibes.includes(v) ? ' on' : ''}`}
-                  onClick={() => toggleVibe(v)}>{v}</button>
+            <div className="ob3-vibe-grid" style={{ marginTop: 8 }}>
+              {VIBES_WITH_EMOJI.map(v => (
+                <button key={v.label} className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
+                  onClick={() => toggleVibe(v.label)}>
+                  <span className="ob3-vibe-emoji">{v.emoji}</span>
+                  <span className="ob3-vibe-label">{v.label}</span>
+                  <span className="ob3-vibe-desc">{v.desc}</span>
+                </button>
               ))}
             </div>
           </div>
