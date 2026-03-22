@@ -1,8 +1,8 @@
 import type { ReactNode } from 'react'
 import { useAppStore } from '@/store/app'
 import { signOut } from '@/lib/supabase'
-import type { Screen } from '@/types'
-import { initials, daysUntil } from '@/lib/utils'
+import type { Screen, DashTab } from '@/types'
+import { initials, daysUntil, formatDate } from '@/lib/utils'
 
 interface NavItem {
   screen: Screen
@@ -18,6 +18,19 @@ function Icon({ path }: { path: string }) {
   )
 }
 
+interface DashItem {
+  id: DashTab
+  label: string
+  icon: ReactNode
+}
+
+const DASH_ITEMS: DashItem[] = [
+  { id: 'guest',     label: 'Overview',      icon: <Icon path="M3 3h7v7H3z M14 3h7v7h-7z M14 14h7v7h-7z M3 14h7v7H3z" /> },
+  { id: 'itinerary', label: 'Itinerary',     icon: <Icon path="M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01" /> },
+  { id: 'details',   label: 'Event Details', icon: <Icon path="M8 2v4 M16 2v4 M3 10h18 M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" /> },
+  { id: 'mom',       label: 'Notes',         icon: <Icon path="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8" /> },
+]
+
 const NAV_ITEMS: NavItem[] = [
   { screen: 'dashboard', label: 'Dashboard', icon: <Icon path="M3 9l9-7 9 7v11a2 2 0 01-2 2H5a2 2 0 01-2-2z M9 22V12h6v10" /> },
   { screen: 'guests',    label: 'Guests',    icon: <Icon path="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2 M9 11a4 4 0 100-8 4 4 0 000 8z M23 21v-2a4 4 0 00-3-3.87 M16 3.13a4 4 0 010 7.75" /> },
@@ -28,10 +41,14 @@ const NAV_ITEMS: NavItem[] = [
 ]
 
 export default function AppShell({ children }: { children: ReactNode }) {
-  const { screen, setScreen, wedding } = useAppStore()
+  const { screen, setScreen, wedding, dashTab, setDashTab } = useAppStore()
   const coupleName = wedding?.couple_name ?? 'Your Wedding'
   const selfName = wedding?.self_name ?? 'Bride'
-  const daysLeft = wedding ? Math.max(0, daysUntil(wedding.wedding_date)) : null
+  const days = wedding ? Math.max(0, daysUntil(wedding.wedding_date)) : 0
+  const circumference = 314
+  const pct = Math.min(1, Math.max(0, (365 - days) / 365))
+  const offset = circumference * (1 - pct)
+  const ringColor = days <= 30 ? 'var(--rose)' : days <= 90 ? 'var(--amber)' : 'var(--sage)'
 
   return (
     <div className="app-shell">
@@ -74,16 +91,36 @@ export default function AppShell({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-inner">
-          {/* Wedding context card */}
-          {wedding && daysLeft !== null && (
-            <div className="sb-wedding-card">
-              <div className="sb-wedding-names">{coupleName}</div>
-              <div className="sb-wedding-countdown">
-                <span className="sb-wedding-num">{daysLeft}</span>
-                <span className="sb-wedding-unit">days to go</span>
+          {/* Countdown ring card */}
+          {wedding && (
+            <div className="sb-countdown-card">
+              <div className={`sb-countdown-ring-wrap${days <= 30 ? ' urgent' : ''}`}>
+                <svg className="sb-countdown-svg" viewBox="0 0 108 108">
+                  <circle className="sb-countdown-track" cx="54" cy="54" r="46" />
+                  <circle
+                    className="sb-countdown-progress"
+                    cx="54" cy="54" r="46"
+                    style={{ strokeDashoffset: offset, stroke: ringColor }}
+                  />
+                </svg>
+                <div className="sb-countdown-centre">
+                  <div className="sb-countdown-num">{days}</div>
+                  <div className="sb-countdown-unit">days</div>
+                </div>
               </div>
-              <div className="sb-wedding-progress">
-                <div className="sb-wedding-prog-fill" style={{ width: `${Math.min(100, ((365 - daysLeft) / 365) * 100)}%` }} />
+              <div className="sb-countdown-names">{coupleName}</div>
+              <div className="sb-countdown-date">{formatDate(wedding.wedding_date, 'd MMM yyyy')}</div>
+              <div className="sb-countdown-venue">📍 {wedding.venue}</div>
+              <div className="sb-countdown-stats">
+                <div className="sb-countdown-stat">
+                  <span className="sb-countdown-stat-n">{Math.floor(days / 7)}</span>
+                  <span className="sb-countdown-stat-l">wks</span>
+                </div>
+                <div className="sb-countdown-stat-div" />
+                <div className="sb-countdown-stat">
+                  <span className="sb-countdown-stat-n">{Math.floor(days / 30)}</span>
+                  <span className="sb-countdown-stat-l">mo</span>
+                </div>
               </div>
             </div>
           )}
@@ -102,6 +139,22 @@ export default function AppShell({ children }: { children: ReactNode }) {
               </button>
             ))}
           </div>
+
+          {/* Dashboard sub-nav — visible only when on dashboard screen */}
+          {screen === 'dashboard' && (
+            <div className="sb-sub-section">
+              {DASH_ITEMS.map(item => (
+                <button
+                  key={item.id}
+                  className={`sb-item sb-sub-item${dashTab === item.id ? ' active' : ''}`}
+                  onClick={() => setDashTab(item.id)}
+                >
+                  <span className="sb-item-icon">{item.icon}</span>
+                  {item.label}
+                </button>
+              ))}
+            </div>
+          )}
 
           {/* Bottom */}
           <div className="sb-bottom">

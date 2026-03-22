@@ -1,68 +1,11 @@
 import { useState } from 'react'
 import { useAppStore } from '@/store/app'
-import type { DashTab, ItineraryItem, Note, WeddingEvent } from '@/types'
-import { formatDate, daysUntil, formatINR } from '@/lib/utils'
+import type { ItineraryItem, Note, WeddingEvent } from '@/types'
+import { formatDate, formatINR } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import { uuid } from '@/lib/utils'
 
-// ── Sub-component: Tab ──────────────────────────────────────────────
-function TabBtn({ id, label, active, onClick }: { id: DashTab; label: string; active: boolean; onClick: (t: DashTab) => void }) {
-  return (
-    <button className={`tab-btn${active ? ' active' : ''}`} onClick={() => onClick(id)}>
-      {label}
-    </button>
-  )
-}
-
-// ── Sub-component: Countdown ring ───────────────────────────────────
-function Countdown({ date, coupleName, venue }: { date: string; coupleName: string; venue: string }) {
-  const days = Math.max(0, daysUntil(date))
-  const totalDays = 365
-  const elapsed = Math.max(0, totalDays - days)
-  const pct = Math.min(1, elapsed / totalDays)
-  const circumference = 314
-  const offset = circumference * (1 - pct)
-
-  return (
-    <div className="countdown-hero">
-      <div className={`countdown-ring-wrap${days <= 30 ? ' urgent' : ''}`}>
-        <svg className="countdown-svg" viewBox="0 0 108 108">
-          <circle className="countdown-track" cx="54" cy="54" r="46" />
-          <circle
-            className="countdown-progress"
-            cx="54" cy="54" r="46"
-            style={{ strokeDashoffset: offset, stroke: days <= 30 ? 'var(--rose)' : days <= 90 ? 'var(--amber)' : 'var(--sage)' }}
-          />
-        </svg>
-        <div className="countdown-centre">
-          <div className="countdown-num">{days}</div>
-          <div className="countdown-unit">days</div>
-        </div>
-      </div>
-      <div className="countdown-title">{coupleName}</div>
-      <div className="countdown-date">{formatDate(date, 'EEEE, d MMMM yyyy')}</div>
-      <div className="countdown-stats">
-        <div className="countdown-stat">
-          <div className="countdown-stat-num">{Math.floor(days / 7)}</div>
-          <div className="countdown-stat-lbl">Weeks Away</div>
-        </div>
-        <div className="countdown-stat-div" />
-        <div className="countdown-stat">
-          <div className="countdown-stat-num">{Math.floor(days / 30)}</div>
-          <div className="countdown-stat-lbl">Months Away</div>
-        </div>
-        <div className="countdown-stat-div" />
-        <div className="countdown-stat">
-          <div className="countdown-stat-num">{days}</div>
-          <div className="countdown-stat-lbl">Days Left</div>
-        </div>
-      </div>
-      <div className="countdown-next">📍 {venue}</div>
-    </div>
-  )
-}
-
-// ── Guest Tab ────────────────────────────────────────────────────────
+// ── Guest Tab (Overview) ─────────────────────────────────────────────
 function GuestTab() {
   const { wedding, guests, events, clTasks, toggleTask } = useAppStore()
   if (!wedding) return null
@@ -71,41 +14,35 @@ function GuestTab() {
   const pending    = guests.filter(g => g.rsvp_status === 'pending').length
   const declined   = guests.filter(g => g.rsvp_status === 'declined').length
   const totalWithPlusOnes = guests.filter(g => g.rsvp_status === 'confirmed').reduce((a, g) => a + (g.plus_one ? 2 : 1), 0)
-
   const pendingTasks = clTasks.filter(t => !t.is_done).slice(0, 5)
 
   return (
     <div className="page-body">
-      <div className="dash-overview-grid">
-        {/* Left: Countdown */}
-        <div>
-          <Countdown date={wedding.wedding_date} coupleName={wedding.couple_name} venue={wedding.venue} />
+      {/* Stat tiles — full width */}
+      <div className="stat-grid" style={{ marginBottom: '24px' }}>
+        <div className="stat-tile tile-rose">
+          <div className="stat-num">{guests.length}</div>
+          <div className="stat-label">Total Guests</div>
         </div>
+        <div className="stat-tile tile-sage">
+          <div className="stat-num">{confirmed}</div>
+          <div className="stat-label">Confirmed</div>
+        </div>
+        <div className="stat-tile tile-amber">
+          <div className="stat-num">{pending}</div>
+          <div className="stat-label">Awaiting RSVP</div>
+        </div>
+        <div className="stat-tile tile-pink">
+          <div className="stat-num">{declined}</div>
+          <div className="stat-label">Declined</div>
+        </div>
+      </div>
 
-        {/* Right: Stats + tasks */}
+      {/* Two-column: headcount + events | tasks */}
+      <div className="dash-overview-grid">
         <div>
-          {/* Stat tiles */}
-          <div className="stat-grid" style={{ marginBottom: '20px' }}>
-            <div className="stat-tile tile-rose">
-              <div className="stat-num">{guests.length}</div>
-              <div className="stat-label">Total Guests</div>
-            </div>
-            <div className="stat-tile tile-sage">
-              <div className="stat-num">{confirmed}</div>
-              <div className="stat-label">Confirmed</div>
-            </div>
-            <div className="stat-tile tile-amber">
-              <div className="stat-num">{pending}</div>
-              <div className="stat-label">Awaiting RSVP</div>
-            </div>
-            <div className="stat-tile tile-pink">
-              <div className="stat-num">{declined}</div>
-              <div className="stat-label">Declined</div>
-            </div>
-          </div>
-
           {/* Headcount info */}
-          <div className="card card-sm" style={{ marginBottom: '20px', display: 'flex', gap: '20px', alignItems: 'center' }}>
+          <div className="card card-sm" style={{ marginBottom: '16px', display: 'flex', gap: '20px', alignItems: 'center' }}>
             <div>
               <div style={{ fontSize: '11px', color: 'var(--ink3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px' }}>Final headcount (with +1s)</div>
               <div style={{ fontSize: '28px', fontWeight: 700, color: 'var(--rose-dark)', letterSpacing: '-1px', lineHeight: 1.2 }}>{totalWithPlusOnes}</div>
@@ -118,7 +55,7 @@ function GuestTab() {
 
           {/* Event guest counts */}
           <div className="sec-head"><span className="sec-title">Guests per Event</span></div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '10px', marginBottom: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '10px' }}>
             {events.map(ev => {
               const count = guests.filter(g => g.events.includes(ev.id) && g.rsvp_status === 'confirmed').length
               return (
@@ -132,31 +69,31 @@ function GuestTab() {
               )
             })}
           </div>
+        </div>
 
-          {/* Quick tasks */}
-          <div className="card">
-            <div className="sec-head" style={{ marginBottom: '8px' }}>
-              <span className="sec-title">Upcoming Tasks</span>
-            </div>
-            {pendingTasks.length === 0 ? (
-              <div style={{ padding: '16px 0', textAlign: 'center', color: 'var(--ink3)', fontSize: '13px' }}>All caught up! 🎉</div>
-            ) : (
-              pendingTasks.map(t => (
-                <div className="task-row" key={t.id}>
-                  <div className={`task-chk${t.is_done ? ' done' : ''}`} onClick={() => toggleTask(t.id)} />
-                  <div className="task-body">
-                    <div className={`task-title${t.is_done ? ' done' : ''}`}>{t.name}</div>
-                    {t.due_date && <div className="task-sub">Due {formatDate(t.due_date)}</div>}
-                    {t.assigned_to && (
-                      <div className="task-meta">
-                        <span className="badge badge-muted">{t.assigned_to}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
+        {/* Quick tasks */}
+        <div className="card">
+          <div className="sec-head" style={{ marginBottom: '8px' }}>
+            <span className="sec-title">Upcoming Tasks</span>
           </div>
+          {pendingTasks.length === 0 ? (
+            <div style={{ padding: '16px 0', textAlign: 'center', color: 'var(--ink3)', fontSize: '13px' }}>All caught up! 🎉</div>
+          ) : (
+            pendingTasks.map(t => (
+              <div className="task-row" key={t.id}>
+                <div className={`task-chk${t.is_done ? ' done' : ''}`} onClick={() => toggleTask(t.id)} />
+                <div className="task-body">
+                  <div className={`task-title${t.is_done ? ' done' : ''}`}>{t.name}</div>
+                  {t.due_date && <div className="task-sub">Due {formatDate(t.due_date)}</div>}
+                  {t.assigned_to && (
+                    <div className="task-meta">
+                      <span className="badge badge-muted">{t.assigned_to}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
         </div>
       </div>
     </div>
@@ -402,7 +339,7 @@ function MOMTab() {
 
 // ── Main Dashboard ───────────────────────────────────────────────────
 export default function Dashboard() {
-  const { dashTab, setDashTab, wedding } = useAppStore()
+  const { dashTab, wedding } = useAppStore()
 
   if (!wedding) {
     return <div style={{ padding: '40px', color: 'var(--ink3)' }}>Loading...</div>
@@ -410,30 +347,21 @@ export default function Dashboard() {
 
   return (
     <div style={{ height: '100%', overflowY: 'auto' }}>
-      <div className="dash-sticky-header">
-        <div className="page-head">
-          <div>
-            <div className="page-title">
-              <em>{wedding.couple_name}</em>
-            </div>
-            <div className="page-date">{formatDate(wedding.wedding_date, 'EEEE, d MMMM yyyy')} · {wedding.venue}</div>
+      <div className="page-head">
+        <div>
+          <div className="page-title">
+            <em>{wedding.couple_name}</em>
           </div>
-          <button className="btn btn-ghost btn-sm" onClick={() => {
-            navigator.clipboard.writeText(window.location.href).then(
-              () => toast.success('Link copied to clipboard!'),
-              () => toast('Share: ' + window.location.href),
-            )
-          }}>
-            Share Dashboard
-          </button>
+          <div className="page-date">{formatDate(wedding.wedding_date, 'EEEE, d MMMM yyyy')} · {wedding.venue}</div>
         </div>
-
-        <div className="tab-nav">
-          <TabBtn id="guest"     label="Overview"    active={dashTab === 'guest'}     onClick={setDashTab} />
-          <TabBtn id="itinerary" label="Itinerary"   active={dashTab === 'itinerary'} onClick={setDashTab} />
-          <TabBtn id="details"   label="Event Details" active={dashTab === 'details'} onClick={setDashTab} />
-          <TabBtn id="mom"       label="Meeting Notes" active={dashTab === 'mom'}     onClick={setDashTab} />
-        </div>
+        <button className="btn btn-ghost btn-sm" onClick={() => {
+          navigator.clipboard.writeText(window.location.href).then(
+            () => toast.success('Link copied to clipboard!'),
+            () => toast('Share: ' + window.location.href),
+          )
+        }}>
+          Share Dashboard
+        </button>
       </div>
 
       {dashTab === 'guest'     && <GuestTab />}
