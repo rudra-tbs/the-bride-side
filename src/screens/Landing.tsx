@@ -16,21 +16,21 @@ const TESTIMONIALS = [
     location: 'Mumbai',
     text: 'We planned our entire 3-day wedding using The Bride Side. From 400+ guests to 12 vendors — everything was organised in one place. Absolute lifesaver!',
     avatar: 'PA',
-    photo: 'https://picsum.photos/seed/reception-lights/800/480',
+    photo: '/AxM 2-44.jpg',
   },
   {
     name: 'Sneha & Rohan',
     location: 'Delhi',
     text: 'The budget tracker alone saved us ₹2L. We could see exactly where every rupee was going and avoided last-minute surprises.',
     avatar: 'SR',
-    photo: 'https://picsum.photos/seed/ceremony-florals/800/480',
+    photo: '/AxM 2-71.jpg',
   },
   {
     name: 'Meera & Karan',
     location: 'Bangalore',
     text: 'As a destination wedding couple, coordinating vendors across cities was a nightmare — until we found The Bride Side. The vendor tracker is brilliant.',
     avatar: 'MK',
-    photo: 'https://picsum.photos/seed/garden-venue-warm/800/480',
+    photo: '/AxM 2-142.jpg',
   },
 ]
 
