@@ -250,65 +250,103 @@ export default function Landing() {
                   <div className="preview-main">
                     <div className="preview-page-head">
                       <div className="preview-page-title">Priya &amp; Arjun's Wedding</div>
-                      <div className="preview-page-date">Tuesday, 2 December 2026</div>
+                      <div className="preview-page-date">Saturday, 15 November 2026</div>
                     </div>
+
+                    {/* 6 stat tiles */}
                     <div className="preview-tiles">
                       <div className="preview-tile preview-tile-rose">
-                        <div className="preview-tile-n">239</div>
-                        <div className="preview-tile-l">Days to go</div>
+                        <div className="preview-tile-n">124</div>
+                        <div className="preview-tile-l">Total Guests</div>
                       </div>
                       <div className="preview-tile preview-tile-sage">
                         <div className="preview-tile-n">87</div>
                         <div className="preview-tile-l">Confirmed</div>
                       </div>
                       <div className="preview-tile preview-tile-amber">
-                        <div className="preview-tile-n">₹18.5L</div>
-                        <div className="preview-tile-l">Budget left</div>
+                        <div className="preview-tile-n">28</div>
+                        <div className="preview-tile-l">Awaiting RSVP</div>
+                      </div>
+                      <div className="preview-tile preview-tile-pink">
+                        <div className="preview-tile-n">9</div>
+                        <div className="preview-tile-l">Declined</div>
                       </div>
                       <div className="preview-tile preview-tile-mauve">
-                        <div className="preview-tile-n">68%</div>
-                        <div className="preview-tile-l">Tasks done</div>
+                        <div className="preview-tile-n">₹8.4L</div>
+                        <div className="preview-tile-l">Budget Used</div>
+                      </div>
+                      <div className="preview-tile preview-tile-sage2">
+                        <div className="preview-tile-n">14/21</div>
+                        <div className="preview-tile-l">Tasks Done</div>
                       </div>
                     </div>
+
+                    {/* Two-column content grid */}
                     <div className="preview-content-grid">
+
+                      {/* Left column — stacked cards */}
+                      <div className="preview-left-col">
+                        {/* Headcount */}
+                        <div className="preview-card preview-headcount-card">
+                          <div className="preview-headcount-big">98</div>
+                          <div className="preview-headcount-divider" />
+                          <div className="preview-headcount-sub">final headcount · ₹3.4L est. per head</div>
+                        </div>
+
+                        {/* Budget Snapshot */}
+                        <div className="preview-card">
+                          <div className="preview-card-row-between">
+                            <div className="preview-card-title" style={{ marginBottom: 0 }}>Budget Snapshot</div>
+                            <span className="preview-pct-label" style={{ color: 'var(--sage)' }}>34%</span>
+                          </div>
+                          <div className="preview-card-row-between" style={{ marginTop: '6px' }}>
+                            <span className="preview-big-num">₹8.4L</span>
+                            <span className="preview-of-label">of ₹25L</span>
+                          </div>
+                          <div className="preview-prog-bar">
+                            <div className="preview-prog-fill" style={{ width: '34%', background: 'var(--sage)' }} />
+                          </div>
+                          <div className="preview-sub-label">₹16.6L remaining</div>
+                        </div>
+
+                        {/* Vendor Pipeline */}
+                        <div className="preview-card">
+                          <div className="preview-card-title">Vendor Pipeline</div>
+                          <div className="preview-vend-grid">
+                            <div className="preview-vend-cell" style={{ background: 'var(--sage-light)' }}>
+                              <div className="preview-vend-n" style={{ color: 'var(--sage)' }}>3</div>
+                              <div className="preview-vend-l">Booked</div>
+                            </div>
+                            <div className="preview-vend-cell" style={{ background: 'var(--amber-light)' }}>
+                              <div className="preview-vend-n" style={{ color: 'var(--amber)' }}>2</div>
+                              <div className="preview-vend-l">In Progress</div>
+                            </div>
+                            <div className="preview-vend-cell" style={{ background: 'var(--surface2)' }}>
+                              <div className="preview-vend-n" style={{ color: 'var(--ink2)' }}>3</div>
+                              <div className="preview-vend-l">Saved</div>
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+
+                      {/* Right column — tasks */}
                       <div className="preview-card">
-                        <div className="preview-card-title">Pending Tasks</div>
+                        <div className="preview-card-row-between" style={{ marginBottom: '6px' }}>
+                          <div className="preview-card-title" style={{ marginBottom: 0 }}>Upcoming Tasks</div>
+                          <span className="preview-pct-label">67%</span>
+                        </div>
+                        <div className="preview-prog-bar" style={{ marginBottom: '10px' }}>
+                          <div className="preview-prog-fill" style={{ width: '67%', background: 'var(--sage)' }} />
+                        </div>
                         <div className="preview-task-list">
-                          <div className="preview-task"><span className="preview-check" />Book final photographer</div>
-                          <div className="preview-task"><span className="preview-check" />Order wedding cake</div>
+                          <div className="preview-task"><span className="preview-check" />Book final venue décor</div>
                           <div className="preview-task"><span className="preview-check" />Send Mehendi invites</div>
-                          <div className="preview-task done-task"><span className="preview-check done" />Finalise venue décor</div>
+                          <div className="preview-task"><span className="preview-check" />Confirm catering menu</div>
+                          <div className="preview-task done-task"><span className="preview-check done" />Book photographer</div>
+                          <div className="preview-task done-task"><span className="preview-check done" />Finalise guest list</div>
                         </div>
                       </div>
-                      <div className="preview-card">
-                        <div className="preview-card-title">Recent RSVPs</div>
-                        <div className="preview-guest-list">
-                          <div className="preview-guest">
-                            <div className="preview-gav">RS</div>
-                            <div className="preview-ginfo">
-                              <div className="preview-gname">Riya Sharma</div>
-                              <div className="preview-gevents">Wedding · Reception</div>
-                            </div>
-                            <div className="preview-gbadge conf">Confirmed</div>
-                          </div>
-                          <div className="preview-guest">
-                            <div className="preview-gav">AK</div>
-                            <div className="preview-ginfo">
-                              <div className="preview-gname">Aarav Kapoor</div>
-                              <div className="preview-gevents">All events</div>
-                            </div>
-                            <div className="preview-gbadge pend">Pending</div>
-                          </div>
-                          <div className="preview-guest">
-                            <div className="preview-gav">MP</div>
-                            <div className="preview-ginfo">
-                              <div className="preview-gname">Meera Patel</div>
-                              <div className="preview-gevents">Sangeet · Wedding</div>
-                            </div>
-                            <div className="preview-gbadge conf">Confirmed</div>
-                          </div>
-                        </div>
-                      </div>
+
                     </div>
                   </div>
                 </div>
