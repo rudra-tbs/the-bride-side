@@ -2,12 +2,46 @@ import { useRef, useEffect, useState } from 'react'
 import { useAppStore } from '@/store/app'
 
 const FEATURES = [
-  { emoji: '🗒️', color: '#FDE8EC', title: 'Smart Itinerary', desc: 'Timeline planner for every event — Mehendi, Sangeet, Wedding, Reception.' },
-  { emoji: '🎟️', color: '#E8F4EE', title: 'Guest Management', desc: 'Track RSVPs, dietary preferences, and seating across all your events.' },
-  { emoji: '🤝', color: '#FAF0E8', title: 'Vendor Tracker', desc: 'Shortlist, compare, and communicate with all your vendors in one place.' },
-  { emoji: '📊', color: '#E8F0F8', title: 'Budget Control', desc: 'Category-wise budget tracking with payment status and due date alerts.' },
-  { emoji: '🎨', color: '#F2E8F0', title: 'Moodboard', desc: 'Pin your vision — decor, outfits, makeup — and share with vendors.' },
-  { emoji: '🔖', color: '#FDE8EC', title: 'Checklist', desc: 'Timeline-driven tasks from 6 months out to the morning of your big day.' },
+  {
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h4M8 18h.01M12 18h4"/></svg>,
+    accent: '#E8748A', iconBg: 'rgba(232,116,138,0.1)', tag: 'Planning',
+    title: 'Smart Itinerary', desc: 'Timeline planner for every event — Mehendi, Sangeet, Wedding, Reception.',
+    preview: [
+      { label: 'Mehendi · 14 Nov', dot: '#C898B8' },
+      { label: 'Sangeet · 15 Nov', dot: '#7AAA90' },
+      { label: 'Wedding · 16 Nov', dot: '#E8748A', active: true },
+    ],
+  },
+  {
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>,
+    accent: '#7AAA90', iconBg: 'rgba(122,170,144,0.12)', tag: 'Guests',
+    title: 'Guest Management', desc: 'Track RSVPs, dietary preferences, and seating across all your events.',
+    preview: null,
+  },
+  {
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7" strokeWidth={2.5}/></svg>,
+    accent: '#D4956A', iconBg: 'rgba(212,149,106,0.1)', tag: 'Vendors',
+    title: 'Vendor Tracker', desc: 'Shortlist, compare, and communicate with all your vendors in one place.',
+    preview: null,
+  },
+  {
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>,
+    accent: '#7098B8', iconBg: 'rgba(112,152,184,0.12)', tag: 'Finance',
+    title: 'Budget Control', desc: 'Category-wise budget tracking with payment status and due date alerts.',
+    preview: null,
+  },
+  {
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.2"/><rect x="14" y="3" width="7" height="7" rx="1.2"/><rect x="3" y="14" width="7" height="7" rx="1.2"/><rect x="14" y="14" width="7" height="7" rx="1.2"/></svg>,
+    accent: '#A06080', iconBg: 'rgba(160,96,128,0.1)', tag: 'Vision',
+    title: 'Moodboard', desc: 'Pin your vision — decor, outfits, makeup — and share with vendors.',
+    preview: null,
+  },
+  {
+    icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><path d="M9 11l3 3L22 4M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/></svg>,
+    accent: '#E8748A', iconBg: 'rgba(232,116,138,0.12)', tag: 'Tasks',
+    title: 'Checklist', desc: 'Timeline-driven tasks from 6 months out to the morning of your big day.',
+    preview: null,
+  },
 ]
 
 const TESTIMONIALS = [
@@ -469,10 +503,24 @@ export default function Landing() {
           <div className="feat-grid">
             {FEATURES.map(f => (
               <div className="feat-card" key={f.title}>
-                <div className="feat-icon">{f.emoji}</div>
+                <div className="feat-icon-badge" style={{ background: f.iconBg, color: f.accent } as React.CSSProperties}>
+                  {f.icon}
+                </div>
                 <div className="feat-body">
+                  <span className="feat-tag" style={{ color: f.accent } as React.CSSProperties}>{f.tag}</span>
                   <div className="feat-title">{f.title}</div>
                   <div className="feat-desc">{f.desc}</div>
+                  {f.preview && (
+                    <div className="feat-preview-strip">
+                      {f.preview.map(p => (
+                        <div key={p.label} className={`feat-preview-chip${p.active ? ' active' : ''}`}>
+                          <span className="fpc-dot" style={{ background: p.dot } as React.CSSProperties} />
+                          <span>{p.label}</span>
+                          {p.active && <span className="fpc-badge">Today</span>}
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             ))}

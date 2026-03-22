@@ -107,18 +107,24 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <div className="sb-countdown-card">
               <div className={`sb-countdown-ring-wrap${days <= 30 ? ' urgent' : ''}`}>
                 <svg className="sb-countdown-svg" viewBox="0 0 108 108">
+                  {/* Decorative outer tick ring */}
+                  <circle cx="54" cy="54" r="51" fill="none" stroke="rgba(232,116,138,0.12)" strokeWidth="1.5" strokeDasharray="2.5 6.5" strokeLinecap="round" />
                   <circle className="sb-countdown-track" cx="54" cy="54" r="46" />
                   <circle className="sb-countdown-progress" cx="54" cy="54" r="46"
                     style={{ strokeDashoffset: offset, stroke: ringColor }} />
                 </svg>
                 <div className="sb-countdown-centre">
                   <div className="sb-countdown-num">{days}</div>
-                  <div className="sb-countdown-unit">days</div>
+                  <div className="sb-countdown-unit">days to go</div>
                 </div>
               </div>
               <div className="sb-countdown-names">{coupleName}</div>
               <div className="sb-countdown-date">{formatDate(wedding.wedding_date, 'd MMM yyyy')}</div>
-              <div className="sb-countdown-venue">📍 {wedding.venue}</div>
+              <div className="sb-countdown-ornament" />
+              <div className="sb-countdown-venue">
+                <svg viewBox="0 0 24 24" fill="currentColor" className="sb-venue-pin"><path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/></svg>
+                {wedding.venue}
+              </div>
               <div className="sb-countdown-stats">
                 <div className="sb-countdown-stat">
                   <span className="sb-countdown-stat-n">{Math.floor(days / 7)}</span>
