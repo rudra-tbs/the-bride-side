@@ -139,8 +139,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
             {NAV_ITEMS.map(item => (
               <button
                 key={item.screen}
-                className={`sb-item${screen === item.screen ? ' active' : ''}`}
-                onClick={() => { setScreen(item.screen); if (item.screen === 'dashboard') setDashTab('guest') }}
+                className={`sb-item${screen === item.screen && (item.screen !== 'dashboard' || !['itinerary','details','mom'].includes(dashTab)) ? ' active' : ''}`}
+                onClick={() => setScreen(item.screen)}
               >
                 <span className="sb-item-icon">{item.icon}</span>
                 <span className="sb-item-label">{item.label}</span>
@@ -148,14 +148,14 @@ export default function AppShell({ children }: { children: ReactNode }) {
             ))}
           </div>
 
-          {/* Dashboard sub-nav */}
-          {screen === 'dashboard' && (
+          {/* Dashboard sub-nav — always visible when wedding data exists */}
+          {!!wedding && (
             <div className="sb-sub-section">
               {DASH_ITEMS.map(item => (
                 <button
                   key={item.id}
-                  className={`sb-item${dashTab === item.id ? ' active' : ''}`}
-                  onClick={() => setDashTab(item.id)}
+                  className={`sb-item${screen === 'dashboard' && dashTab === item.id ? ' active' : ''}`}
+                  onClick={() => { setScreen('dashboard'); setDashTab(item.id) }}
                 >
                   <span className="sb-item-icon">{item.icon}</span>
                   <span className="sb-item-label">{item.label}</span>
