@@ -410,28 +410,30 @@ export default function Dashboard() {
 
   return (
     <div style={{ height: '100%', overflowY: 'auto' }}>
-      <div className="page-head">
-        <div>
-          <div className="page-title">
-            <em>{wedding.couple_name}</em>
+      <div className="dash-sticky-header">
+        <div className="page-head">
+          <div>
+            <div className="page-title">
+              <em>{wedding.couple_name}</em>
+            </div>
+            <div className="page-date">{formatDate(wedding.wedding_date, 'EEEE, d MMMM yyyy')} · {wedding.venue}</div>
           </div>
-          <div className="page-date">{formatDate(wedding.wedding_date, 'EEEE, d MMMM yyyy')} · {wedding.venue}</div>
+          <button className="btn btn-ghost btn-sm" onClick={() => {
+            navigator.clipboard.writeText(window.location.href).then(
+              () => toast.success('Link copied to clipboard!'),
+              () => toast('Share: ' + window.location.href),
+            )
+          }}>
+            Share Dashboard
+          </button>
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={() => {
-          navigator.clipboard.writeText(window.location.href).then(
-            () => toast.success('Link copied to clipboard!'),
-            () => toast('Share: ' + window.location.href),
-          )
-        }}>
-          Share Dashboard
-        </button>
-      </div>
 
-      <div className="tab-nav">
-        <TabBtn id="guest"     label="Overview"    active={dashTab === 'guest'}     onClick={setDashTab} />
-        <TabBtn id="itinerary" label="Itinerary"   active={dashTab === 'itinerary'} onClick={setDashTab} />
-        <TabBtn id="details"   label="Event Details" active={dashTab === 'details'} onClick={setDashTab} />
-        <TabBtn id="mom"       label="Meeting Notes" active={dashTab === 'mom'}     onClick={setDashTab} />
+        <div className="tab-nav">
+          <TabBtn id="guest"     label="Overview"    active={dashTab === 'guest'}     onClick={setDashTab} />
+          <TabBtn id="itinerary" label="Itinerary"   active={dashTab === 'itinerary'} onClick={setDashTab} />
+          <TabBtn id="details"   label="Event Details" active={dashTab === 'details'} onClick={setDashTab} />
+          <TabBtn id="mom"       label="Meeting Notes" active={dashTab === 'mom'}     onClick={setDashTab} />
+        </div>
       </div>
 
       {dashTab === 'guest'     && <GuestTab />}
