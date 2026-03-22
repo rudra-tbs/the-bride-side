@@ -212,16 +212,24 @@ const HELP_AREAS = [
 const NOTIF_PREFS = ['WhatsApp', 'Email', 'Push Notifications']
 
 // ── Step dots indicator ──────────────────────────────────────────
+const STEP_LABELS: Record<string, string> = {
+  '1/4': 'Step 1 of 4', '2/4': 'Step 2 of 4', '3/4': 'Step 3 of 4', '4/4': 'Last step ✨',
+  '1/3': 'Step 1 of 3', '2/3': 'Step 2 of 3', '3/3': 'Last step ✨',
+}
+
 function StepDots({ current, total }: { current: number; total: number }) {
   return (
-    <div className="ob3-step-dots">
-      {Array.from({ length: total }).map((_, i) => (
-        <div
-          key={i}
-          className={`ob3-step-dot${i + 1 === current ? ' current' : i + 1 < current ? ' done' : ''}`}
-        />
-      ))}
-    </div>
+    <>
+      <div className="ob3-step-dots">
+        {Array.from({ length: total }).map((_, i) => (
+          <div
+            key={i}
+            className={`ob3-step-dot${i + 1 === current ? ' current' : i + 1 < current ? ' done' : ''}`}
+          />
+        ))}
+      </div>
+      <span className="ob3-prog-label">{STEP_LABELS[`${current}/${total}`]}</span>
+    </>
   )
 }
 
@@ -382,7 +390,7 @@ export default function Onboarding() {
               <button
                 key={r.value}
                 className={`ob3-role-card${role === r.value ? ' selected' : ''}`}
-                onClick={() => { setRole(r.value); goFwd(1) }}
+                onClick={() => { setRole(r.value); setTimeout(() => goFwd(1), 180) }}
               >
                 {r.icon}
                 <div className="ob3-role-label-wrap">
@@ -409,7 +417,9 @@ export default function Onboarding() {
               <StepDots current={1} total={4} />
             </div>
             <span className="ob3-eyebrow-pill">The couple</span>
-            <h2 className="ob3-card-heading serif">Tell us your names</h2>
+            <h2 className="ob3-card-heading serif">
+              {role === 'bride' ? "Let's start with you, bride ♥" : "Let's start with you, groom ♥"}
+            </h2>
             <div className="ob3-fields">
               <div className="ob3-field">
                 <label className="ob3-label">Your name <span className="ob3-req">*</span></label>
@@ -433,7 +443,7 @@ export default function Onboarding() {
             <div className="ob3-actions">
               <button className="ob3-btn-ghost" onClick={() => goBck(0)}>← Back</button>
               <button className="ob3-btn-primary" disabled={!canContinue} onClick={() => goFwd(2)}>
-                Continue →
+                Save our names →
               </button>
             </div>
           </div>
@@ -481,7 +491,7 @@ export default function Onboarding() {
             </div>
             <div className="ob3-actions">
               <button className="ob3-btn-ghost" onClick={() => goBck(1)}>← Back</button>
-              <button className="ob3-btn-primary" onClick={() => goFwd(3)}>Continue →</button>
+              <button className="ob3-btn-primary" onClick={() => goFwd(3)}>Set the events →</button>
             </div>
           </div>
         </div>
@@ -518,7 +528,7 @@ export default function Onboarding() {
             </div>
             <div className="ob3-field" style={{ marginTop: 20 }}>
               <div className="ob3-events-covered-row">
-                <label className="ob3-label">Events this budget covers</label>
+                <label className="ob3-label">Which events does this budget cover?<span className="ob3-opt" style={{ display: 'block', fontWeight: 400, marginTop: 1 }}>We'll auto-split your budget across these</span></label>
                 <button className="ob3-add-event-btn"
                   onClick={() => setShowBudgetEventsExpander(v => !v)}>
                   {showBudgetEventsExpander ? '✕ Done' : '+ Add event'}
@@ -540,7 +550,7 @@ export default function Onboarding() {
             </div>
             <div className="ob3-actions">
               <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
-              <button className="ob3-btn-primary" onClick={() => goFwd(4)}>Continue →</button>
+              <button className="ob3-btn-primary" onClick={() => goFwd(4)}>Lock the budget →</button>
             </div>
           </div>
         </div>
@@ -621,7 +631,7 @@ export default function Onboarding() {
             <div className="ob3-actions">
               <button className="ob3-btn-ghost" onClick={() => goBck(0)}>← Back</button>
               <button className="ob3-btn-primary" disabled={!canContinue} onClick={() => goFwd(2)}>
-                Continue →
+                Save our details →
               </button>
             </div>
           </div>
@@ -655,7 +665,7 @@ export default function Onboarding() {
             </div>
             <div className="ob3-actions">
               <button className="ob3-btn-ghost" onClick={() => goBck(1)}>← Back</button>
-              <button className="ob3-btn-primary" onClick={() => goFwd(3)}>Continue →</button>
+              <button className="ob3-btn-primary" onClick={() => goFwd(3)}>Set the events →</button>
             </div>
           </div>
         </div>
@@ -709,7 +719,7 @@ export default function Onboarding() {
             </div>
             <div className="ob3-actions">
               <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
-              <button className="ob3-btn-primary" onClick={() => goFwd(4)}>Continue →</button>
+              <button className="ob3-btn-primary" onClick={() => goFwd(4)}>Lock the budget →</button>
             </div>
           </div>
         </div>
@@ -857,7 +867,7 @@ export default function Onboarding() {
           </div>
           <div className="ob3-actions">
             <button className="ob3-btn-ghost" onClick={() => goBck(1)}>← Back</button>
-            <button className="ob3-btn-primary" onClick={() => goFwd(3)}>Continue →</button>
+              <button className="ob3-btn-primary" onClick={() => goFwd(3)}>Continue →</button>
           </div>
         </div>
       </div>
