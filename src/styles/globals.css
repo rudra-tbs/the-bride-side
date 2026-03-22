@@ -351,9 +351,6 @@ html, body, #root {
   border-bottom: 1px solid var(--border);
   margin-bottom: -1px;
 }
-@media (prefers-color-scheme: dark) {
-  .page-head { background: rgba(22, 20, 28, 0.9); }
-}
 .page-title { font-family: var(--serif); font-size: 30px; font-weight: 500; color: var(--ink); letter-spacing: -0.3px; line-height: 1.1; }
 .page-title em { font-style: italic; color: var(--rose-dark); }
 .page-date { font-size: 13px; color: var(--ink3); margin-top: 3px; }
