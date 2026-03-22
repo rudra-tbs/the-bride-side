@@ -2,7 +2,7 @@ import type { ReactNode } from 'react'
 import { useAppStore } from '@/store/app'
 import { signOut } from '@/lib/supabase'
 import type { Screen } from '@/types'
-import { initials } from '@/lib/utils'
+import { initials, daysUntil } from '@/lib/utils'
 
 interface NavItem {
   screen: Screen
@@ -31,26 +31,29 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const { screen, setScreen, wedding } = useAppStore()
   const coupleName = wedding?.couple_name ?? 'Your Wedding'
   const selfName = wedding?.self_name ?? 'Bride'
+  const daysLeft = wedding ? Math.max(0, daysUntil(wedding.wedding_date)) : null
 
   return (
     <div className="app-shell">
       {/* Topbar */}
       <header className="app-topbar">
         <div className="topbar-logo-zone">
-          <span className="logo">The Bride Side</span>
+          <span className="logo">
+            <span className="logo-mark">🌸</span>
+            The Bride Side
+          </span>
         </div>
         <nav className="topbar-nav" />
         <div className="topbar-right">
           <button
-            className="btn btn-ghost btn-sm"
-            style={{ fontSize: '11px', gap: '5px' }}
+            className="topbar-search-btn"
             onClick={() => window.dispatchEvent(new KeyboardEvent('keydown', { key: 'k', metaKey: true }))}
           >
-            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
             </svg>
-            Search
-            <kbd style={{ fontSize: '9px', padding: '1px 4px', background: 'var(--border)', borderRadius: '3px', fontFamily: 'monospace' }}>⌘K</kbd>
+            <span>Search</span>
+            <kbd>⌘K</kbd>
           </button>
           <div className="topbar-notif" title="Notifications">
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
@@ -71,6 +74,21 @@ export default function AppShell({ children }: { children: ReactNode }) {
       {/* Sidebar */}
       <aside className="sidebar">
         <div className="sidebar-inner">
+          {/* Wedding context card */}
+          {wedding && daysLeft !== null && (
+            <div className="sb-wedding-card">
+              <div className="sb-wedding-names">{coupleName}</div>
+              <div className="sb-wedding-countdown">
+                <span className="sb-wedding-num">{daysLeft}</span>
+                <span className="sb-wedding-unit">days to go</span>
+              </div>
+              <div className="sb-wedding-progress">
+                <div className="sb-wedding-prog-fill" style={{ width: `${Math.min(100, ((365 - daysLeft) / 365) * 100)}%` }} />
+              </div>
+            </div>
+          )}
+
+          {/* Nav items */}
           <div className="sidebar-section">
             <div className="sidebar-label">Planning</div>
             {NAV_ITEMS.map(item => (
@@ -79,15 +97,18 @@ export default function AppShell({ children }: { children: ReactNode }) {
                 className={`sb-item${screen === item.screen ? ' active' : ''}`}
                 onClick={() => setScreen(item.screen)}
               >
-                {item.icon}
+                <span className="sb-item-icon">{item.icon}</span>
                 {item.label}
               </button>
             ))}
           </div>
-          <div className="sb-divider" />
+
+          {/* Bottom */}
           <div className="sb-bottom">
-            <button className="sb-item" onClick={() => { signOut(); setScreen('landing') }}>
-              <Icon path="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4 M16 17l5-5-5-5 M21 12H9" />
+            <button className="sb-item sb-signout" onClick={() => { signOut(); setScreen('landing') }}>
+              <span className="sb-item-icon">
+                <Icon path="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4 M16 17l5-5-5-5 M21 12H9" />
+              </span>
               Sign Out
             </button>
           </div>
