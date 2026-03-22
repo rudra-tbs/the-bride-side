@@ -139,8 +139,8 @@ export default function AppShell({ children }: { children: ReactNode }) {
             {NAV_ITEMS.map(item => (
               <button
                 key={item.screen}
-                className={`sb-item${screen === item.screen && (item.screen !== 'dashboard' || !['itinerary','details','mom'].includes(dashTab)) ? ' active' : ''}`}
-                onClick={() => setScreen(item.screen)}
+                className={`sb-item${screen === item.screen && (item.screen !== 'dashboard' || dashTab === 'guest') ? ' active' : ''}`}
+                onClick={() => { setScreen(item.screen); if (item.screen === 'dashboard') setDashTab('guest') }}
               >
                 <span className="sb-item-icon">{item.icon}</span>
                 <span className="sb-item-label">{item.label}</span>

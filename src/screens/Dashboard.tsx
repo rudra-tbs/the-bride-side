@@ -100,14 +100,78 @@ function GuestTab() {
   )
 }
 
+// ── Itinerary Edit Modal ──────────────────────────────────────────────
+function ItineraryEditModal({ item, onClose }: { item: ItineraryItem; onClose: () => void }) {
+  const { updateItineraryItem } = useAppStore()
+  const [time, setTime] = useState(item.time)
+  const [name, setName] = useState(item.name)
+  const [note, setNote] = useState(item.note)
+  const [durationMin, setDurationMin] = useState(String(item.duration_min || ''))
+  const [isMilestone, setIsMilestone] = useState(item.is_milestone)
+  const [isDone, setIsDone] = useState(item.is_done)
+
+  function handleSave() {
+    updateItineraryItem(item.id, {
+      time: time.trim(),
+      name: name.trim(),
+      note: note.trim(),
+      duration_min: Number(durationMin) || 0,
+      is_milestone: isMilestone,
+      is_done: isDone,
+    })
+    onClose()
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="modal-box">
+        <div className="modal-title">Edit Itinerary Item</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div className="modal-field">
+            <label className="modal-label">Time</label>
+            <input className="input" type="time" value={time} onChange={e => setTime(e.target.value)} />
+          </div>
+          <div className="modal-field">
+            <label className="modal-label">Duration (min)</label>
+            <input className="input" type="number" min="0" placeholder="0" value={durationMin} onChange={e => setDurationMin(e.target.value)} />
+          </div>
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">Name</label>
+          <input className="input" value={name} onChange={e => setName(e.target.value)} />
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">Note</label>
+          <textarea className="input" rows={3} value={note} onChange={e => setNote(e.target.value)} />
+        </div>
+        <div style={{ display: 'flex', gap: '20px', marginBottom: '4px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
+            <input type="checkbox" checked={isMilestone} onChange={e => setIsMilestone(e.target.checked)} />
+            Milestone
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
+            <input type="checkbox" checked={isDone} onChange={e => setIsDone(e.target.checked)} />
+            Done
+          </label>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-rose" onClick={handleSave} disabled={!name.trim()}>Save</button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
 // ── Itinerary Tab ────────────────────────────────────────────────────
 function ItineraryTab() {
   const { events, itinerary, updateItineraryItem } = useAppStore()
   const [activeEvent, setActiveEvent] = useState(events[2]?.id ?? events[0]?.id ?? '')
+  const [editingItem, setEditingItem] = useState<ItineraryItem | null>(null)
 
   const items: ItineraryItem[] = itinerary
     .filter(i => i.event_id === activeEvent)
-    .sort((a, b) => a.sort_order - b.sort_order)
+    .sort((a, b) => a.time.localeCompare(b.time))
 
   const activeEv: WeddingEvent | undefined = events.find(e => e.id === activeEvent)
 
@@ -150,7 +214,8 @@ function ItineraryTab() {
             <div
               key={item.id}
               className={`itinerary-row${item.is_milestone ? ' milestone' : ''}${item.is_done ? ' done' : ''}`}
-              onClick={() => updateItineraryItem(item.id, { is_done: !item.is_done })}
+              style={{ cursor: 'pointer' }}
+              onClick={() => setEditingItem(item)}
             >
               <div className="itin-time-col">
                 <div className="itin-time">{item.time}</div>
@@ -173,10 +238,19 @@ function ItineraryTab() {
                   </div>
                 )}
               </div>
+              <div
+                className={`task-chk${item.is_done ? ' done' : ''}`}
+                style={{ flexShrink: 0, marginLeft: 'auto', alignSelf: 'center' }}
+                onClick={e => { e.stopPropagation(); updateItineraryItem(item.id, { is_done: !item.is_done }) }}
+              />
             </div>
           ))
         )}
       </div>
+
+      {editingItem && (
+        <ItineraryEditModal item={editingItem} onClose={() => setEditingItem(null)} />
+      )}
     </div>
   )
 }
