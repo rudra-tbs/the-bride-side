@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import type { ReactNode } from 'react'
 import { useAppStore } from '@/store/app'
 import { signOut } from '@/lib/supabase'
@@ -10,6 +11,12 @@ interface NavItem {
   icon: ReactNode
 }
 
+interface DashItem {
+  id: DashTab
+  label: string
+  icon: ReactNode
+}
+
 function Icon({ path }: { path: string }) {
   return (
     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
@@ -18,14 +25,8 @@ function Icon({ path }: { path: string }) {
   )
 }
 
-interface DashItem {
-  id: DashTab
-  label: string
-  icon: ReactNode
-}
-
+// Dashboard sub-items (no Overview — Dashboard itself is the overview)
 const DASH_ITEMS: DashItem[] = [
-  { id: 'guest',     label: 'Overview',      icon: <Icon path="M3 3h7v7H3z M14 3h7v7h-7z M14 14h7v7h-7z M3 14h7v7H3z" /> },
   { id: 'itinerary', label: 'Itinerary',     icon: <Icon path="M8 6h13 M8 12h13 M8 18h13 M3 6h.01 M3 12h.01 M3 18h.01" /> },
   { id: 'details',   label: 'Event Details', icon: <Icon path="M8 2v4 M16 2v4 M3 10h18 M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" /> },
   { id: 'mom',       label: 'Notes',         icon: <Icon path="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z M14 2v6h6 M16 13H8 M16 17H8 M10 9H8" /> },
@@ -42,23 +43,32 @@ const NAV_ITEMS: NavItem[] = [
 
 export default function AppShell({ children }: { children: ReactNode }) {
   const { screen, setScreen, wedding, dashTab, setDashTab } = useAppStore()
+  const [open, setOpen] = useState(true)
+
   const coupleName = wedding?.couple_name ?? 'Your Wedding'
-  const selfName = wedding?.self_name ?? 'Bride'
+  const selfName   = wedding?.self_name ?? 'Bride'
   const days = wedding ? Math.max(0, daysUntil(wedding.wedding_date)) : 0
-  const circumference = 314
-  const pct = Math.min(1, Math.max(0, (365 - days) / 365))
-  const offset = circumference * (1 - pct)
+  const offset = 314 * (1 - Math.min(1, Math.max(0, (365 - days) / 365)))
   const ringColor = days <= 30 ? 'var(--rose)' : days <= 90 ? 'var(--amber)' : 'var(--sage)'
 
   return (
-    <div className="app-shell">
-      {/* Topbar */}
+    <div className={`app-shell${open ? '' : ' sidebar-closed'}`}>
+
+      {/* ── Topbar ──────────────────────────────────────────────── */}
       <header className="app-topbar">
         <div className="topbar-logo-zone">
           <span className="logo">
             <span className="logo-mark">🌸</span>
-            The Bride Side
+            <span className="logo-text">The Bride Side</span>
           </span>
+          <button className="sidebar-toggle" onClick={() => setOpen(o => !o)} title={open ? 'Collapse sidebar' : 'Expand sidebar'}>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round">
+              {open
+                ? <path d="M15 18l-6-6 6-6" />
+                : <path d="M9 18l6-6-6-6" />
+              }
+            </svg>
+          </button>
         </div>
         <nav className="topbar-nav" />
         <div className="topbar-right">
@@ -88,20 +98,18 @@ export default function AppShell({ children }: { children: ReactNode }) {
         </div>
       </header>
 
-      {/* Sidebar */}
+      {/* ── Sidebar ─────────────────────────────────────────────── */}
       <aside className="sidebar">
         <div className="sidebar-inner">
+
           {/* Countdown ring card */}
           {wedding && (
             <div className="sb-countdown-card">
               <div className={`sb-countdown-ring-wrap${days <= 30 ? ' urgent' : ''}`}>
                 <svg className="sb-countdown-svg" viewBox="0 0 108 108">
                   <circle className="sb-countdown-track" cx="54" cy="54" r="46" />
-                  <circle
-                    className="sb-countdown-progress"
-                    cx="54" cy="54" r="46"
-                    style={{ strokeDashoffset: offset, stroke: ringColor }}
-                  />
+                  <circle className="sb-countdown-progress" cx="54" cy="54" r="46"
+                    style={{ strokeDashoffset: offset, stroke: ringColor }} />
                 </svg>
                 <div className="sb-countdown-centre">
                   <div className="sb-countdown-num">{days}</div>
@@ -125,57 +133,57 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </div>
           )}
 
-          {/* Nav items */}
+          {/* Main nav */}
           <div className="sidebar-section">
             <div className="sidebar-label">Planning</div>
             {NAV_ITEMS.map(item => (
               <button
                 key={item.screen}
                 className={`sb-item${screen === item.screen ? ' active' : ''}`}
-                onClick={() => setScreen(item.screen)}
+                onClick={() => { setScreen(item.screen); if (item.screen === 'dashboard') setDashTab('guest') }}
               >
                 <span className="sb-item-icon">{item.icon}</span>
-                {item.label}
+                <span className="sb-item-label">{item.label}</span>
               </button>
             ))}
           </div>
 
-          {/* Dashboard sub-nav — visible only when on dashboard screen */}
+          {/* Dashboard sub-nav */}
           {screen === 'dashboard' && (
             <div className="sb-sub-section">
               {DASH_ITEMS.map(item => (
                 <button
                   key={item.id}
-                  className={`sb-item sb-sub-item${dashTab === item.id ? ' active' : ''}`}
+                  className={`sb-item${dashTab === item.id ? ' active' : ''}`}
                   onClick={() => setDashTab(item.id)}
                 >
                   <span className="sb-item-icon">{item.icon}</span>
-                  {item.label}
+                  <span className="sb-item-label">{item.label}</span>
                 </button>
               ))}
             </div>
           )}
 
-          {/* Bottom */}
+          {/* Sign out */}
           <div className="sb-bottom">
             <button className="sb-item sb-signout" onClick={() => { signOut(); setScreen('landing') }}>
               <span className="sb-item-icon">
                 <Icon path="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4 M16 17l5-5-5-5 M21 12H9" />
               </span>
-              Sign Out
+              <span className="sb-item-label">Sign Out</span>
             </button>
           </div>
         </div>
       </aside>
 
-      {/* Main */}
+      {/* ── Main ────────────────────────────────────────────────── */}
       <main className="main-wrapper">
         <div key={screen} className="page-enter" style={{ height: '100%' }}>
           {children}
         </div>
       </main>
 
-      {/* Mobile bottom navigation */}
+      {/* ── Mobile bottom nav ───────────────────────────────────── */}
       <nav className="mobile-nav">
         {NAV_ITEMS.map(item => (
           <button

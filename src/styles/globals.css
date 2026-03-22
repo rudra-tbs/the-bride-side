@@ -117,7 +117,21 @@ html, body, #root {
   grid-template-rows: var(--nav-h) 1fr;
   flex: 1;
   overflow: hidden;
+  transition: grid-template-columns 0.24s ease;
 }
+
+/* ── COLLAPSED SIDEBAR ─────────────────────────────────────────── */
+.sidebar-closed { --sidebar-w: 60px; }
+.sidebar-closed .sb-countdown-card { display: none; }
+.sidebar-closed .sidebar-label { display: none; }
+.sidebar-closed .sb-sub-section { display: none; }
+.sidebar-closed .sb-item { justify-content: center; padding: 9px; }
+.sidebar-closed .sb-item-label { display: none; }
+.sidebar-closed .logo-text { display: none; }
+.sidebar-closed .topbar-logo-zone { justify-content: center; padding: 0 8px; gap: 0; }
+.sidebar-closed .logo { justify-content: center; }
+.sidebar-closed .topbar-search-btn span,
+.sidebar-closed .topbar-search-btn kbd { display: none; }
 
 /* ── TOPBAR ────────────────────────────────────────────────────── */
 .app-topbar {
@@ -131,15 +145,29 @@ html, body, #root {
 }
 .topbar-logo-zone {
   width: var(--sidebar-w);
-  display: flex; align-items: center; padding: 0 20px;
-  height: 100%; flex-shrink: 0;
+  display: flex; align-items: center; padding: 0 14px 0 20px;
+  height: 100%; flex-shrink: 0; gap: 0;
+  transition: width 0.24s ease, padding 0.24s ease;
 }
 .logo {
   font-family: var(--serif); font-size: 20px; font-weight: 600;
   color: var(--rose-dark); letter-spacing: -0.3px;
-  display: flex; align-items: center; gap: 7px;
+  display: flex; align-items: center; gap: 7px; flex: 1; min-width: 0;
 }
 .logo-mark { font-size: 16px; line-height: 1; flex-shrink: 0; }
+.logo-text { overflow: hidden; white-space: nowrap; }
+
+/* Sidebar toggle button */
+.sidebar-toggle {
+  display: flex; align-items: center; justify-content: center;
+  width: 26px; height: 26px; border-radius: 7px;
+  border: 1px solid var(--border2); background: transparent;
+  color: var(--ink3); cursor: pointer; flex-shrink: 0;
+  transition: all 0.15s;
+}
+.sidebar-toggle:hover { background: var(--rose-light); border-color: var(--rose-mid); color: var(--rose-dark); }
+.sidebar-toggle svg { width: 14px; height: 14px; }
+
 .topbar-nav { display: flex; align-items: center; gap: 2px; padding: 0 12px; flex: 1; }
 .topbar-right { display: flex; align-items: center; gap: 10px; }
 
@@ -252,17 +280,10 @@ html, body, #root {
 
 /* ── DASHBOARD SUB-NAVIGATION ──────────────────────────────────── */
 .sb-sub-section {
-  margin-top: 4px;
-  padding: 6px 0 4px;
+  margin-top: 2px;
+  padding: 4px 0 2px;
   border-top: 1px dashed var(--border2);
 }
-.sb-sub-item {
-  padding-left: 16px !important;
-  font-size: 12.5px !important;
-  color: var(--ink3) !important;
-}
-.sb-sub-item:hover { color: var(--rose-dark) !important; }
-.sb-sub-item.active { color: white !important; }
 
 /* Section label */
 .sidebar-section { margin-top: 0; }
