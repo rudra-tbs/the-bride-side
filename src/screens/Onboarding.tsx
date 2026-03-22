@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { useAppStore } from '@/store/app'
 import type { Role } from '@/types'
 import { uuid } from '@/lib/utils'
@@ -258,6 +258,7 @@ export default function Onboarding() {
   const [travelOutstation, setTravelOutstation] = useState<boolean | null>(null)
   const [helpAreas, setHelpAreas]               = useState<string[]>([])
   const [notifPrefs, setNotifPrefs]             = useState<string[]>([])
+  const [showBudgetEventsExpander, setShowBudgetEventsExpander] = useState(false)
 
   const isBG      = role === 'bride' || role === 'groom'
   const isPlanner = role === 'planner'
@@ -280,6 +281,18 @@ export default function Onboarding() {
   function toggleNotifPref(n: string) {
     setNotifPrefs(prev => prev.includes(n) ? prev.filter(x => x !== n) : [...prev, n])
   }
+
+  // Auto-populate budgetEvents from selectedEvents on first visit to the budget step
+  useEffect(() => {
+    if (isBG && step === 3 && budgetEvents.length === 0 && selectedEvents.length > 0) {
+      setBudgetEvents([...selectedEvents])
+    }
+    if (isPlanner && step === 4 && budgetEvents.length === 0 && selectedEvents.length > 0) {
+      setBudgetEvents([...selectedEvents])
+    }
+    setShowBudgetEventsExpander(false)
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, role])
 
   function goFwd(n: number) { setDir('fwd'); setStep(n) }
   function goBck(n: number) { setDir('bck'); setStep(n) }
@@ -504,13 +517,26 @@ export default function Onboarding() {
               </div>
             </div>
             <div className="ob3-field" style={{ marginTop: 20 }}>
-              <label className="ob3-label">What events does this budget cover? <span className="ob3-opt">(pick any)</span></label>
-              <div className="ob3-chip-row ob3-chip-wrap" style={{ marginTop: 8 }}>
-                {EVENTS_LIST.map(ev => (
-                  <button key={ev} className={`ob3-chip${budgetEvents.includes(ev) ? ' on' : ''}`}
-                    onClick={() => toggleBudgetEvent(ev)}>{ev}</button>
-                ))}
+              <div className="ob3-events-covered-row">
+                <label className="ob3-label">Events this budget covers</label>
+                <button className="ob3-add-event-btn"
+                  onClick={() => setShowBudgetEventsExpander(v => !v)}>
+                  {showBudgetEventsExpander ? '✕ Done' : '+ Add event'}
+                </button>
               </div>
+              <div className="ob3-chip-row ob3-chip-wrap ob3-events-tags" style={{ marginTop: 8 }}>
+                {budgetEvents.length > 0
+                  ? budgetEvents.map(ev => <span key={ev} className="ob3-chip on">{ev}</span>)
+                  : <span className="ob3-events-empty">No events — tap "+ Add event" to select</span>}
+              </div>
+              {showBudgetEventsExpander && (
+                <div className="ob3-chip-row ob3-chip-wrap ob3-events-expander" style={{ marginTop: 10 }}>
+                  {EVENTS_LIST.map(ev => (
+                    <button key={ev} className={`ob3-chip${budgetEvents.includes(ev) ? ' on' : ''}`}
+                      onClick={() => toggleBudgetEvent(ev)}>{ev}</button>
+                  ))}
+                </div>
+              )}
             </div>
             <div className="ob3-actions">
               <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
@@ -717,13 +743,26 @@ export default function Onboarding() {
             </div>
           </div>
           <div className="ob3-field" style={{ marginTop: 20 }}>
-            <label className="ob3-label">What events does this budget cover? <span className="ob3-opt">(pick any)</span></label>
-            <div className="ob3-chip-row ob3-chip-wrap" style={{ marginTop: 8 }}>
-              {EVENTS_LIST.map(ev => (
-                <button key={ev} className={`ob3-chip${budgetEvents.includes(ev) ? ' on' : ''}`}
-                  onClick={() => toggleBudgetEvent(ev)}>{ev}</button>
-              ))}
+            <div className="ob3-events-covered-row">
+              <label className="ob3-label">Events this budget covers</label>
+              <button className="ob3-add-event-btn"
+                onClick={() => setShowBudgetEventsExpander(v => !v)}>
+                {showBudgetEventsExpander ? '✕ Done' : '+ Add event'}
+              </button>
             </div>
+            <div className="ob3-chip-row ob3-chip-wrap ob3-events-tags" style={{ marginTop: 8 }}>
+              {budgetEvents.length > 0
+                ? budgetEvents.map(ev => <span key={ev} className="ob3-chip on">{ev}</span>)
+                : <span className="ob3-events-empty">No events — tap "+ Add event" to select</span>}
+            </div>
+            {showBudgetEventsExpander && (
+              <div className="ob3-chip-row ob3-chip-wrap ob3-events-expander" style={{ marginTop: 10 }}>
+                {EVENTS_LIST.map(ev => (
+                  <button key={ev} className={`ob3-chip${budgetEvents.includes(ev) ? ' on' : ''}`}
+                    onClick={() => toggleBudgetEvent(ev)}>{ev}</button>
+                ))}
+              </div>
+            )}
           </div>
           <div className="ob3-field" style={{ marginTop: 24 }}>
             <label className="ob3-label">Wedding vibe <span className="ob3-opt">(pick any)</span></label>
