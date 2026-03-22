@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAppStore } from '@/store/app'
+import EmptyState from '@/components/ui/EmptyState'
 import type { Vendor, VendorCategory, VendorStatus } from '@/types'
 import { formatINR, uuid } from '@/lib/utils'
 import { dbInsertVendor, dbUpdateVendor, dbDeleteVendor } from '@/lib/supabase'
@@ -328,11 +329,22 @@ export default function Vendors() {
     dbUpdateVendor(editingVendor.id, patch).catch(() => null)
   }
 
-  async function handleDelete(id: string) {
-    removeVendor(id)
+  async function handleDelete(v: Vendor) {
+    const snapshot = { ...v }
+    removeVendor(v.id)
     setSelected(null)
-    toast.success('Vendor removed')
-    dbDeleteVendor(id).catch(() => null)
+    toast((t) => (
+      <div className="flex-center gap-10">
+        <span>Removed {snapshot.name}</span>
+        <button
+          onClick={() => { addVendor(snapshot); toast.dismiss(t.id) }}
+          style={{ fontSize: '11px', fontWeight: 600, color: 'var(--rose-dark)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          Undo
+        </button>
+      </div>
+    ), { duration: 5000 })
+    dbDeleteVendor(v.id).catch(() => null)
   }
 
   return (
@@ -368,13 +380,29 @@ export default function Vendors() {
 
       <div className="page-body">
         {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', color: 'var(--ink3)', padding: '48px 0' }}>
-            {vendors.length === 0 ? 'No vendors yet — add your first vendor above.' : 'No vendors match your filter.'}
-          </div>
+          vendors.length === 0 ? (
+            <EmptyState
+              icon="🤝"
+              title="No vendors yet"
+              subtitle="Add your photographer, caterer, decorator — everyone who makes the day magical."
+              action={{ label: '+ Add your first vendor', onClick: () => setShowAdd(true) }}
+            />
+          ) : (
+            <EmptyState
+              icon="🔍"
+              title="No vendors match"
+              subtitle="Try a different category or remove the shortlisted filter."
+            />
+          )
         ) : (
           <div className="g4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(220px, 1fr))' }}>
             {filtered.map(v => (
-              <div className="v-card" key={v.id} onClick={() => setSelected(v)}>
+              <div
+                className="v-card"
+                key={v.id}
+                data-status={v.is_shortlisted ? 'shortlisted' : v.status}
+                onClick={() => setSelected(v)}
+              >
                 <div className="v-img" style={{ background: v.is_shortlisted ? 'var(--rose-light)' : 'var(--surface2)' }}>
                   <span style={{ fontSize: '44px' }}>{CAT_EMOJI[v.category] ?? '⭐'}</span>
                   <button
@@ -413,7 +441,7 @@ export default function Vendors() {
             setSelected(v => v ? { ...v, is_shortlisted: !v.is_shortlisted } : v)
           }}
           onEdit={() => setEditingVendor(selected)}
-          onDelete={() => handleDelete(selected.id)}
+          onDelete={() => handleDelete(selected)}
         />
       )}
 

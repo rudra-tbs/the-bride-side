@@ -16,6 +16,7 @@ import Budget from '@/screens/Budget'
 import Guests from '@/screens/Guests'
 import Moodboard from '@/screens/Moodboard'
 import Checklist from '@/screens/Checklist'
+import CommandPalette from '@/components/ui/CommandPalette'
 
 const APP_SCREENS: Screen[] = ['dashboard', 'vendors', 'budget', 'guests', 'moodboard', 'checklist']
 
@@ -127,6 +128,7 @@ export default function App() {
           {screen === 'checklist'  && <Checklist />}
         </AppShell>
       )}
+      <CommandPalette />
     </div>
   )
 }

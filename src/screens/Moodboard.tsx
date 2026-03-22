@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useAppStore } from '@/store/app'
+import EmptyState from '@/components/ui/EmptyState'
 import type { PinCategory } from '@/types'
 import { uuid } from '@/lib/utils'
 import toast from 'react-hot-toast'
@@ -87,7 +88,12 @@ export default function Moodboard() {
 
       <div className="page-body">
         {filtered.length === 0 ? (
-          <div style={{ textAlign: 'center', color: 'var(--ink3)', padding: '48px 0' }}>No pins yet in this category.</div>
+          <EmptyState
+            icon="🌸"
+            title={catFilter === 'all' ? 'Your moodboard is empty' : `No ${catFilter} pins yet`}
+            subtitle="Pin inspiration for your decor, outfits, makeup, and venue. Share with your vendors."
+            action={{ label: '+ Add your first pin', onClick: () => setShowAdd(true) }}
+          />
         ) : (
           <div className="mood-grid">
             {filtered.map(pin => {

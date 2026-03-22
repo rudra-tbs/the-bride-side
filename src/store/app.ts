@@ -50,7 +50,9 @@ interface AppState {
   setBudgetCategories: (cats: BudgetCategory[]) => void
   setExpenses: (e: Expense[]) => void
   addExpense: (e: Expense) => void
+  updateExpense: (id: string, patch: Partial<Expense>) => void
   removeExpense: (id: string) => void
+  updateBudgetCategory: (id: string, patch: Partial<BudgetCategory>) => void
 
   // ── Checklist ─────────────────────────────────────────────────────────────
   clCategories: ChecklistCategory[]
@@ -124,7 +126,11 @@ export const useAppStore = create<AppState>()(
       setBudgetCategories: (budgetCategories) => set({ budgetCategories }),
       setExpenses: (expenses) => set({ expenses }),
       addExpense: (e) => set((s) => ({ expenses: [e, ...s.expenses] })),
+      updateExpense: (id, patch) =>
+        set((s) => ({ expenses: s.expenses.map((e) => (e.id === id ? { ...e, ...patch } : e)) })),
       removeExpense: (id) => set((s) => ({ expenses: s.expenses.filter((e) => e.id !== id) })),
+      updateBudgetCategory: (id, patch) =>
+        set((s) => ({ budgetCategories: s.budgetCategories.map((c) => (c.id === id ? { ...c, ...patch } : c)) })),
 
       // Checklist
       clCategories: [],

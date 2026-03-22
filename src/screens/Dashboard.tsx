@@ -1,111 +1,74 @@
 import { useState } from 'react'
 import { useAppStore } from '@/store/app'
-import type { DashTab, ItineraryItem, WeddingEvent } from '@/types'
-import { formatDate, daysUntil, formatINR } from '@/lib/utils'
+import type { ItineraryItem, Note, WeddingEvent } from '@/types'
+import { formatDate, formatINR, budgetPct } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import { uuid } from '@/lib/utils'
 
-// ── Sub-component: Tab ──────────────────────────────────────────────
-function TabBtn({ id, label, active, onClick }: { id: DashTab; label: string; active: boolean; onClick: (t: DashTab) => void }) {
-  return (
-    <button className={`tab-btn${active ? ' active' : ''}`} onClick={() => onClick(id)}>
-      {label}
-    </button>
-  )
-}
-
-// ── Sub-component: Countdown ring ───────────────────────────────────
-function Countdown({ date, coupleName, venue }: { date: string; coupleName: string; venue: string }) {
-  const days = Math.max(0, daysUntil(date))
-  const totalDays = 365
-  const elapsed = Math.max(0, totalDays - days)
-  const pct = Math.min(1, elapsed / totalDays)
-  const circumference = 314
-  const offset = circumference * (1 - pct)
-
-  return (
-    <div className="countdown-hero">
-      <div className="countdown-ring-wrap">
-        <svg className="countdown-svg" viewBox="0 0 108 108">
-          <circle className="countdown-track" cx="54" cy="54" r="46" />
-          <circle
-            className="countdown-progress"
-            cx="54" cy="54" r="46"
-            style={{ strokeDashoffset: offset, stroke: days <= 30 ? 'var(--rose)' : days <= 90 ? 'var(--amber)' : 'var(--sage)' }}
-          />
-        </svg>
-        <div className="countdown-centre">
-          <div className="countdown-num">{days}</div>
-          <div className="countdown-unit">days</div>
-        </div>
-      </div>
-      <div className="countdown-title">{coupleName}</div>
-      <div className="countdown-date">{formatDate(date, 'EEEE, d MMMM yyyy')}</div>
-      <div className="countdown-stats">
-        <div className="countdown-stat">
-          <div className="countdown-stat-num">{Math.floor(days / 7)}</div>
-          <div className="countdown-stat-lbl">Weeks Away</div>
-        </div>
-        <div className="countdown-stat-div" />
-        <div className="countdown-stat">
-          <div className="countdown-stat-num">{Math.floor(days / 30)}</div>
-          <div className="countdown-stat-lbl">Months Away</div>
-        </div>
-        <div className="countdown-stat-div" />
-        <div className="countdown-stat">
-          <div className="countdown-stat-num">{days}</div>
-          <div className="countdown-stat-lbl">Days Left</div>
-        </div>
-      </div>
-      <div className="countdown-next">📍 {venue}</div>
-    </div>
-  )
-}
-
-// ── Guest Tab ────────────────────────────────────────────────────────
+// ── Guest Tab (Overview) ─────────────────────────────────────────────
 function GuestTab() {
-  const { wedding, guests, events, clTasks, toggleTask } = useAppStore()
+  const { wedding, guests, events, clTasks, toggleTask, vendors, expenses } = useAppStore()
   if (!wedding) return null
 
   const confirmed = guests.filter(g => g.rsvp_status === 'confirmed').length
   const pending    = guests.filter(g => g.rsvp_status === 'pending').length
   const declined   = guests.filter(g => g.rsvp_status === 'declined').length
   const totalWithPlusOnes = guests.filter(g => g.rsvp_status === 'confirmed').reduce((a, g) => a + (g.plus_one ? 2 : 1), 0)
-
   const pendingTasks = clTasks.filter(t => !t.is_done).slice(0, 5)
+
+  // Budget stats
+  const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0)
+  const totalBudget = wedding.total_budget
+  const budgetUsedPct = budgetPct(totalSpent, totalBudget)
+  const budgetColor = budgetUsedPct >= 90 ? 'var(--rose-dark)' : budgetUsedPct >= 70 ? 'var(--amber)' : 'var(--sage)'
+  const budgetBarColor = budgetUsedPct >= 90 ? 'var(--rose-mid)' : budgetUsedPct >= 70 ? 'var(--amber)' : 'var(--sage)'
+
+  // Vendor stats
+  const bookedVendors    = vendors.filter(v => v.status === 'booked').length
+  const contactedVendors = vendors.filter(v => v.status === 'contacted' || v.status === 'quoted').length
+  const savedVendors     = vendors.filter(v => v.status === 'saved').length
+
+  // Checklist stats
+  const doneTasksCount  = clTasks.filter(t => t.is_done).length
+  const totalTasksCount = clTasks.length
+  const checklistPct    = totalTasksCount > 0 ? Math.round((doneTasksCount / totalTasksCount) * 100) : 0
+  const checklistColor  = checklistPct >= 80 ? 'var(--sage)' : checklistPct >= 40 ? 'var(--amber)' : 'var(--rose-mid)'
 
   return (
     <div className="page-body">
-      <div className="dash-overview-grid">
-        {/* Left: Countdown */}
-        <div>
-          <Countdown date={wedding.wedding_date} coupleName={wedding.couple_name} venue={wedding.venue} />
+      {/* Stat tiles — full width */}
+      <div className="stat-grid" style={{ marginBottom: '24px', gridTemplateColumns: 'repeat(6, 1fr)' }}>
+        <div className="stat-tile tile-rose">
+          <div className="stat-num">{guests.length}</div>
+          <div className="stat-label">Total Guests</div>
         </div>
+        <div className="stat-tile tile-sage">
+          <div className="stat-num">{confirmed}</div>
+          <div className="stat-label">Confirmed</div>
+        </div>
+        <div className="stat-tile tile-amber">
+          <div className="stat-num">{pending}</div>
+          <div className="stat-label">Awaiting RSVP</div>
+        </div>
+        <div className="stat-tile tile-pink">
+          <div className="stat-num">{declined}</div>
+          <div className="stat-label">Declined</div>
+        </div>
+        <div className="stat-tile" style={{ background: 'var(--mauve-light)' }}>
+          <div className="stat-num" style={{ color: budgetColor }}>{formatINR(totalSpent, true)}</div>
+          <div className="stat-label">Budget Used</div>
+        </div>
+        <div className="stat-tile" style={{ background: 'var(--sage-light)' }}>
+          <div className="stat-num" style={{ color: checklistPct >= 80 ? 'var(--sage)' : 'var(--ink)' }}>{doneTasksCount}/{totalTasksCount}</div>
+          <div className="stat-label">Tasks Done</div>
+        </div>
+      </div>
 
-        {/* Right: Stats + tasks */}
+      {/* Two-column: left cards | right tasks */}
+      <div className="dash-overview-grid">
         <div>
-          {/* Stat tiles */}
-          <div className="stat-grid" style={{ marginBottom: '20px' }}>
-            <div className="stat-tile tile-rose">
-              <div className="stat-num">{guests.length}</div>
-              <div className="stat-label">Total Guests</div>
-            </div>
-            <div className="stat-tile tile-sage">
-              <div className="stat-num">{confirmed}</div>
-              <div className="stat-label">Confirmed</div>
-            </div>
-            <div className="stat-tile tile-amber">
-              <div className="stat-num">{pending}</div>
-              <div className="stat-label">Awaiting RSVP</div>
-            </div>
-            <div className="stat-tile tile-pink">
-              <div className="stat-num">{declined}</div>
-              <div className="stat-label">Declined</div>
-            </div>
-          </div>
-
           {/* Headcount info */}
-          <div className="card card-sm" style={{ marginBottom: '20px', display: 'flex', gap: '20px', alignItems: 'center' }}>
+          <div className="card card-sm" style={{ marginBottom: '16px', display: 'flex', gap: '20px', alignItems: 'center' }}>
             <div>
               <div style={{ fontSize: '11px', color: 'var(--ink3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px' }}>Final headcount (with +1s)</div>
               <div style={{ fontSize: '28px', fontWeight: 700, color: 'var(--rose-dark)', letterSpacing: '-1px', lineHeight: 1.2 }}>{totalWithPlusOnes}</div>
@@ -116,9 +79,46 @@ function GuestTab() {
             </div>
           </div>
 
+          {/* Budget Snapshot */}
+          <div className="card card-sm" style={{ marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--ink3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px' }}>Budget Snapshot</div>
+              <span style={{ fontSize: '12px', fontWeight: 600, color: budgetColor }}>{budgetUsedPct}% used</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
+              <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--ink)', letterSpacing: '-0.5px' }}>{formatINR(totalSpent, true)}</span>
+              <span style={{ fontSize: '13px', color: 'var(--ink3)' }}>of {formatINR(totalBudget, true)}</span>
+            </div>
+            <div style={{ height: '6px', background: 'var(--border)', borderRadius: '99px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${Math.min(100, budgetUsedPct)}%`, background: budgetBarColor, borderRadius: '99px', transition: 'width 0.4s ease' }} />
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--ink3)', marginTop: '8px' }}>
+              {formatINR(totalBudget - totalSpent, true)} remaining
+            </div>
+          </div>
+
+          {/* Vendor Pipeline */}
+          <div className="card card-sm" style={{ marginBottom: '16px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--ink3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '12px' }}>Vendor Pipeline</div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: '60px', textAlign: 'center', padding: '8px', borderRadius: '8px', background: 'var(--sage-light)' }}>
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--sage)' }}>{bookedVendors}</div>
+                <div style={{ fontSize: '11px', color: 'var(--ink3)', fontWeight: 600 }}>Booked</div>
+              </div>
+              <div style={{ flex: 1, minWidth: '60px', textAlign: 'center', padding: '8px', borderRadius: '8px', background: 'var(--amber-light)' }}>
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--amber)' }}>{contactedVendors}</div>
+                <div style={{ fontSize: '11px', color: 'var(--ink3)', fontWeight: 600 }}>In Progress</div>
+              </div>
+              <div style={{ flex: 1, minWidth: '60px', textAlign: 'center', padding: '8px', borderRadius: '8px', background: 'var(--bg-alt)' }}>
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--ink2)' }}>{savedVendors}</div>
+                <div style={{ fontSize: '11px', color: 'var(--ink3)', fontWeight: 600 }}>Saved</div>
+              </div>
+            </div>
+          </div>
+
           {/* Event guest counts */}
           <div className="sec-head"><span className="sec-title">Guests per Event</span></div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '10px', marginBottom: '20px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2,1fr)', gap: '10px' }}>
             {events.map(ev => {
               const count = guests.filter(g => g.events.includes(ev.id) && g.rsvp_status === 'confirmed').length
               return (
@@ -132,31 +132,98 @@ function GuestTab() {
               )
             })}
           </div>
+        </div>
 
-          {/* Quick tasks */}
-          <div className="card">
-            <div className="sec-head" style={{ marginBottom: '8px' }}>
-              <span className="sec-title">Upcoming Tasks</span>
-            </div>
-            {pendingTasks.length === 0 ? (
-              <div style={{ padding: '16px 0', textAlign: 'center', color: 'var(--ink3)', fontSize: '13px' }}>All caught up! 🎉</div>
-            ) : (
-              pendingTasks.map(t => (
-                <div className="task-row" key={t.id}>
-                  <div className={`task-chk${t.is_done ? ' done' : ''}`} onClick={() => toggleTask(t.id)} />
-                  <div className="task-body">
-                    <div className={`task-title${t.is_done ? ' done' : ''}`}>{t.name}</div>
-                    {t.due_date && <div className="task-sub">Due {formatDate(t.due_date)}</div>}
-                    {t.assigned_to && (
-                      <div className="task-meta">
-                        <span className="badge badge-muted">{t.assigned_to}</span>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              ))
-            )}
+        {/* Quick tasks with progress */}
+        <div className="card">
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+            <span className="sec-title">Upcoming Tasks</span>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: checklistPct >= 80 ? 'var(--sage)' : 'var(--ink3)' }}>{checklistPct}%</span>
           </div>
+          <div style={{ height: '4px', background: 'var(--border)', borderRadius: '99px', overflow: 'hidden', marginBottom: '14px' }}>
+            <div style={{ height: '100%', width: `${checklistPct}%`, background: checklistColor, borderRadius: '99px', transition: 'width 0.4s ease' }} />
+          </div>
+          {pendingTasks.length === 0 ? (
+            <div style={{ padding: '16px 0', textAlign: 'center', color: 'var(--ink3)', fontSize: '13px' }}>All caught up! 🎉</div>
+          ) : (
+            pendingTasks.map(t => (
+              <div className="task-row" key={t.id}>
+                <div className={`task-chk${t.is_done ? ' done' : ''}`} onClick={() => toggleTask(t.id)} />
+                <div className="task-body">
+                  <div className={`task-title${t.is_done ? ' done' : ''}`}>{t.name}</div>
+                  {t.due_date && <div className="task-sub">Due {formatDate(t.due_date)}</div>}
+                  {t.assigned_to && (
+                    <div className="task-meta">
+                      <span className="badge badge-muted">{t.assigned_to}</span>
+                    </div>
+                  )}
+                </div>
+              </div>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Itinerary Edit Modal ──────────────────────────────────────────────
+function ItineraryEditModal({ item, onClose }: { item: ItineraryItem; onClose: () => void }) {
+  const { updateItineraryItem } = useAppStore()
+  const [time, setTime] = useState(item.time)
+  const [name, setName] = useState(item.name)
+  const [note, setNote] = useState(item.note)
+  const [durationMin, setDurationMin] = useState(String(item.duration_min || ''))
+  const [isMilestone, setIsMilestone] = useState(item.is_milestone)
+  const [isDone, setIsDone] = useState(item.is_done)
+
+  function handleSave() {
+    updateItineraryItem(item.id, {
+      time: time.trim(),
+      name: name.trim(),
+      note: note.trim(),
+      duration_min: Number(durationMin) || 0,
+      is_milestone: isMilestone,
+      is_done: isDone,
+    })
+    onClose()
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="modal-box">
+        <div className="modal-title">Edit Itinerary Item</div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div className="modal-field">
+            <label className="modal-label">Time</label>
+            <input className="input" type="time" value={time} onChange={e => setTime(e.target.value)} />
+          </div>
+          <div className="modal-field">
+            <label className="modal-label">Duration (min)</label>
+            <input className="input" type="number" min="0" placeholder="0" value={durationMin} onChange={e => setDurationMin(e.target.value)} />
+          </div>
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">Name</label>
+          <input className="input" value={name} onChange={e => setName(e.target.value)} />
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">Note</label>
+          <textarea className="input" rows={3} value={note} onChange={e => setNote(e.target.value)} />
+        </div>
+        <div style={{ display: 'flex', gap: '20px', marginBottom: '4px' }}>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
+            <input type="checkbox" checked={isMilestone} onChange={e => setIsMilestone(e.target.checked)} />
+            Milestone
+          </label>
+          <label style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '13px', cursor: 'pointer' }}>
+            <input type="checkbox" checked={isDone} onChange={e => setIsDone(e.target.checked)} />
+            Done
+          </label>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-rose" onClick={handleSave} disabled={!name.trim()}>Save</button>
         </div>
       </div>
     </div>
@@ -167,10 +234,11 @@ function GuestTab() {
 function ItineraryTab() {
   const { events, itinerary, updateItineraryItem } = useAppStore()
   const [activeEvent, setActiveEvent] = useState(events[2]?.id ?? events[0]?.id ?? '')
+  const [editingItem, setEditingItem] = useState<ItineraryItem | null>(null)
 
   const items: ItineraryItem[] = itinerary
     .filter(i => i.event_id === activeEvent)
-    .sort((a, b) => a.sort_order - b.sort_order)
+    .sort((a, b) => a.time.localeCompare(b.time))
 
   const activeEv: WeddingEvent | undefined = events.find(e => e.id === activeEvent)
 
@@ -213,7 +281,8 @@ function ItineraryTab() {
             <div
               key={item.id}
               className={`itinerary-row${item.is_milestone ? ' milestone' : ''}${item.is_done ? ' done' : ''}`}
-              onClick={() => updateItineraryItem(item.id, { is_done: !item.is_done })}
+              style={{ cursor: 'pointer' }}
+              onClick={() => setEditingItem(item)}
             >
               <div className="itin-time-col">
                 <div className="itin-time">{item.time}</div>
@@ -236,10 +305,19 @@ function ItineraryTab() {
                   </div>
                 )}
               </div>
+              <div
+                className={`task-chk${item.is_done ? ' done' : ''}`}
+                style={{ flexShrink: 0, marginLeft: 'auto', alignSelf: 'center' }}
+                onClick={e => { e.stopPropagation(); updateItineraryItem(item.id, { is_done: !item.is_done }) }}
+              />
             </div>
           ))
         )}
       </div>
+
+      {editingItem && (
+        <ItineraryEditModal item={editingItem} onClose={() => setEditingItem(null)} />
+      )}
     </div>
   )
 }
@@ -294,6 +372,22 @@ function DetailsTab() {
 // ── MOM Tab ──────────────────────────────────────────────────────────
 function MOMTab() {
   const { wedding, notes, addNote, removeNote } = useAppStore()
+
+  function handleRemoveNote(note: Note) {
+    const snapshot = { ...note }
+    removeNote(note.id)
+    toast((t) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span>Removed "{snapshot.title}"</span>
+        <button
+          onClick={() => { addNote(snapshot); toast.dismiss(t.id) }}
+          style={{ fontSize: '11px', fontWeight: 600, color: 'var(--rose-dark)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          Undo
+        </button>
+      </div>
+    ), { duration: 5000 })
+  }
   const [showAdd, setShowAdd] = useState(false)
   const [title, setTitle] = useState('')
   const [body, setBody] = useState('')
@@ -342,7 +436,7 @@ function MOMTab() {
               <div className="note-title">{note.title}</div>
               <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
                 <span className={`badge ${typeBadge[note.type] ?? 'badge-muted'}`}>{note.type}</span>
-                <button className="btn btn-xs btn-ghost" onClick={() => removeNote(note.id)}>✕</button>
+                <button className="btn btn-xs btn-ghost" onClick={() => handleRemoveNote(note)}>✕</button>
               </div>
             </div>
             <div className="note-body">{note.body}</div>
@@ -386,7 +480,7 @@ function MOMTab() {
 
 // ── Main Dashboard ───────────────────────────────────────────────────
 export default function Dashboard() {
-  const { dashTab, setDashTab, wedding } = useAppStore()
+  const { dashTab, wedding } = useAppStore()
 
   if (!wedding) {
     return <div style={{ padding: '40px', color: 'var(--ink3)' }}>Loading...</div>
@@ -409,13 +503,6 @@ export default function Dashboard() {
         }}>
           Share Dashboard
         </button>
-      </div>
-
-      <div className="tab-nav">
-        <TabBtn id="guest"     label="Overview"    active={dashTab === 'guest'}     onClick={setDashTab} />
-        <TabBtn id="itinerary" label="Itinerary"   active={dashTab === 'itinerary'} onClick={setDashTab} />
-        <TabBtn id="details"   label="Event Details" active={dashTab === 'details'} onClick={setDashTab} />
-        <TabBtn id="mom"       label="Meeting Notes" active={dashTab === 'mom'}     onClick={setDashTab} />
       </div>
 
       {dashTab === 'guest'     && <GuestTab />}

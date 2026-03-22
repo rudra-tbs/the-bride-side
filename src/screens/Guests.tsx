@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useAppStore } from '@/store/app'
-import type { GuestSide, RSVPStatus, DietaryPref } from '@/types'
+import EmptyState from '@/components/ui/EmptyState'
+import type { Guest, GuestSide, RSVPStatus, DietaryPref } from '@/types'
 import { initials, uuid } from '@/lib/utils'
 import toast from 'react-hot-toast'
 
@@ -57,6 +58,22 @@ export default function Guests() {
     toast.success('Guest added!')
   }
 
+  function handleRemoveGuest(g: Guest) {
+    const snapshot = { ...g }
+    removeGuest(g.id)
+    toast((t) => (
+      <div className="flex-center gap-10">
+        <span>Removed {snapshot.name}</span>
+        <button
+          onClick={() => { addGuest(snapshot); toast.dismiss(t.id) }}
+          style={{ fontSize: '11px', fontWeight: 600, color: 'var(--rose-dark)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          Undo
+        </button>
+      </div>
+    ), { duration: 5000 })
+  }
+
   const FILTERS: { value: Filter; label: string }[] = [
     { value: 'all', label: `All (${guests.length})` },
     { value: 'confirmed', label: `Confirmed (${confirmed})` },
@@ -109,7 +126,14 @@ export default function Guests() {
             <tbody>
               {filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={7} style={{ textAlign: 'center', color: 'var(--ink3)', padding: '32px' }}>No guests match.</td>
+                  <td colSpan={7} style={{ padding: 0 }}>
+                    <EmptyState
+                      icon="💌"
+                      title={search ? 'No guests match' : 'No guests yet'}
+                      subtitle={search ? 'Try a different name or phone number.' : 'Start building your guest list — add family and friends one by one or in bulk.'}
+                      action={!search ? { label: '+ Add first guest', onClick: () => setShowAdd(true) } : undefined}
+                    />
+                  </td>
                 </tr>
               ) : (
                 filtered.map(g => (
@@ -131,7 +155,7 @@ export default function Guests() {
                     <td><span style={{ color: g.plus_one ? 'var(--sage)' : 'var(--ink4)', fontSize: '13px' }}>{g.plus_one ? '✓' : '–'}</span></td>
                     <td><span style={{ fontSize: '12px', color: 'var(--ink3)' }}>{g.phone || '–'}</span></td>
                     <td>
-                      <button className="btn btn-xs btn-ghost" onClick={() => { removeGuest(g.id); toast('Guest removed') }}>✕</button>
+                      <button className="btn btn-xs btn-ghost" onClick={() => handleRemoveGuest(g)}>✕</button>
                     </td>
                   </tr>
                 ))
