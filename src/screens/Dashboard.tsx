@@ -1,13 +1,13 @@
 import { useState } from 'react'
 import { useAppStore } from '@/store/app'
 import type { ItineraryItem, Note, WeddingEvent } from '@/types'
-import { formatDate, formatINR } from '@/lib/utils'
+import { formatDate, formatINR, budgetPct } from '@/lib/utils'
 import toast from 'react-hot-toast'
 import { uuid } from '@/lib/utils'
 
 // ── Guest Tab (Overview) ─────────────────────────────────────────────
 function GuestTab() {
-  const { wedding, guests, events, clTasks, toggleTask } = useAppStore()
+  const { wedding, guests, events, clTasks, toggleTask, vendors, expenses } = useAppStore()
   if (!wedding) return null
 
   const confirmed = guests.filter(g => g.rsvp_status === 'confirmed').length
@@ -16,10 +16,28 @@ function GuestTab() {
   const totalWithPlusOnes = guests.filter(g => g.rsvp_status === 'confirmed').reduce((a, g) => a + (g.plus_one ? 2 : 1), 0)
   const pendingTasks = clTasks.filter(t => !t.is_done).slice(0, 5)
 
+  // Budget stats
+  const totalSpent = expenses.reduce((sum, e) => sum + e.amount, 0)
+  const totalBudget = wedding.total_budget
+  const budgetUsedPct = budgetPct(totalSpent, totalBudget)
+  const budgetColor = budgetUsedPct >= 90 ? 'var(--rose-dark)' : budgetUsedPct >= 70 ? 'var(--amber)' : 'var(--sage)'
+  const budgetBarColor = budgetUsedPct >= 90 ? 'var(--rose-mid)' : budgetUsedPct >= 70 ? 'var(--amber)' : 'var(--sage)'
+
+  // Vendor stats
+  const bookedVendors    = vendors.filter(v => v.status === 'booked').length
+  const contactedVendors = vendors.filter(v => v.status === 'contacted' || v.status === 'quoted').length
+  const savedVendors     = vendors.filter(v => v.status === 'saved').length
+
+  // Checklist stats
+  const doneTasksCount  = clTasks.filter(t => t.is_done).length
+  const totalTasksCount = clTasks.length
+  const checklistPct    = totalTasksCount > 0 ? Math.round((doneTasksCount / totalTasksCount) * 100) : 0
+  const checklistColor  = checklistPct >= 80 ? 'var(--sage)' : checklistPct >= 40 ? 'var(--amber)' : 'var(--rose-mid)'
+
   return (
     <div className="page-body">
       {/* Stat tiles — full width */}
-      <div className="stat-grid" style={{ marginBottom: '24px' }}>
+      <div className="stat-grid" style={{ marginBottom: '24px', gridTemplateColumns: 'repeat(6, 1fr)' }}>
         <div className="stat-tile tile-rose">
           <div className="stat-num">{guests.length}</div>
           <div className="stat-label">Total Guests</div>
@@ -36,9 +54,17 @@ function GuestTab() {
           <div className="stat-num">{declined}</div>
           <div className="stat-label">Declined</div>
         </div>
+        <div className="stat-tile" style={{ background: 'var(--mauve-light)' }}>
+          <div className="stat-num" style={{ color: budgetColor }}>{formatINR(totalSpent, true)}</div>
+          <div className="stat-label">Budget Used</div>
+        </div>
+        <div className="stat-tile" style={{ background: 'var(--sage-light)' }}>
+          <div className="stat-num" style={{ color: checklistPct >= 80 ? 'var(--sage)' : 'var(--ink)' }}>{doneTasksCount}/{totalTasksCount}</div>
+          <div className="stat-label">Tasks Done</div>
+        </div>
       </div>
 
-      {/* Two-column: headcount + events | tasks */}
+      {/* Two-column: left cards | right tasks */}
       <div className="dash-overview-grid">
         <div>
           {/* Headcount info */}
@@ -50,6 +76,43 @@ function GuestTab() {
             <div style={{ height: '40px', width: '1px', background: 'var(--border)' }} />
             <div style={{ fontSize: '13px', color: 'var(--ink2)' }}>
               {formatINR(totalWithPlusOnes * 3500, true)} estimated per head cost
+            </div>
+          </div>
+
+          {/* Budget Snapshot */}
+          <div className="card card-sm" style={{ marginBottom: '16px' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
+              <div style={{ fontSize: '11px', color: 'var(--ink3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px' }}>Budget Snapshot</div>
+              <span style={{ fontSize: '12px', fontWeight: 600, color: budgetColor }}>{budgetUsedPct}% used</span>
+            </div>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'baseline', marginBottom: '8px' }}>
+              <span style={{ fontSize: '20px', fontWeight: 700, color: 'var(--ink)', letterSpacing: '-0.5px' }}>{formatINR(totalSpent, true)}</span>
+              <span style={{ fontSize: '13px', color: 'var(--ink3)' }}>of {formatINR(totalBudget, true)}</span>
+            </div>
+            <div style={{ height: '6px', background: 'var(--border)', borderRadius: '99px', overflow: 'hidden' }}>
+              <div style={{ height: '100%', width: `${Math.min(100, budgetUsedPct)}%`, background: budgetBarColor, borderRadius: '99px', transition: 'width 0.4s ease' }} />
+            </div>
+            <div style={{ fontSize: '12px', color: 'var(--ink3)', marginTop: '8px' }}>
+              {formatINR(totalBudget - totalSpent, true)} remaining
+            </div>
+          </div>
+
+          {/* Vendor Pipeline */}
+          <div className="card card-sm" style={{ marginBottom: '16px' }}>
+            <div style={{ fontSize: '11px', color: 'var(--ink3)', fontWeight: 600, textTransform: 'uppercase', letterSpacing: '0.4px', marginBottom: '12px' }}>Vendor Pipeline</div>
+            <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+              <div style={{ flex: 1, minWidth: '60px', textAlign: 'center', padding: '8px', borderRadius: '8px', background: 'var(--sage-light)' }}>
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--sage)' }}>{bookedVendors}</div>
+                <div style={{ fontSize: '11px', color: 'var(--ink3)', fontWeight: 600 }}>Booked</div>
+              </div>
+              <div style={{ flex: 1, minWidth: '60px', textAlign: 'center', padding: '8px', borderRadius: '8px', background: 'var(--amber-light)' }}>
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--amber)' }}>{contactedVendors}</div>
+                <div style={{ fontSize: '11px', color: 'var(--ink3)', fontWeight: 600 }}>In Progress</div>
+              </div>
+              <div style={{ flex: 1, minWidth: '60px', textAlign: 'center', padding: '8px', borderRadius: '8px', background: 'var(--bg-alt)' }}>
+                <div style={{ fontSize: '22px', fontWeight: 700, color: 'var(--ink2)' }}>{savedVendors}</div>
+                <div style={{ fontSize: '11px', color: 'var(--ink3)', fontWeight: 600 }}>Saved</div>
+              </div>
             </div>
           </div>
 
@@ -71,10 +134,14 @@ function GuestTab() {
           </div>
         </div>
 
-        {/* Quick tasks */}
+        {/* Quick tasks with progress */}
         <div className="card">
-          <div className="sec-head" style={{ marginBottom: '8px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
             <span className="sec-title">Upcoming Tasks</span>
+            <span style={{ fontSize: '12px', fontWeight: 600, color: checklistPct >= 80 ? 'var(--sage)' : 'var(--ink3)' }}>{checklistPct}%</span>
+          </div>
+          <div style={{ height: '4px', background: 'var(--border)', borderRadius: '99px', overflow: 'hidden', marginBottom: '14px' }}>
+            <div style={{ height: '100%', width: `${checklistPct}%`, background: checklistColor, borderRadius: '99px', transition: 'width 0.4s ease' }} />
           </div>
           {pendingTasks.length === 0 ? (
             <div style={{ padding: '16px 0', textAlign: 'center', color: 'var(--ink3)', fontSize: '13px' }}>All caught up! 🎉</div>
