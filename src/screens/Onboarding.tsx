@@ -520,13 +520,6 @@ export default function Onboarding() {
           </div>
           <span className="ob3-eyebrow-pill">Almost there ✨</span>
           <h2 className="ob3-card-heading serif">Budget & vibe</h2>
-          {/* Recap of what was entered */}
-          <div className="ob3-recap">
-            {selfName && <span className="ob3-recap-pill"><span>👤</span>{selfName}{partnerName ? ` & ${partnerName}` : ''}</span>}
-            {weddingDate && <span className="ob3-recap-pill"><span>📅</span>{new Date(weddingDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
-            {city && <span className="ob3-recap-pill"><span>📍</span>{city}</span>}
-            {venue && <span className="ob3-recap-pill"><span>🏛️</span>{venue}</span>}
-          </div>
           <p className="ob3-section-label">Budget</p>
           <div className="ob3-budget-section">
             <div className="ob3-budget-slider-wrap" style={{ padding: '4px 0 0' }}>
@@ -698,13 +691,6 @@ export default function Onboarding() {
           </div>
           <span className="ob3-eyebrow-pill">Almost there ✨</span>
           <h2 className="ob3-card-heading serif">Budget & vibe</h2>
-          <div className="ob3-recap">
-            {selfName && <span className="ob3-recap-pill"><span>👤</span>{selfName}</span>}
-            {(clientBrideName || clientGroomName) && (
-              <span className="ob3-recap-pill"><span>💍</span>{[clientBrideName, clientGroomName].filter(Boolean).join(' & ')}</span>
-            )}
-            {city && <span className="ob3-recap-pill"><span>📍</span>{city}</span>}
-          </div>
           <p className="ob3-section-label">Budget</p>
           <div className="ob3-budget-section">
             <div className="ob3-budget-slider-wrap" style={{ padding: '4px 0 0' }}>
@@ -859,14 +845,6 @@ export default function Onboarding() {
         </div>
         <span className="ob3-eyebrow-pill">Almost done ✨</span>
         <h2 className="ob3-card-heading serif">How can you help?</h2>
-        {selfName && (
-          <div className="ob3-recap">
-            <span className="ob3-recap-pill"><span>👤</span>{selfName}{relation ? ` · ${relation}` : ''}</span>
-            {attendingEvents.length > 0 && (
-              <span className="ob3-recap-pill"><span>🎉</span>{attendingEvents.slice(0, 2).join(', ')}{attendingEvents.length > 2 ? ` +${attendingEvents.length - 2}` : ''}</span>
-            )}
-          </div>
-        )}
         <div className="ob3-field" style={{ marginTop: 8 }}>
           <label className="ob3-label">Areas you can help with <span className="ob3-opt">(pick any)</span></label>
           <div className="ob3-chip-row ob3-chip-wrap" style={{ marginTop: 8 }}>
