@@ -539,18 +539,26 @@ export default function Onboarding() {
           </div>
           <p className="ob3-section-label">Vibe</p>
           <p className="ob3-card-sub" style={{ marginBottom: 12 }}>Pick all that match your dream — we'll personalise everything.</p>
-          <div className="ob3-vibe-grid">
-            {VIBES_WITH_EMOJI.map(v => (
-              <button key={v.label} className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
-                onClick={() => toggleVibe(v.label)}>
-                <span className="ob3-vibe-emoji">{v.emoji}</span>
-                <span className="ob3-vibe-label">{v.label}</span>
-                <span className="ob3-vibe-tagline">{v.tagline}</span>
-                <div className="ob3-vibe-pills">
-                  {v.elements.map(el => <span key={el} className="ob3-vibe-pill">{el}</span>)}
-                </div>
-              </button>
-            ))}
+          <div className="ob3-vibe-strip-wrap">
+            <div className="ob3-vibe-strip" role="list">
+              {VIBES_WITH_EMOJI.map((v, i) => (
+                <button
+                  key={v.label}
+                  role="listitem"
+                  className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
+                  onClick={() => toggleVibe(v.label)}
+                  style={{ '--vibe-i': i } as React.CSSProperties}
+                  aria-pressed={vibes.includes(v.label)}
+                >
+                  <span className="ob3-vibe-emoji">{v.emoji}</span>
+                  <span className="ob3-vibe-label">{v.label}</span>
+                  <span className="ob3-vibe-tagline">{v.tagline}</span>
+                  <div className="ob3-vibe-pills">
+                    {v.elements.map(el => <span key={el} className="ob3-vibe-pill">{el}</span>)}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
           <div className="ob3-actions" style={{ marginTop: 28 }}>
             <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
@@ -731,18 +739,26 @@ export default function Onboarding() {
             )}
           </div>
           <p className="ob3-section-label">Vibe</p>
-          <div className="ob3-vibe-grid">
-            {VIBES_WITH_EMOJI.map(v => (
-              <button key={v.label} className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
-                onClick={() => toggleVibe(v.label)}>
-                <span className="ob3-vibe-emoji">{v.emoji}</span>
-                <span className="ob3-vibe-label">{v.label}</span>
-                <span className="ob3-vibe-tagline">{v.tagline}</span>
-                <div className="ob3-vibe-pills">
-                  {v.elements.map(el => <span key={el} className="ob3-vibe-pill">{el}</span>)}
-                </div>
-              </button>
-            ))}
+          <div className="ob3-vibe-strip-wrap">
+            <div className="ob3-vibe-strip" role="list">
+              {VIBES_WITH_EMOJI.map((v, i) => (
+                <button
+                  key={v.label}
+                  role="listitem"
+                  className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
+                  onClick={() => toggleVibe(v.label)}
+                  style={{ '--vibe-i': i } as React.CSSProperties}
+                  aria-pressed={vibes.includes(v.label)}
+                >
+                  <span className="ob3-vibe-emoji">{v.emoji}</span>
+                  <span className="ob3-vibe-label">{v.label}</span>
+                  <span className="ob3-vibe-tagline">{v.tagline}</span>
+                  <div className="ob3-vibe-pills">
+                    {v.elements.map(el => <span key={el} className="ob3-vibe-pill">{el}</span>)}
+                  </div>
+                </button>
+              ))}
+            </div>
           </div>
           <div className="ob3-actions" style={{ marginTop: 28 }}>
             <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
