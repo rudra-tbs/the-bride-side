@@ -201,6 +201,10 @@ function sliderToBudget(v: number): number {
 }
 
 const EVENTS_LIST = ['Wedding', 'Reception', 'Mehndi', 'Sangeet', 'Haldi', 'Engagement', 'Roka']
+const EVENTS_EMOJI: Record<string, string> = {
+  Wedding: '💒', Reception: '🥂', Mehndi: '🌿',
+  Sangeet: '🎵', Haldi: '🌼', Engagement: '💍', Roka: '🙏',
+}
 
 const RELATIONS = ['Sister', 'Brother', 'Mom', 'Dad', 'Best Friend', 'Cousin', 'Colleague', 'Other']
 
@@ -295,7 +299,7 @@ export default function Onboarding() {
     if (isBG && step === 3 && budgetEvents.length === 0 && selectedEvents.length > 0) {
       setBudgetEvents([...selectedEvents])
     }
-    if (isPlanner && step === 4 && budgetEvents.length === 0 && selectedEvents.length > 0) {
+    if (isPlanner && step === 3 && budgetEvents.length === 0 && selectedEvents.length > 0) {
       setBudgetEvents([...selectedEvents])
     }
     setShowBudgetEventsExpander(false)
@@ -413,8 +417,8 @@ export default function Onboarding() {
         <div className="ob3-shell">
           <div className={`ob3-card-wrap ${dir}`}>
             <div className="ob3-progress">
-              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '25%' }} /></div>
-              <StepDots current={1} total={4} />
+              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '33%' }} /></div>
+              <StepDots current={1} total={3} />
             </div>
             <span className="ob3-eyebrow-pill">The couple</span>
             <h2 className="ob3-card-heading serif">
@@ -456,20 +460,24 @@ export default function Onboarding() {
         <div className="ob3-shell">
           <div className={`ob3-card-wrap ob3-card-wide ${dir}`}>
             <div className="ob3-progress">
-              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '50%' }} /></div>
-              <StepDots current={2} total={4} />
+              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '66%' }} /></div>
+              <StepDots current={2} total={3} />
             </div>
-            <span className="ob3-eyebrow-pill">The events</span>
-            <h2 className="ob3-card-heading serif">What events are you planning?</h2>
-            <div className="ob3-field" style={{ marginTop: 8 }}>
+            <span className="ob3-eyebrow-pill">Celebration details</span>
+            <h2 className="ob3-card-heading serif">Your wedding, your way</h2>
+            <p className="ob3-section-label">Events</p>
+            <div className="ob3-field">
               <div className="ob3-chip-row ob3-chip-wrap">
                 {EVENTS_LIST.map(ev => (
                   <button key={ev} className={`ob3-chip${selectedEvents.includes(ev) ? ' on' : ''}`}
-                    onClick={() => toggleSelectedEvent(ev)}>{ev}</button>
+                    onClick={() => toggleSelectedEvent(ev)}>
+                    <span className="ob3-chip-emoji">{EVENTS_EMOJI[ev]}</span>{ev}
+                  </button>
                 ))}
               </div>
             </div>
-            <div className="ob3-two-col" style={{ marginTop: 20 }}>
+            <p className="ob3-section-label">Logistics</p>
+            <div className="ob3-two-col" style={{ marginTop: 0 }}>
               <div className="ob3-field">
                 <label className="ob3-label">Wedding date <span className="ob3-opt">(optional)</span></label>
                 <input type="date" className="ob3-input" value={weddingDate}
@@ -483,90 +491,39 @@ export default function Onboarding() {
                   onKeyDown={enterKey(() => goFwd(3))} />
               </div>
             </div>
-            <div className="ob3-field" style={{ marginTop: 16 }}>
-              <label className="ob3-label">Expected guest count <span className="ob3-opt">(optional)</span></label>
-              <input className="ob3-input" type="number" placeholder="e.g. 300" value={guestCount}
-                onChange={e => setGuestCount(e.target.value)}
-                onKeyDown={enterKey(() => goFwd(3))} />
+            <div className="ob3-two-col" style={{ marginTop: 14 }}>
+              <div className="ob3-field">
+                <label className="ob3-label">Venue <span className="ob3-opt">(optional)</span></label>
+                <input className="ob3-input" placeholder="e.g. Grand Hyatt Mumbai" value={venue}
+                  onChange={e => setVenue(e.target.value)}
+                  onKeyDown={enterKey(() => goFwd(3))} />
+              </div>
+              <div className="ob3-field">
+                <label className="ob3-label">Guest count <span className="ob3-opt">(optional)</span></label>
+                <input className="ob3-input" type="number" placeholder="e.g. 300" value={guestCount}
+                  onChange={e => setGuestCount(e.target.value)}
+                  onKeyDown={enterKey(() => goFwd(3))} />
+              </div>
             </div>
             <div className="ob3-actions">
               <button className="ob3-btn-ghost" onClick={() => goBck(1)}>← Back</button>
-              <button className="ob3-btn-primary" onClick={() => goFwd(3)}>Set the events →</button>
+              <button className="ob3-btn-primary" onClick={() => goFwd(3)}>Next →</button>
             </div>
           </div>
         </div>
       )
     }
 
-    if (step === 3) {
-      return (
-        <div className="ob3-shell">
-          <div className={`ob3-card-wrap ob3-card-wide ${dir}`}>
-            <div className="ob3-progress">
-              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '75%' }} /></div>
-              <StepDots current={3} total={4} />
-            </div>
-            <span className="ob3-eyebrow-pill">The venue & budget</span>
-            <h2 className="ob3-card-heading serif">Where's the celebration?</h2>
-            <div className="ob3-fields">
-              <div className="ob3-field">
-                <label className="ob3-label">Venue name <span className="ob3-opt">(optional)</span></label>
-                <input className="ob3-input" placeholder="e.g. Grand Hyatt Mumbai" value={venue}
-                  onChange={e => setVenue(e.target.value)} autoFocus
-                  onKeyDown={enterKey(() => goFwd(4))} />
-              </div>
-            </div>
-            <div className="ob3-field" style={{ marginTop: 24 }}>
-              <label className="ob3-label">Approximate budget</label>
-              <div className="ob3-budget-slider-wrap">
-                <div className="ob3-budget-amount">{sliderLabel(budgetSlider)}</div>
-                <input type="range" className="ob3-range" min={0} max={37} step={1}
-                  value={budgetSlider} onChange={e => setBudgetSlider(Number(e.target.value))}
-                  style={{ '--slider-pct': `${(budgetSlider / 37) * 100}%` } as React.CSSProperties} />
-                <div className="ob3-range-bounds"><span>₹20L</span><span>₹2Cr+</span></div>
-              </div>
-            </div>
-            <div className="ob3-field" style={{ marginTop: 20 }}>
-              <div className="ob3-events-covered-row">
-                <label className="ob3-label">Which events does this budget cover?<span className="ob3-opt" style={{ display: 'block', fontWeight: 400, marginTop: 1 }}>We'll auto-split your budget across these</span></label>
-                <button className="ob3-add-event-btn"
-                  onClick={() => setShowBudgetEventsExpander(v => !v)}>
-                  {showBudgetEventsExpander ? '✕ Done' : '+ Add event'}
-                </button>
-              </div>
-              <div className="ob3-chip-row ob3-chip-wrap ob3-events-tags" style={{ marginTop: 8 }}>
-                {budgetEvents.length > 0
-                  ? budgetEvents.map(ev => <span key={ev} className="ob3-chip on">{ev}</span>)
-                  : <span className="ob3-events-empty">No events — tap "+ Add event" to select</span>}
-              </div>
-              {showBudgetEventsExpander && (
-                <div className="ob3-chip-row ob3-chip-wrap ob3-events-expander" style={{ marginTop: 10 }}>
-                  {EVENTS_LIST.map(ev => (
-                    <button key={ev} className={`ob3-chip${budgetEvents.includes(ev) ? ' on' : ''}`}
-                      onClick={() => toggleBudgetEvent(ev)}>{ev}</button>
-                  ))}
-                </div>
-              )}
-            </div>
-            <div className="ob3-actions">
-              <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
-              <button className="ob3-btn-primary" onClick={() => goFwd(4)}>Lock the budget →</button>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    // Bride/Groom step 4: Vibe
+    // Bride/Groom step 3 (final): Budget + Vibe
     return (
       <div className="ob3-shell">
         <div className={`ob3-card-wrap ob3-card-wide ${dir}`}>
           <div className="ob3-progress">
             <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '100%' }} /></div>
-            <StepDots current={4} total={4} />
+            <StepDots current={3} total={3} />
           </div>
           <span className="ob3-eyebrow-pill">Almost there ✨</span>
-          <h2 className="ob3-card-heading serif">What's the wedding vibe?</h2>
+          <h2 className="ob3-card-heading serif">Budget & vibe</h2>
           {/* Recap of what was entered */}
           <div className="ob3-recap">
             {selfName && <span className="ob3-recap-pill"><span>👤</span>{selfName}{partnerName ? ` & ${partnerName}` : ''}</span>}
@@ -574,8 +531,19 @@ export default function Onboarding() {
             {city && <span className="ob3-recap-pill"><span>📍</span>{city}</span>}
             {venue && <span className="ob3-recap-pill"><span>🏛️</span>{venue}</span>}
           </div>
-          <p className="ob3-card-sub">Pick all that match your dream wedding — we'll personalise everything.</p>
-          <div className="ob3-vibe-grid" style={{ marginTop: 16 }}>
+          <p className="ob3-section-label">Budget</p>
+          <div className="ob3-budget-section">
+            <div className="ob3-budget-slider-wrap" style={{ padding: '4px 0 0' }}>
+              <div className="ob3-budget-amount">{sliderLabel(budgetSlider)}</div>
+              <input type="range" className="ob3-range" min={0} max={37} step={1}
+                value={budgetSlider} onChange={e => setBudgetSlider(Number(e.target.value))}
+                style={{ '--slider-pct': `${(budgetSlider / 37) * 100}%` } as React.CSSProperties} />
+              <div className="ob3-range-bounds"><span>₹20L</span><span>₹2Cr+</span></div>
+            </div>
+          </div>
+          <p className="ob3-section-label">Vibe</p>
+          <p className="ob3-card-sub" style={{ marginBottom: 12 }}>Pick all that match your dream — we'll personalise everything.</p>
+          <div className="ob3-vibe-grid">
             {VIBES_WITH_EMOJI.map(v => (
               <button key={v.label} className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
                 onClick={() => toggleVibe(v.label)}>
@@ -585,8 +553,8 @@ export default function Onboarding() {
               </button>
             ))}
           </div>
-          <div className="ob3-actions" style={{ marginTop: 32 }}>
-            <button className="ob3-btn-ghost" onClick={() => goBck(3)}>← Back</button>
+          <div className="ob3-actions" style={{ marginTop: 28 }}>
+            <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
             <button className="ob3-btn-primary ob3-btn-finish" onClick={finish}>Start planning ✨</button>
           </div>
           <p className="ob3-skip" onClick={finish}>Skip and go to dashboard →</p>
@@ -603,23 +571,25 @@ export default function Onboarding() {
         <div className="ob3-shell">
           <div className={`ob3-card-wrap ${dir}`}>
             <div className="ob3-progress">
-              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '25%' }} /></div>
-              <StepDots current={1} total={4} />
+              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '33%' }} /></div>
+              <StepDots current={1} total={3} />
             </div>
             <span className="ob3-eyebrow-pill">Your details</span>
             <h2 className="ob3-card-heading serif">Tell us about yourself</h2>
             <div className="ob3-fields">
-              <div className="ob3-field">
-                <label className="ob3-label">Your name <span className="ob3-req">*</span></label>
-                <input className="ob3-input" placeholder="e.g. Kavya Sharma" value={selfName}
-                  onChange={e => setSelfName(e.target.value)} autoFocus
-                  onKeyDown={enterKey(() => goFwd(2), canContinue)} />
-              </div>
-              <div className="ob3-field">
-                <label className="ob3-label">Agency / Studio name <span className="ob3-opt">(optional)</span></label>
-                <input className="ob3-input" placeholder="e.g. Dream Weddings Co." value={agencyName}
-                  onChange={e => setAgencyName(e.target.value)}
-                  onKeyDown={enterKey(() => goFwd(2), canContinue)} />
+              <div className="ob3-two-col">
+                <div className="ob3-field">
+                  <label className="ob3-label">Your name <span className="ob3-req">*</span></label>
+                  <input className="ob3-input" placeholder="e.g. Kavya Sharma" value={selfName}
+                    onChange={e => setSelfName(e.target.value)} autoFocus
+                    onKeyDown={enterKey(() => goFwd(2), canContinue)} />
+                </div>
+                <div className="ob3-field">
+                  <label className="ob3-label">Agency / Studio <span className="ob3-opt">(optional)</span></label>
+                  <input className="ob3-input" placeholder="e.g. Dream Weddings Co." value={agencyName}
+                    onChange={e => setAgencyName(e.target.value)}
+                    onKeyDown={enterKey(() => goFwd(2), canContinue)} />
+                </div>
               </div>
               <div className="ob3-field">
                 <label className="ob3-label">Work email <span className="ob3-opt">(optional)</span></label>
@@ -627,11 +597,26 @@ export default function Onboarding() {
                   value={workEmail} onChange={e => setWorkEmail(e.target.value)}
                   onKeyDown={enterKey(() => goFwd(2), canContinue)} />
               </div>
+              <p className="ob3-section-label" style={{ marginTop: 20 }}>The couple</p>
+              <div className="ob3-two-col" style={{ marginTop: 0 }}>
+                <div className="ob3-field">
+                  <label className="ob3-label">Bride's name <span className="ob3-opt">(optional)</span></label>
+                  <input className="ob3-input" placeholder="e.g. Priya" value={clientBrideName}
+                    onChange={e => setClientBrideName(e.target.value)}
+                    onKeyDown={enterKey(() => goFwd(2), canContinue)} />
+                </div>
+                <div className="ob3-field">
+                  <label className="ob3-label">Groom's name <span className="ob3-opt">(optional)</span></label>
+                  <input className="ob3-input" placeholder="e.g. Arjun" value={clientGroomName}
+                    onChange={e => setClientGroomName(e.target.value)}
+                    onKeyDown={enterKey(() => goFwd(2), canContinue)} />
+                </div>
+              </div>
             </div>
             <div className="ob3-actions">
               <button className="ob3-btn-ghost" onClick={() => goBck(0)}>← Back</button>
               <button className="ob3-btn-primary" disabled={!canContinue} onClick={() => goFwd(2)}>
-                Save our details →
+                Next →
               </button>
             </div>
           </div>
@@ -642,56 +627,26 @@ export default function Onboarding() {
     if (step === 2) {
       return (
         <div className="ob3-shell">
-          <div className={`ob3-card-wrap ${dir}`}>
-            <div className="ob3-progress">
-              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '50%' }} /></div>
-              <StepDots current={2} total={4} />
-            </div>
-            <span className="ob3-eyebrow-pill">The couple</span>
-            <h2 className="ob3-card-heading serif">Who are you planning for?</h2>
-            <div className="ob3-fields">
-              <div className="ob3-field">
-                <label className="ob3-label">Bride's name <span className="ob3-opt">(optional)</span></label>
-                <input className="ob3-input" placeholder="e.g. Priya" value={clientBrideName}
-                  onChange={e => setClientBrideName(e.target.value)} autoFocus
-                  onKeyDown={enterKey(() => goFwd(3))} />
-              </div>
-              <div className="ob3-field">
-                <label className="ob3-label">Groom's name <span className="ob3-opt">(optional)</span></label>
-                <input className="ob3-input" placeholder="e.g. Arjun" value={clientGroomName}
-                  onChange={e => setClientGroomName(e.target.value)}
-                  onKeyDown={enterKey(() => goFwd(3))} />
-              </div>
-            </div>
-            <div className="ob3-actions">
-              <button className="ob3-btn-ghost" onClick={() => goBck(1)}>← Back</button>
-              <button className="ob3-btn-primary" onClick={() => goFwd(3)}>Set the events →</button>
-            </div>
-          </div>
-        </div>
-      )
-    }
-
-    if (step === 3) {
-      return (
-        <div className="ob3-shell">
           <div className={`ob3-card-wrap ob3-card-wide ${dir}`}>
             <div className="ob3-progress">
-              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '75%' }} /></div>
-              <StepDots current={3} total={4} />
+              <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '66%' }} /></div>
+              <StepDots current={2} total={3} />
             </div>
             <span className="ob3-eyebrow-pill">The celebration</span>
             <h2 className="ob3-card-heading serif">Events & logistics</h2>
-            <div className="ob3-field" style={{ marginTop: 8 }}>
-              <label className="ob3-label">Events to plan</label>
-              <div className="ob3-chip-row ob3-chip-wrap" style={{ marginTop: 8 }}>
+            <p className="ob3-section-label">Events to plan</p>
+            <div className="ob3-field">
+              <div className="ob3-chip-row ob3-chip-wrap">
                 {EVENTS_LIST.map(ev => (
                   <button key={ev} className={`ob3-chip${selectedEvents.includes(ev) ? ' on' : ''}`}
-                    onClick={() => toggleSelectedEvent(ev)}>{ev}</button>
+                    onClick={() => toggleSelectedEvent(ev)}>
+                    <span className="ob3-chip-emoji">{EVENTS_EMOJI[ev]}</span>{ev}
+                  </button>
                 ))}
               </div>
             </div>
-            <div className="ob3-two-col" style={{ marginTop: 20 }}>
+            <p className="ob3-section-label">Logistics</p>
+            <div className="ob3-two-col" style={{ marginTop: 0 }}>
               <div className="ob3-field">
                 <label className="ob3-label">Wedding date <span className="ob3-opt">(optional)</span></label>
                 <input type="date" className="ob3-input" value={weddingDate}
@@ -701,10 +656,10 @@ export default function Onboarding() {
                 <label className="ob3-label">City</label>
                 <input className="ob3-input" placeholder="e.g. Mumbai" value={city}
                   onChange={e => setCity(e.target.value)}
-                  onKeyDown={enterKey(() => goFwd(4))} />
+                  onKeyDown={enterKey(() => goFwd(3))} />
               </div>
             </div>
-            <div className="ob3-two-col" style={{ marginTop: 16 }}>
+            <div className="ob3-two-col" style={{ marginTop: 14 }}>
               <div className="ob3-field">
                 <label className="ob3-label">Venue <span className="ob3-opt">(optional)</span></label>
                 <input className="ob3-input" placeholder="e.g. The Leela" value={venue}
@@ -714,25 +669,25 @@ export default function Onboarding() {
                 <label className="ob3-label">Guest count <span className="ob3-opt">(optional)</span></label>
                 <input className="ob3-input" type="number" placeholder="e.g. 300" value={guestCount}
                   onChange={e => setGuestCount(e.target.value)}
-                  onKeyDown={enterKey(() => goFwd(4))} />
+                  onKeyDown={enterKey(() => goFwd(3))} />
               </div>
             </div>
             <div className="ob3-actions">
-              <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
-              <button className="ob3-btn-primary" onClick={() => goFwd(4)}>Lock the budget →</button>
+              <button className="ob3-btn-ghost" onClick={() => goBck(1)}>← Back</button>
+              <button className="ob3-btn-primary" onClick={() => goFwd(3)}>Next →</button>
             </div>
           </div>
         </div>
       )
     }
 
-    // Planner step 4: Budget + Vibe
+    // Planner step 3 (final): Budget + Vibe
     return (
       <div className="ob3-shell">
         <div className={`ob3-card-wrap ob3-card-wide ${dir}`}>
           <div className="ob3-progress">
             <div className="ob3-prog-bar"><div className="ob3-prog-fill" style={{ width: '100%' }} /></div>
-            <StepDots current={4} total={4} />
+            <StepDots current={3} total={3} />
           </div>
           <span className="ob3-eyebrow-pill">Almost there ✨</span>
           <h2 className="ob3-card-heading serif">Budget & vibe</h2>
@@ -743,9 +698,9 @@ export default function Onboarding() {
             )}
             {city && <span className="ob3-recap-pill"><span>📍</span>{city}</span>}
           </div>
-          <div className="ob3-field" style={{ marginTop: 8 }}>
-            <label className="ob3-label">Total budget</label>
-            <div className="ob3-budget-slider-wrap">
+          <p className="ob3-section-label">Budget</p>
+          <div className="ob3-budget-section">
+            <div className="ob3-budget-slider-wrap" style={{ padding: '4px 0 0' }}>
               <div className="ob3-budget-amount">{sliderLabel(budgetSlider)}</div>
               <input type="range" className="ob3-range" min={0} max={37} step={1}
                 value={budgetSlider} onChange={e => setBudgetSlider(Number(e.target.value))} />
@@ -762,33 +717,33 @@ export default function Onboarding() {
             </div>
             <div className="ob3-chip-row ob3-chip-wrap ob3-events-tags" style={{ marginTop: 8 }}>
               {budgetEvents.length > 0
-                ? budgetEvents.map(ev => <span key={ev} className="ob3-chip on">{ev}</span>)
+                ? budgetEvents.map(ev => <span key={ev} className="ob3-chip on"><span className="ob3-chip-emoji">{EVENTS_EMOJI[ev]}</span>{ev}</span>)
                 : <span className="ob3-events-empty">No events — tap "+ Add event" to select</span>}
             </div>
             {showBudgetEventsExpander && (
               <div className="ob3-chip-row ob3-chip-wrap ob3-events-expander" style={{ marginTop: 10 }}>
                 {EVENTS_LIST.map(ev => (
                   <button key={ev} className={`ob3-chip${budgetEvents.includes(ev) ? ' on' : ''}`}
-                    onClick={() => toggleBudgetEvent(ev)}>{ev}</button>
+                    onClick={() => toggleBudgetEvent(ev)}>
+                    <span className="ob3-chip-emoji">{EVENTS_EMOJI[ev]}</span>{ev}
+                  </button>
                 ))}
               </div>
             )}
           </div>
-          <div className="ob3-field" style={{ marginTop: 24 }}>
-            <label className="ob3-label">Wedding vibe <span className="ob3-opt">(pick any)</span></label>
-            <div className="ob3-vibe-grid" style={{ marginTop: 8 }}>
-              {VIBES_WITH_EMOJI.map(v => (
-                <button key={v.label} className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
-                  onClick={() => toggleVibe(v.label)}>
-                  <span className="ob3-vibe-emoji">{v.emoji}</span>
-                  <span className="ob3-vibe-label">{v.label}</span>
-                  <span className="ob3-vibe-desc">{v.desc}</span>
-                </button>
-              ))}
-            </div>
+          <p className="ob3-section-label">Vibe</p>
+          <div className="ob3-vibe-grid">
+            {VIBES_WITH_EMOJI.map(v => (
+              <button key={v.label} className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
+                onClick={() => toggleVibe(v.label)}>
+                <span className="ob3-vibe-emoji">{v.emoji}</span>
+                <span className="ob3-vibe-label">{v.label}</span>
+                <span className="ob3-vibe-desc">{v.desc}</span>
+              </button>
+            ))}
           </div>
-          <div className="ob3-actions" style={{ marginTop: 32 }}>
-            <button className="ob3-btn-ghost" onClick={() => goBck(3)}>← Back</button>
+          <div className="ob3-actions" style={{ marginTop: 28 }}>
+            <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
             <button className="ob3-btn-primary ob3-btn-finish" onClick={finish}>Start planning ✨</button>
           </div>
           <p className="ob3-skip" onClick={finish}>Skip and go to dashboard →</p>
@@ -847,12 +802,14 @@ export default function Onboarding() {
           </div>
           <span className="ob3-eyebrow-pill">Your involvement</span>
           <h2 className="ob3-card-heading serif">Events & travel</h2>
-          <div className="ob3-field" style={{ marginTop: 8 }}>
-            <label className="ob3-label">Which events are you attending?</label>
-            <div className="ob3-chip-row ob3-chip-wrap" style={{ marginTop: 8 }}>
+          <p className="ob3-section-label">Events you're attending</p>
+          <div className="ob3-field">
+            <div className="ob3-chip-row ob3-chip-wrap">
               {EVENTS_LIST.map(ev => (
                 <button key={ev} className={`ob3-chip${attendingEvents.includes(ev) ? ' on' : ''}`}
-                  onClick={() => toggleAttendingEvent(ev)}>{ev}</button>
+                  onClick={() => toggleAttendingEvent(ev)}>
+                  <span className="ob3-chip-emoji">{EVENTS_EMOJI[ev]}</span>{ev}
+                </button>
               ))}
             </div>
           </div>
