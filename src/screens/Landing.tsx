@@ -492,7 +492,7 @@ export default function Landing() {
       <section className="landing-section landing-section-alt">
         <div className="container">
           <div className="section-header-center">
-            <div className="section-eyebrow">Features</div>
+            <div className="section-eyebrow">The Toolkit</div>
             <h2 className="serif section-title">
               Everything you need, <em>in one place</em>
             </h2>
