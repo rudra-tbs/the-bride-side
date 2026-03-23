@@ -175,13 +175,13 @@ const ROLES: { value: Role; label: string; icon: React.ReactNode; sub: string }[
   { value: 'other',   label: 'Family',  icon: <FamilyIcon />,  sub: 'Helping a loved one' },
 ]
 
-const VIBES_WITH_EMOJI = [
-  { label: 'Romantic Luxe',     emoji: '💕', tagline: 'Soft, dreamy & elegant',     elements: ['Blush tones', 'Candles & fairy lights', 'Lush florals'] },
-  { label: 'Modern Minimal',    emoji: '🖤', tagline: 'Clean, bold & stylish',       elements: ['Neutral palettes', 'Sharp layouts', 'Statement decor'] },
-  { label: 'Floral Garden',     emoji: '🌸', tagline: 'Bloom-filled & vibrant',      elements: ['Floral ceilings', 'Pastel setups', 'Outdoor vibes'] },
-  { label: 'Royal Traditional', emoji: '🪔', tagline: 'Rich, cultural & timeless',   elements: ['Reds & golds', 'Grand mandaps', 'Heritage rituals'] },
-  { label: 'Boho Intimate',     emoji: '🌿', tagline: 'Warm, earthy & personal',     elements: ['Pampas grass', 'Muted tones', 'Cozy setups'] },
-  { label: 'Grand Statement',   emoji: '🏰', tagline: 'Big, bold & unforgettable',   elements: ['Dramatic entries', 'Large-scale decor', 'Wow moments'] },
+const VIBE_SETS = [
+  { label: 'Romantic Luxe',     tagline: 'Soft, dreamy & elegant',     elements: ['Blush tones', 'Candles & fairy lights', 'Lush florals'],      image: 'https://images.unsplash.com/photo-1602874801006-bf8c1b70e0b0?w=400&h=300&fit=crop&q=80' },
+  { label: 'Modern Minimal',    tagline: 'Clean, bold & stylish',       elements: ['Neutral palettes', 'Sharp layouts', 'Statement decor'],        image: 'https://images.unsplash.com/photo-1625755568824-c27ef71d62a5?w=400&h=300&fit=crop&q=80' },
+  { label: 'Floral Garden',     tagline: 'Bloom-filled & vibrant',      elements: ['Floral ceilings', 'Pastel setups', 'Outdoor vibes'],           image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400&h=300&fit=crop&q=80' },
+  { label: 'Royal Traditional', tagline: 'Rich, cultural & timeless',   elements: ['Reds & golds', 'Grand mandaps', 'Heritage rituals'],           image: 'https://images.unsplash.com/photo-1589463349208-95817c91f971?w=400&h=300&fit=crop&q=80' },
+  { label: 'Boho Intimate',     tagline: 'Warm, earthy & personal',     elements: ['Pampas grass', 'Muted tones', 'Cozy setups'],                  image: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=400&h=300&fit=crop&q=80' },
+  { label: 'Grand Statement',   tagline: 'Big, bold & unforgettable',   elements: ['Dramatic entries', 'Large-scale decor', 'Wow moments'],        image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&h=300&fit=crop&q=80' },
 ]
 
 function sliderLabel(v: number): string {
@@ -541,20 +541,20 @@ export default function Onboarding() {
           <p className="ob3-card-sub" style={{ marginBottom: 12 }}>Pick all that match your dream — we'll personalise everything.</p>
           <div className="ob3-vibe-strip-wrap">
             <div className="ob3-vibe-strip" role="list">
-              {VIBES_WITH_EMOJI.map((v, i) => (
+              {VIBE_SETS.map((v, i) => (
                 <button
                   key={v.label}
                   role="listitem"
                   className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
                   onClick={() => toggleVibe(v.label)}
-                  style={{ '--vibe-i': i } as React.CSSProperties}
+                  style={{ '--vibe-i': i, '--vibe-img': `url("${v.image}")` } as React.CSSProperties}
                   aria-pressed={vibes.includes(v.label)}
                 >
-                  <span className="ob3-vibe-emoji">{v.emoji}</span>
-                  <span className="ob3-vibe-label">{v.label}</span>
-                  <span className="ob3-vibe-tagline">{v.tagline}</span>
-                  <div className="ob3-vibe-pills">
-                    {v.elements.map(el => <span key={el} className="ob3-vibe-pill">{el}</span>)}
+                  <div className="ob3-vibe-img-overlay" />
+                  {vibes.includes(v.label) && <div className="ob3-vibe-selected-badge">✓</div>}
+                  <div className="ob3-vibe-card-body">
+                    <span className="ob3-vibe-label">{v.label}</span>
+                    <span className="ob3-vibe-tagline">{v.tagline}</span>
                   </div>
                 </button>
               ))}
@@ -741,20 +741,20 @@ export default function Onboarding() {
           <p className="ob3-section-label">Vibe</p>
           <div className="ob3-vibe-strip-wrap">
             <div className="ob3-vibe-strip" role="list">
-              {VIBES_WITH_EMOJI.map((v, i) => (
+              {VIBE_SETS.map((v, i) => (
                 <button
                   key={v.label}
                   role="listitem"
                   className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
                   onClick={() => toggleVibe(v.label)}
-                  style={{ '--vibe-i': i } as React.CSSProperties}
+                  style={{ '--vibe-i': i, '--vibe-img': `url("${v.image}")` } as React.CSSProperties}
                   aria-pressed={vibes.includes(v.label)}
                 >
-                  <span className="ob3-vibe-emoji">{v.emoji}</span>
-                  <span className="ob3-vibe-label">{v.label}</span>
-                  <span className="ob3-vibe-tagline">{v.tagline}</span>
-                  <div className="ob3-vibe-pills">
-                    {v.elements.map(el => <span key={el} className="ob3-vibe-pill">{el}</span>)}
+                  <div className="ob3-vibe-img-overlay" />
+                  {vibes.includes(v.label) && <div className="ob3-vibe-selected-badge">✓</div>}
+                  <div className="ob3-vibe-card-body">
+                    <span className="ob3-vibe-label">{v.label}</span>
+                    <span className="ob3-vibe-tagline">{v.tagline}</span>
                   </div>
                 </button>
               ))}
