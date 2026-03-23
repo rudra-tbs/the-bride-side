@@ -221,7 +221,7 @@ export default function Landing() {
           {/* Text layer — fades & slides up as you scroll */}
           <div className="hero-text-layer" ref={textLayerRef}>
             <div className="container hero-center-container">
-              <div className="hero-eyebrow">Made for Indian weddings</div>
+              <div className="hero-eyebrow">Curated with <span className="hero-eyebrow-heart">❤️</span> in India</div>
               <h1 className="hero-h1 hero-h1-center">
                 Your dream wedding,<br />
                 <em>beautifully organised.</em>
