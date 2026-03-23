@@ -167,32 +167,89 @@ function GuestTab() {
   )
 }
 
-// ── Itinerary Edit Modal ──────────────────────────────────────────────
-function ItineraryEditModal({ item, onClose }: { item: ItineraryItem; onClose: () => void }) {
-  const { updateItineraryItem } = useAppStore()
-  const [time, setTime] = useState(item.time)
-  const [name, setName] = useState(item.name)
-  const [note, setNote] = useState(item.note)
-  const [durationMin, setDurationMin] = useState(String(item.duration_min || ''))
-  const [isMilestone, setIsMilestone] = useState(item.is_milestone)
-  const [isDone, setIsDone] = useState(item.is_done)
+// ── Itinerary Item Modal (Add & Edit) ────────────────────────────────
+function ItineraryItemModal({
+  item,
+  defaultEventId,
+  events,
+  onClose,
+}: {
+  item: ItineraryItem | null
+  defaultEventId: string
+  events: WeddingEvent[]
+  onClose: () => void
+}) {
+  const { addItineraryItem, updateItineraryItem, deleteItineraryItem } = useAppStore()
+  const isNew = item === null
+
+  const [eventId, setEventId] = useState(item?.event_id ?? defaultEventId)
+  const [time, setTime] = useState(item?.time ?? '')
+  const [name, setName] = useState(item?.name ?? '')
+  const [note, setNote] = useState(item?.note ?? '')
+  const [durationMin, setDurationMin] = useState(String(item?.duration_min || ''))
+  const [isMilestone, setIsMilestone] = useState(item?.is_milestone ?? false)
+  const [isDone, setIsDone] = useState(item?.is_done ?? false)
 
   function handleSave() {
-    updateItineraryItem(item.id, {
-      time: time.trim(),
-      name: name.trim(),
-      note: note.trim(),
-      duration_min: Number(durationMin) || 0,
-      is_milestone: isMilestone,
-      is_done: isDone,
-    })
+    if (isNew) {
+      addItineraryItem({
+        id: uuid(),
+        event_id: eventId,
+        time: time.trim() || '00:00',
+        name: name.trim(),
+        note: note.trim(),
+        duration_min: Number(durationMin) || 0,
+        is_milestone: isMilestone,
+        is_done: isDone,
+        tags: [],
+        sort_order: 999,
+      })
+      toast.success('Itinerary item added!')
+    } else {
+      updateItineraryItem(item!.id, {
+        time: time.trim(),
+        name: name.trim(),
+        note: note.trim(),
+        duration_min: Number(durationMin) || 0,
+        is_milestone: isMilestone,
+        is_done: isDone,
+      })
+    }
     onClose()
+  }
+
+  function handleDelete() {
+    if (!item) return
+    const snapshot = { ...item }
+    deleteItineraryItem(item.id)
+    onClose()
+    toast((t) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span>Removed "{snapshot.name}"</span>
+        <button
+          onClick={() => { addItineraryItem(snapshot); toast.dismiss(t.id) }}
+          style={{ fontSize: '11px', fontWeight: 600, color: 'var(--rose-dark)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          Undo
+        </button>
+      </div>
+    ), { duration: 5000 })
   }
 
   return (
     <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
       <div className="modal-box">
-        <div className="modal-title">Edit Itinerary Item</div>
+        <div className="modal-title">{isNew ? 'Add Itinerary Item' : 'Edit Itinerary Item'}</div>
+        {isNew && (
+          <div className="modal-field">
+            <label className="modal-label">Event</label>
+            <select className="select" value={eventId} onChange={e => setEventId(e.target.value)}>
+              {events.map(ev => (
+                <option key={ev.id} value={ev.id}>{ev.name} · {formatDate(ev.date, 'd MMM')}</option>
+              ))}
+            </select>
+          </div>
+        )}
         <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
           <div className="modal-field">
             <label className="modal-label">Time</label>
@@ -204,8 +261,8 @@ function ItineraryEditModal({ item, onClose }: { item: ItineraryItem; onClose: (
           </div>
         </div>
         <div className="modal-field">
-          <label className="modal-label">Name</label>
-          <input className="input" value={name} onChange={e => setName(e.target.value)} />
+          <label className="modal-label">Name *</label>
+          <input className="input" placeholder="e.g. Baraat procession" value={name} onChange={e => setName(e.target.value)} />
         </div>
         <div className="modal-field">
           <label className="modal-label">Note</label>
@@ -222,8 +279,15 @@ function ItineraryEditModal({ item, onClose }: { item: ItineraryItem; onClose: (
           </label>
         </div>
         <div className="modal-footer">
+          {!isNew && (
+            <button className="btn btn-ghost btn-sm" style={{ color: 'var(--rose-dark)', marginRight: 'auto' }} onClick={handleDelete}>
+              Delete
+            </button>
+          )}
           <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
-          <button className="btn btn-rose" onClick={handleSave} disabled={!name.trim()}>Save</button>
+          <button className="btn btn-rose" onClick={handleSave} disabled={!name.trim()}>
+            {isNew ? 'Add Item' : 'Save'}
+          </button>
         </div>
       </div>
     </div>
@@ -234,7 +298,8 @@ function ItineraryEditModal({ item, onClose }: { item: ItineraryItem; onClose: (
 function ItineraryTab() {
   const { events, itinerary, updateItineraryItem } = useAppStore()
   const [activeEvent, setActiveEvent] = useState(events[2]?.id ?? events[0]?.id ?? '')
-  const [editingItem, setEditingItem] = useState<ItineraryItem | null>(null)
+  const [editingItem, setEditingItem] = useState<ItineraryItem | null | undefined>(undefined)
+  // undefined = modal closed, null = adding new, ItineraryItem = editing
 
   const items: ItineraryItem[] = itinerary
     .filter(i => i.event_id === activeEvent)
@@ -244,8 +309,8 @@ function ItineraryTab() {
 
   return (
     <div className="page-body">
-      {/* Event selector */}
-      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap' }}>
+      {/* Event selector + Add button */}
+      <div style={{ display: 'flex', gap: '8px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
         {events.map(ev => (
           <button
             key={ev.id}
@@ -255,6 +320,13 @@ function ItineraryTab() {
             {ev.name} · {formatDate(ev.date, 'd MMM')}
           </button>
         ))}
+        <button
+          className="btn btn-rose btn-sm"
+          style={{ marginLeft: 'auto' }}
+          onClick={() => setEditingItem(null)}
+        >
+          + Add Item
+        </button>
       </div>
 
       {activeEv && (
@@ -275,7 +347,10 @@ function ItineraryTab() {
 
       <div className="card" style={{ padding: 0, overflow: 'hidden' }}>
         {items.length === 0 ? (
-          <div style={{ padding: '32px', textAlign: 'center', color: 'var(--ink3)' }}>No itinerary items yet for this event.</div>
+          <div style={{ padding: '40px', textAlign: 'center' }}>
+            <div style={{ fontSize: '13px', color: 'var(--ink3)', marginBottom: '12px' }}>No itinerary items yet for this event.</div>
+            <button className="btn btn-rose btn-sm" onClick={() => setEditingItem(null)}>+ Add first item</button>
+          </div>
         ) : (
           items.map((item, idx) => (
             <div
@@ -315,9 +390,78 @@ function ItineraryTab() {
         )}
       </div>
 
-      {editingItem && (
-        <ItineraryEditModal item={editingItem} onClose={() => setEditingItem(null)} />
+      {editingItem !== undefined && (
+        <ItineraryItemModal
+          item={editingItem}
+          defaultEventId={activeEvent}
+          events={events}
+          onClose={() => setEditingItem(undefined)}
+        />
       )}
+    </div>
+  )
+}
+
+// ── Event Edit Modal ──────────────────────────────────────────────────
+function EventEditModal({ event, onClose }: { event: WeddingEvent; onClose: () => void }) {
+  const { updateEvent } = useAppStore()
+  const [name, setName] = useState(event.name)
+  const [date, setDate] = useState(event.date)
+  const [venue, setVenue] = useState(event.venue)
+  const [startTime, setStartTime] = useState(event.start_time)
+  const [endTime, setEndTime] = useState(event.end_time)
+  const [notes, setNotes] = useState(event.notes ?? '')
+
+  function handleSave() {
+    updateEvent(event.id, {
+      name: name.trim(),
+      date,
+      venue: venue.trim(),
+      start_time: startTime,
+      end_time: endTime,
+      notes: notes.trim(),
+    })
+    onClose()
+    toast.success('Event updated')
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="modal-box">
+        <div className="modal-title">Edit Event</div>
+        <div className="modal-field">
+          <label className="modal-label">Event Name</label>
+          <input className="input" value={name} onChange={e => setName(e.target.value)} />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div className="modal-field">
+            <label className="modal-label">Date</label>
+            <input className="input" type="date" value={date} onChange={e => setDate(e.target.value)} />
+          </div>
+          <div className="modal-field">
+            <label className="modal-label">Venue</label>
+            <input className="input" value={venue} onChange={e => setVenue(e.target.value)} />
+          </div>
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div className="modal-field">
+            <label className="modal-label">Start Time</label>
+            <input className="input" type="time" value={startTime} onChange={e => setStartTime(e.target.value)} />
+          </div>
+          <div className="modal-field">
+            <label className="modal-label">End Time</label>
+            <input className="input" type="time" value={endTime} onChange={e => setEndTime(e.target.value)} />
+          </div>
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">Notes</label>
+          <textarea className="input" rows={3} value={notes} onChange={e => setNotes(e.target.value)} />
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-rose" onClick={handleSave} disabled={!name.trim()}>Save</button>
+        </div>
+      </div>
     </div>
   )
 }
@@ -325,6 +469,8 @@ function ItineraryTab() {
 // ── Details Tab ──────────────────────────────────────────────────────
 function DetailsTab() {
   const { events } = useAppStore()
+  const [editingEvent, setEditingEvent] = useState<WeddingEvent | null>(null)
+
   const typeColors: Record<string, string> = {
     mehndi: 'var(--amber-light)', sangeet: 'var(--rose-light)',
     wedding: 'var(--mauve-light)', reception: 'var(--sage-light)', other: 'var(--border)',
@@ -336,15 +482,21 @@ function DetailsTab() {
     <div className="page-body">
       <div className="g2">
         {events.map(ev => (
-          <div className="card" key={ev.id} style={{ borderTop: `3px solid`, borderColor: 'var(--rose-mid)' }}>
+          <div
+            className="card"
+            key={ev.id}
+            style={{ borderTop: `3px solid`, borderColor: 'var(--rose-mid)', cursor: 'pointer' }}
+            onClick={() => setEditingEvent(ev)}
+          >
             <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '14px' }}>
               <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: typeColors[ev.type] ?? 'var(--border)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '22px', flexShrink: 0 }}>
                 {typeEmoji[ev.type] ?? '📅'}
               </div>
-              <div>
+              <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: 600, fontSize: '16px' }}>{ev.name}</div>
                 <div style={{ fontSize: '12px', color: 'var(--ink3)' }}>{formatDate(ev.date, 'EEEE, d MMMM yyyy')}</div>
               </div>
+              <div style={{ fontSize: '11px', color: 'var(--ink4)', fontWeight: 500 }}>Edit ›</div>
             </div>
             <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               <div style={{ display: 'flex', gap: '8px', alignItems: 'flex-start' }}>
@@ -365,6 +517,83 @@ function DetailsTab() {
           </div>
         ))}
       </div>
+      {editingEvent && (
+        <EventEditModal event={editingEvent} onClose={() => setEditingEvent(null)} />
+      )}
+    </div>
+  )
+}
+
+// ── Note Edit Modal ────────────────────────────────────────────────────
+function NoteModal({
+  note,
+  weddingId,
+  onClose,
+}: {
+  note: Note | null
+  weddingId: string
+  onClose: () => void
+}) {
+  const { addNote, updateNote } = useAppStore()
+  const isNew = note === null
+
+  const [title, setTitle] = useState(note?.title ?? '')
+  const [body, setBody] = useState(note?.body ?? '')
+  const [noteType, setNoteType] = useState<'general' | 'mom' | 'vendor'>(note?.type ?? 'general')
+
+  function handleSave() {
+    if (!title.trim()) return
+    if (isNew) {
+      addNote({
+        id: uuid(),
+        wedding_id: weddingId,
+        title: title.trim(),
+        body: body.trim(),
+        type: noteType,
+        vendor_id: null,
+        created_at: new Date().toISOString(),
+        updated_at: new Date().toISOString(),
+      })
+      toast.success('Note added')
+    } else {
+      updateNote(note!.id, {
+        title: title.trim(),
+        body: body.trim(),
+        type: noteType,
+        updated_at: new Date().toISOString(),
+      })
+      toast.success('Note updated')
+    }
+    onClose()
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="modal-box">
+        <div className="modal-title">{isNew ? 'Add Note' : 'Edit Note'}</div>
+        <div className="modal-field">
+          <label className="modal-label">Type</label>
+          <select className="select" value={noteType} onChange={e => setNoteType(e.target.value as typeof noteType)}>
+            <option value="general">General</option>
+            <option value="mom">Meeting Notes (MOM)</option>
+            <option value="vendor">Vendor Note</option>
+          </select>
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">Title</label>
+          <input className="input" placeholder="Note title..." value={title} onChange={e => setTitle(e.target.value)} />
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">Body</label>
+          <textarea className="input" rows={5} placeholder="Write your note..." value={body} onChange={e => setBody(e.target.value)} />
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-rose" onClick={handleSave} disabled={!title.trim()}>
+            {isNew ? 'Save Note' : 'Update Note'}
+          </button>
+        </div>
+      </div>
     </div>
   )
 }
@@ -372,6 +601,11 @@ function DetailsTab() {
 // ── MOM Tab ──────────────────────────────────────────────────────────
 function MOMTab() {
   const { wedding, notes, addNote, removeNote } = useAppStore()
+  const [showModal, setShowModal] = useState<Note | null | undefined>(undefined)
+  // undefined = closed, null = adding new, Note = editing
+  const [filter, setFilter] = useState<'all' | 'mom' | 'general' | 'vendor'>('all')
+
+  const filtered = notes.filter(n => filter === 'all' || n.type === filter)
 
   function handleRemoveNote(note: Note) {
     const snapshot = { ...note }
@@ -388,29 +622,6 @@ function MOMTab() {
       </div>
     ), { duration: 5000 })
   }
-  const [showAdd, setShowAdd] = useState(false)
-  const [title, setTitle] = useState('')
-  const [body, setBody] = useState('')
-  const [noteType, setNoteType] = useState<'general' | 'mom' | 'vendor'>('general')
-  const [filter, setFilter] = useState<'all' | 'mom' | 'general' | 'vendor'>('all')
-
-  const filtered = notes.filter(n => filter === 'all' || n.type === filter)
-
-  function handleAdd() {
-    if (!title.trim()) return
-    addNote({
-      id: uuid(),
-      wedding_id: wedding?.id ?? notes[0]?.wedding_id ?? 'w1',
-      title: title.trim(),
-      body: body.trim(),
-      type: noteType,
-      vendor_id: null,
-      created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString(),
-    })
-    setTitle(''); setBody(''); setNoteType('general'); setShowAdd(false)
-    toast.success('Note added')
-  }
 
   const typeBadge: Record<string, string> = { mom: 'badge-amber', general: 'badge-muted', vendor: 'badge-rose' }
 
@@ -422,7 +633,7 @@ function MOMTab() {
             {t === 'all' ? 'All' : t === 'mom' ? 'Meeting Notes' : t === 'general' ? 'General' : 'Vendor'}
           </button>
         ))}
-        <button className="btn btn-rose btn-sm" style={{ marginLeft: 'auto' }} onClick={() => setShowAdd(true)}>
+        <button className="btn btn-rose btn-sm" style={{ marginLeft: 'auto' }} onClick={() => setShowModal(null)}>
           + Add Note
         </button>
       </div>
@@ -431,12 +642,22 @@ function MOMTab() {
         <div style={{ textAlign: 'center', color: 'var(--ink3)', padding: '48px 0', fontSize: '14px' }}>No notes yet.</div>
       ) : (
         filtered.map(note => (
-          <div className="note-card" key={note.id}>
+          <div
+            className="note-card"
+            key={note.id}
+            style={{ cursor: 'pointer' }}
+            onClick={() => setShowModal(note)}
+          >
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: '10px' }}>
               <div className="note-title">{note.title}</div>
               <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexShrink: 0 }}>
                 <span className={`badge ${typeBadge[note.type] ?? 'badge-muted'}`}>{note.type}</span>
-                <button className="btn btn-xs btn-ghost" onClick={() => handleRemoveNote(note)}>✕</button>
+                <button
+                  className="btn btn-xs btn-ghost"
+                  onClick={e => { e.stopPropagation(); handleRemoveNote(note) }}
+                >
+                  ✕
+                </button>
               </div>
             </div>
             <div className="note-body">{note.body}</div>
@@ -447,32 +668,12 @@ function MOMTab() {
         ))
       )}
 
-      {showAdd && (
-        <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) setShowAdd(false) }}>
-          <div className="modal-box">
-            <div className="modal-title">Add Note</div>
-            <div className="modal-field">
-              <label className="modal-label">Type</label>
-              <select className="select" value={noteType} onChange={e => setNoteType(e.target.value as typeof noteType)}>
-                <option value="general">General</option>
-                <option value="mom">Meeting Notes (MOM)</option>
-                <option value="vendor">Vendor Note</option>
-              </select>
-            </div>
-            <div className="modal-field">
-              <label className="modal-label">Title</label>
-              <input className="input" placeholder="Note title..." value={title} onChange={e => setTitle(e.target.value)} />
-            </div>
-            <div className="modal-field">
-              <label className="modal-label">Body</label>
-              <textarea className="input" rows={5} placeholder="Write your note..." value={body} onChange={e => setBody(e.target.value)} />
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-ghost" onClick={() => setShowAdd(false)}>Cancel</button>
-              <button className="btn btn-rose" onClick={handleAdd} disabled={!title.trim()}>Save Note</button>
-            </div>
-          </div>
-        </div>
+      {showModal !== undefined && (
+        <NoteModal
+          note={showModal}
+          weddingId={wedding?.id ?? 'w1'}
+          onClose={() => setShowModal(undefined)}
+        />
       )}
     </div>
   )

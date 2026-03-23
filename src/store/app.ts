@@ -24,11 +24,14 @@ interface AppState {
   // ── Events ────────────────────────────────────────────────────────────────
   events: WeddingEvent[]
   setEvents: (e: WeddingEvent[]) => void
+  updateEvent: (id: string, patch: Partial<WeddingEvent>) => void
 
   // ── Itinerary ─────────────────────────────────────────────────────────────
   itinerary: ItineraryItem[]
   setItinerary: (items: ItineraryItem[]) => void
+  addItineraryItem: (item: ItineraryItem) => void
   updateItineraryItem: (id: string, patch: Partial<ItineraryItem>) => void
+  deleteItineraryItem: (id: string) => void
 
   // ── Guests ────────────────────────────────────────────────────────────────
   guests: Guest[]
@@ -61,6 +64,8 @@ interface AppState {
   setClTasks: (tasks: ChecklistTask[]) => void
   toggleTask: (id: string) => void
   addTask: (t: ChecklistTask) => void
+  updateTask: (id: string, patch: Partial<ChecklistTask>) => void
+  removeTask: (id: string) => void
 
   // ── Moodboard ─────────────────────────────────────────────────────────────
   pins: MoodPin[]
@@ -97,12 +102,16 @@ export const useAppStore = create<AppState>()(
       // Events
       events: [],
       setEvents: (events) => set({ events }),
+      updateEvent: (id, patch) =>
+        set((s) => ({ events: s.events.map((e) => (e.id === id ? { ...e, ...patch } : e)) })),
 
       // Itinerary
       itinerary: [],
       setItinerary: (itinerary) => set({ itinerary }),
+      addItineraryItem: (item) => set((s) => ({ itinerary: [...s.itinerary, item] })),
       updateItineraryItem: (id, patch) =>
         set((s) => ({ itinerary: s.itinerary.map((i) => (i.id === id ? { ...i, ...patch } : i)) })),
+      deleteItineraryItem: (id) => set((s) => ({ itinerary: s.itinerary.filter((i) => i.id !== id) })),
 
       // Guests
       guests: [],
@@ -142,6 +151,9 @@ export const useAppStore = create<AppState>()(
           clTasks: s.clTasks.map((t) => (t.id === id ? { ...t, is_done: !t.is_done } : t)),
         })),
       addTask: (t) => set((s) => ({ clTasks: [...s.clTasks, t] })),
+      updateTask: (id, patch) =>
+        set((s) => ({ clTasks: s.clTasks.map((t) => (t.id === id ? { ...t, ...patch } : t)) })),
+      removeTask: (id) => set((s) => ({ clTasks: s.clTasks.filter((t) => t.id !== id) })),
 
       // Moodboard
       pins: [],

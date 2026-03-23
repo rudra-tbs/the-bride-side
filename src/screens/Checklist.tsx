@@ -3,6 +3,7 @@ import { useAppStore } from '@/store/app'
 import confetti from 'canvas-confetti'
 import { uuid } from '@/lib/utils'
 import toast from 'react-hot-toast'
+import type { ChecklistTask } from '@/types'
 
 const BADGE_CLASS: Record<string, string> = {
   'Done': 'cl-badge-done',
@@ -11,16 +12,131 @@ const BADGE_CLASS: Record<string, string> = {
   'In Progress': 'cl-badge-twd',
 }
 
+// ── Task Edit Modal ────────────────────────────────────────────────────
+function TaskModal({
+  task,
+  defaultCatId,
+  onClose,
+}: {
+  task: ChecklistTask | null
+  defaultCatId: string
+  onClose: () => void
+}) {
+  const { clCategories, addTask, updateTask, removeTask } = useAppStore()
+  const isNew = task === null
+
+  const [name, setName] = useState(task?.name ?? '')
+  const [catId, setCatId] = useState(task?.category_id ?? defaultCatId)
+  const [dueDate, setDueDate] = useState(task?.due_date ?? '')
+  const [assignedTo, setAssignedTo] = useState(task?.assigned_to ?? '')
+  const [costEstimate, setCostEstimate] = useState(task?.cost_estimate != null ? String(task.cost_estimate) : '')
+
+  function handleSave() {
+    if (!name.trim()) return
+    if (isNew) {
+      addTask({
+        id: uuid(),
+        category_id: catId,
+        wedding_id: useAppStore.getState().wedding?.id ?? 'w1',
+        name: name.trim(),
+        is_done: false,
+        cost_estimate: costEstimate ? Number(costEstimate) : null,
+        due_date: dueDate || null,
+        assigned_to: assignedTo.trim(),
+        sort_order: 999,
+      })
+      toast.success('Task added!')
+    } else {
+      updateTask(task!.id, {
+        name: name.trim(),
+        category_id: catId,
+        cost_estimate: costEstimate ? Number(costEstimate) : null,
+        due_date: dueDate || null,
+        assigned_to: assignedTo.trim(),
+      })
+      toast.success('Task updated')
+    }
+    onClose()
+  }
+
+  function handleDelete() {
+    if (!task) return
+    const snapshot = { ...task }
+    removeTask(task.id)
+    onClose()
+    toast((t) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span>Removed "{snapshot.name}"</span>
+        <button
+          onClick={() => { addTask(snapshot); toast.dismiss(t.id) }}
+          style={{ fontSize: '11px', fontWeight: 600, color: 'var(--rose-dark)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          Undo
+        </button>
+      </div>
+    ), { duration: 5000 })
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="modal-box">
+        <div className="modal-title">{isNew ? 'Add Task' : 'Edit Task'}</div>
+        <div className="modal-field">
+          <label className="modal-label">Category</label>
+          <select className="select" value={catId} onChange={e => setCatId(e.target.value)}>
+            {clCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
+          </select>
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">Task *</label>
+          <input className="input" placeholder="e.g. Book honeymoon hotel" value={name} onChange={e => setName(e.target.value)} />
+        </div>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+          <div className="modal-field">
+            <label className="modal-label">Due Date</label>
+            <input className="input" type="date" value={dueDate} onChange={e => setDueDate(e.target.value)} />
+          </div>
+          <div className="modal-field">
+            <label className="modal-label">Assigned To</label>
+            <input className="input" placeholder="e.g. Priya" value={assignedTo} onChange={e => setAssignedTo(e.target.value)} />
+          </div>
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">Cost Estimate (₹)</label>
+          <input className="input" type="number" min="0" placeholder="Optional" value={costEstimate} onChange={e => setCostEstimate(e.target.value)} />
+        </div>
+        <div className="modal-footer">
+          {!isNew && (
+            <button
+              className="btn btn-ghost btn-sm"
+              style={{ color: 'var(--rose-dark)', marginRight: 'auto' }}
+              onClick={handleDelete}
+            >
+              Delete
+            </button>
+          )}
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-rose" onClick={handleSave} disabled={!name.trim()}>
+            {isNew ? 'Add Task' : 'Save'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Checklist Screen ───────────────────────────────────────────────────
 export default function Checklist() {
-  const { wedding, clCategories, clTasks, toggleTask, addTask } = useAppStore()
+  const { clCategories, clTasks, toggleTask } = useAppStore()
   const [openCats, setOpenCats] = useState<Set<string>>(new Set(['cc1', 'cc2', 'cc3']))
-  const [showAdd, setShowAdd] = useState(false)
-  const [newTaskName, setNewTaskName] = useState('')
-  const [newTaskCat, setNewTaskCat] = useState(clCategories[1]?.id ?? '')
+  const [taskModal, setTaskModal] = useState<ChecklistTask | null | undefined>(undefined)
+  // undefined = closed, null = adding new, ChecklistTask = editing
 
   const totalTasks = clTasks.length
   const doneTasks = clTasks.filter(t => t.is_done).length
   const pct = totalTasks ? Math.round((doneTasks / totalTasks) * 100) : 0
+
+  const defaultCatId = clCategories[0]?.id ?? ''
 
   function toggleCat(id: string) {
     setOpenCats(prev => {
@@ -45,24 +161,6 @@ export default function Checklist() {
     }
   }
 
-  function handleAddTask() {
-    if (!newTaskName.trim()) return
-    addTask({
-      id: uuid(),
-      category_id: newTaskCat,
-      wedding_id: wedding?.id ?? 'w1',
-      name: newTaskName.trim(),
-      is_done: false,
-      cost_estimate: null,
-      due_date: null,
-      assigned_to: '',
-      sort_order: 999,
-    })
-    setNewTaskName('')
-    setShowAdd(false)
-    toast.success('Task added!')
-  }
-
   const sortedCats = [...clCategories].sort((a, b) => a.sort_order - b.sort_order)
 
   return (
@@ -72,7 +170,7 @@ export default function Checklist() {
           <div className="page-title">Checklist</div>
           <div className="page-date">{doneTasks} of {totalTasks} tasks completed</div>
         </div>
-        <button className="btn btn-rose btn-sm" onClick={() => setShowAdd(true)}>+ Add Task</button>
+        <button className="btn btn-rose btn-sm" onClick={() => setTaskModal(null)}>+ Add Task</button>
       </div>
 
       <div className="page-body">
@@ -133,15 +231,34 @@ export default function Checklist() {
                     <div
                       key={task.id}
                       className="cl-task-row"
-                      onClick={() => handleToggleTask(task.id, cat.id)}
                     >
-                      <div className={`cl-check${task.is_done ? ' checked' : ''}`} />
-                      <div className={`cl-task-name${task.is_done ? ' done' : ''}`}>
+                      <div
+                        className={`cl-check${task.is_done ? ' checked' : ''}`}
+                        onClick={() => handleToggleTask(task.id, cat.id)}
+                      />
+                      <div
+                        className={`cl-task-name${task.is_done ? ' done' : ''}`}
+                        style={{ flex: 1, cursor: 'pointer' }}
+                        onClick={() => setTaskModal(task)}
+                      >
                         {task.name}
+                        {task.due_date && (
+                          <span style={{ fontSize: '11px', color: 'var(--ink4)', marginLeft: '8px', fontWeight: 400 }}>
+                            · Due {new Date(task.due_date).toLocaleDateString('en-IN', { day: 'numeric', month: 'short' })}
+                          </span>
+                        )}
                       </div>
                       {task.assigned_to && (
-                        <span className="badge badge-muted" style={{ fontSize: '10px', marginLeft: 'auto' }}>{task.assigned_to}</span>
+                        <span className="badge badge-muted" style={{ fontSize: '10px' }}>{task.assigned_to}</span>
                       )}
+                      <button
+                        className="btn btn-xs btn-ghost"
+                        style={{ opacity: 0.5, marginLeft: '4px' }}
+                        onClick={e => { e.stopPropagation(); setTaskModal(task) }}
+                        title="Edit task"
+                      >
+                        ···
+                      </button>
                     </div>
                   ))}
                 </div>
@@ -151,26 +268,12 @@ export default function Checklist() {
         </div>
       </div>
 
-      {showAdd && (
-        <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) setShowAdd(false) }}>
-          <div className="modal-box">
-            <div className="modal-title">Add Task</div>
-            <div className="modal-field">
-              <label className="modal-label">Category</label>
-              <select className="select" value={newTaskCat} onChange={e => setNewTaskCat(e.target.value)}>
-                {clCategories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
-              </select>
-            </div>
-            <div className="modal-field">
-              <label className="modal-label">Task</label>
-              <input className="input" placeholder="e.g. Book honeymoon hotel" value={newTaskName} onChange={e => setNewTaskName(e.target.value)} />
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-ghost" onClick={() => setShowAdd(false)}>Cancel</button>
-              <button className="btn btn-rose" onClick={handleAddTask} disabled={!newTaskName.trim()}>Add Task</button>
-            </div>
-          </div>
-        </div>
+      {taskModal !== undefined && (
+        <TaskModal
+          task={taskModal}
+          defaultCatId={defaultCatId}
+          onClose={() => setTaskModal(undefined)}
+        />
       )}
     </div>
   )
