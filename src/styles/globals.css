@@ -1807,14 +1807,119 @@ textarea.input { resize: vertical; min-height: 80px; }
 .ob3-btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
 .ob3-btn-finish { padding: 12px 36px; font-size: 15px; }
 
+/* Skip — demoted, subtle */
 .ob3-skip {
-  text-align: center; margin-top: 16px;
-  font-size: 12px; color: var(--ink4); cursor: pointer;
-  transition: color 0.15s;
-  display: flex; align-items: center; justify-content: center; gap: 4px;
-  text-decoration: underline; text-decoration-color: transparent;
+  text-align: center; margin-top: 12px;
+  font-size: 11px; color: var(--ink4); cursor: pointer;
+  transition: color 0.15s; opacity: 0.7;
+  display: flex; align-items: center; justify-content: center;
 }
-.ob3-skip:hover { color: var(--rose); text-decoration-color: var(--rose-mid); }
+.ob3-skip:hover { color: var(--ink2); opacity: 1; }
+
+/* ── Section label hint ────────────────────────────────────────── */
+.ob3-section-hint {
+  font-size: 10px; font-weight: 400; letter-spacing: 0; text-transform: none;
+  color: var(--ink3); margin-left: 4px; font-style: italic;
+}
+
+/* ── Budget: tap-to-edit amount ─────────────────────────────────── */
+.ob3-budget-amount-tap { cursor: pointer; position: relative; display: inline-flex; flex-direction: column; align-items: center; gap: 2px; }
+.ob3-budget-amount-tap:hover .ob3-budget-edit-hint { opacity: 1; }
+.ob3-budget-edit-hint {
+  font-family: var(--sans); font-size: 10px; font-weight: 600;
+  color: var(--rose); letter-spacing: 0.4px; text-transform: uppercase;
+  opacity: 0; transition: opacity 0.15s;
+}
+.ob3-budget-direct-input {
+  font-family: var(--serif); font-size: 32px; font-weight: 600;
+  color: var(--rose-dark); text-align: center; letter-spacing: -1px;
+  border: none; border-bottom: 2px solid var(--rose); background: transparent;
+  outline: none; width: 100%; margin-bottom: 12px; padding: 4px 0;
+}
+.ob3-budget-context {
+  font-size: 11px; color: var(--ink4); text-align: center;
+  margin-top: 10px; font-style: italic; line-height: 1.4;
+}
+
+/* ── Budget events hint ──────────────────────────────────────────── */
+.ob3-events-hint {
+  font-size: 11px; color: var(--ink4); margin: 4px 0 0; font-style: italic;
+}
+
+/* ── Vibe section header (label + scroll hint) ───────────────────── */
+.ob3-vibe-section-header {
+  display: flex; align-items: center; gap: 10px;
+  margin: 24px 0 0;
+}
+.ob3-vibe-count-badge {
+  font-size: 10px; font-weight: 700; letter-spacing: 0.3px;
+  background: var(--rose); color: #fff;
+  border-radius: 100px; padding: 2px 8px;
+  text-transform: none; animation: badgePop 0.2s cubic-bezier(0.34,1.56,0.64,1) both;
+}
+.ob3-vibe-scroll-hint {
+  font-size: 10.5px; color: var(--ink4); white-space: nowrap;
+  font-style: italic; flex-shrink: 0;
+}
+
+/* ── Vibe zero-selection nudge ──────────────────────────────────── */
+.ob3-vibe-nudge {
+  font-size: 12px; color: var(--rose-dark); font-weight: 500;
+  background: var(--rose-light); border: 1px solid rgba(232,116,138,0.25);
+  border-radius: 10px; padding: 8px 14px; margin-bottom: 8px;
+  animation: nudgeShake 0.4s ease both;
+}
+@keyframes nudgeShake {
+  0%,100% { transform: translateX(0); }
+  20%      { transform: translateX(-6px); }
+  40%      { transform: translateX(6px); }
+  60%      { transform: translateX(-4px); }
+  80%      { transform: translateX(4px); }
+}
+
+/* ── Ready / transition screen ──────────────────────────────────── */
+.ob3-ready-screen {
+  position: fixed; inset: 0; z-index: 999;
+  background: linear-gradient(160deg, #fff5f7 0%, #fef0f4 50%, #fff8f0 100%);
+  display: flex; align-items: center; justify-content: center;
+  animation: readyFadeIn 0.5s ease both;
+}
+@keyframes readyFadeIn {
+  from { opacity: 0; transform: scale(0.97); }
+  to   { opacity: 1; transform: scale(1); }
+}
+.ob3-ready-inner { text-align: center; padding: 40px 24px; }
+.ob3-ready-ring {
+  font-size: 56px; line-height: 1;
+  animation: ringBounce 0.6s 0.3s cubic-bezier(0.34,1.56,0.64,1) both;
+  display: block; margin-bottom: 24px;
+}
+@keyframes ringBounce {
+  from { transform: scale(0) rotate(-20deg); opacity: 0; }
+  to   { transform: scale(1) rotate(0deg);  opacity: 1; }
+}
+.ob3-ready-title {
+  font-size: 32px; font-weight: 600; color: var(--ink);
+  margin-bottom: 12px; animation: readyFadeIn 0.5s 0.5s ease both;
+}
+.ob3-ready-sub {
+  font-size: 15px; color: var(--ink3); line-height: 1.7;
+  animation: readyFadeIn 0.5s 0.7s ease both;
+}
+.ob3-ready-dots {
+  display: flex; justify-content: center; gap: 6px; margin-top: 32px;
+  animation: readyFadeIn 0.5s 0.9s ease both;
+}
+.ob3-ready-dots span {
+  width: 7px; height: 7px; border-radius: 50%; background: var(--rose);
+  animation: dotPulse 1.2s ease-in-out infinite;
+}
+.ob3-ready-dots span:nth-child(2) { animation-delay: 0.2s; }
+.ob3-ready-dots span:nth-child(3) { animation-delay: 0.4s; }
+@keyframes dotPulse {
+  0%,100% { opacity: 0.3; transform: scale(0.85); }
+  50%     { opacity: 1;   transform: scale(1.1); }
+}
 
 /* ── Section label ─────────────────────────────────────────────── */
 .ob3-section-label {

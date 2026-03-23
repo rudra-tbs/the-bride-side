@@ -253,8 +253,12 @@ export default function Onboarding() {
   const [selectedEvents, setSelectedEvents]     = useState<string[]>(['Wedding'])
   const [venue, setVenue]                       = useState('')
   const [budgetSlider, setBudgetSlider]         = useState(10) // default ~₹70L
+  const [budgetInputMode, setBudgetInputMode]   = useState(false)
+  const [budgetRawInput, setBudgetRawInput]     = useState('')
   const [budgetEvents, setBudgetEvents]         = useState<string[]>([])
   const [vibes, setVibes]                       = useState<string[]>([])
+  const [vibeNudge, setVibeNudge]               = useState(false)
+  const [showReady, setShowReady]               = useState(false)
   // Planner
   const [agencyName, setAgencyName]             = useState('')
   const [workEmail, setWorkEmail]               = useState('')
@@ -305,10 +309,33 @@ export default function Onboarding() {
   function goFwd(n: number) { setDir('fwd'); setStep(n) }
   function goBck(n: number) { setDir('bck'); setStep(n) }
 
+  // Convert raw lakhs/crore input back to slider position
+  function commitBudgetInput() {
+    setBudgetInputMode(false)
+    const raw = budgetRawInput.trim().toLowerCase()
+    if (!raw) return
+    let lakhs = 0
+    if (raw.endsWith('cr')) lakhs = parseFloat(raw) * 100
+    else if (raw.endsWith('l')) lakhs = parseFloat(raw)
+    else lakhs = parseFloat(raw) // assume lakhs
+    if (isNaN(lakhs)) return
+    lakhs = Math.max(20, Math.min(200, lakhs))
+    setBudgetSlider(Math.round((lakhs - 20) / 5))
+  }
+
   function enterKey(action: () => void, enabled = true) {
     return (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter' && enabled) action()
     }
+  }
+
+  function tryFinish() {
+    if (vibes.length === 0) {
+      setVibeNudge(true)
+      setTimeout(() => setVibeNudge(false), 2000)
+      return
+    }
+    finish()
   }
 
   function finish() {
@@ -372,7 +399,29 @@ export default function Onboarding() {
     setClTasks(mockClTasks)
     setPins(mockPins)
     setNotes(mockNotes)
-    setScreen('dashboard')
+    setShowReady(true)
+    setTimeout(() => setScreen('dashboard'), 2400)
+  }
+
+  // ── Ready screen (post-finish transition) ─────────────────────
+  if (showReady) {
+    const coupleName = isBG
+      ? (selfName && partnerName ? `${selfName} & ${partnerName}` : selfName || 'You')
+      : isPlanner
+        ? (clientBrideName && clientGroomName ? `${clientBrideName} & ${clientGroomName}` : 'The couple')
+        : selfName || 'You'
+    return (
+      <div className="ob3-ready-screen">
+        <div className="ob3-ready-inner">
+          <div className="ob3-ready-ring">💍</div>
+          <h2 className="ob3-ready-title serif">You're all set{coupleName ? `, ${coupleName.split(' ')[0]}` : ''}!</h2>
+          <p className="ob3-ready-sub">Your planning space is ready.<br />Let's make this wedding unforgettable.</p>
+          <div className="ob3-ready-dots">
+            <span /><span /><span />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // ── Step 0: Role selection ─────────────────────────────────────
@@ -520,18 +569,46 @@ export default function Onboarding() {
           </div>
           <span className="ob3-eyebrow-pill">Almost there ✨</span>
           <h2 className="ob3-card-heading serif">Budget & vibe</h2>
-          <p className="ob3-section-label">Budget</p>
+
+          {/* Budget */}
+          <p className="ob3-section-label">Budget <span className="ob3-section-hint">Helps us alert you when spending exceeds your plan</span></p>
           <div className="ob3-budget-section">
             <div className="ob3-budget-slider-wrap" style={{ padding: '4px 0 0' }}>
-              <div className="ob3-budget-amount">{sliderLabel(budgetSlider)}</div>
+              {budgetInputMode ? (
+                <input
+                  className="ob3-budget-direct-input"
+                  type="text" autoFocus
+                  placeholder="e.g. 50 or 1.2Cr"
+                  value={budgetRawInput}
+                  onChange={e => setBudgetRawInput(e.target.value)}
+                  onBlur={commitBudgetInput}
+                  onKeyDown={e => e.key === 'Enter' && commitBudgetInput()}
+                />
+              ) : (
+                <div className="ob3-budget-amount ob3-budget-amount-tap" title="Tap to enter exact amount"
+                  onClick={() => { setBudgetInputMode(true); setBudgetRawInput('') }}>
+                  {sliderLabel(budgetSlider)}
+                  <span className="ob3-budget-edit-hint">tap to edit</span>
+                </div>
+              )}
               <input type="range" className="ob3-range" min={0} max={37} step={1}
                 value={budgetSlider} onChange={e => setBudgetSlider(Number(e.target.value))}
                 style={{ '--slider-pct': `${(budgetSlider / 37) * 100}%` } as React.CSSProperties} />
               <div className="ob3-range-bounds"><span>₹20L</span><span>₹2Cr+</span></div>
+              <p className="ob3-budget-context">Avg. Indian wedding is ₹40–80L · most couples plan ₹50–120L</p>
             </div>
           </div>
-          <p className="ob3-section-label">Vibe</p>
-          <p className="ob3-card-sub" style={{ marginBottom: 12 }}>Pick all that match your dream — we'll personalise everything.</p>
+
+          {/* Vibe */}
+          <div className="ob3-vibe-section-header">
+            <p className="ob3-section-label" style={{ margin: 0, flex: 1 }}>
+              Vibe
+              {vibes.length > 0 && <span className="ob3-vibe-count-badge">{vibes.length} selected</span>}
+            </p>
+            <span className="ob3-vibe-scroll-hint">scroll to explore →</span>
+          </div>
+          <p className="ob3-card-sub" style={{ marginBottom: 10, marginTop: 4 }}>Pick all that match — we'll theme your dashboard and suggestions around this.</p>
+          {vibeNudge && <p className="ob3-vibe-nudge">Pick at least one vibe to personalise your experience ✨</p>}
           <div className="ob3-vibe-strip-wrap">
             <div className="ob3-vibe-strip" role="list">
               {VIBE_SETS.map((v, i) => (
@@ -553,11 +630,12 @@ export default function Onboarding() {
               ))}
             </div>
           </div>
+
           <div className="ob3-actions" style={{ marginTop: 28 }}>
             <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
-            <button className="ob3-btn-primary ob3-btn-finish" onClick={finish}>Start planning ✨</button>
+            <button className="ob3-btn-primary ob3-btn-finish" onClick={tryFinish}>Start planning ✨</button>
           </div>
-          <p className="ob3-skip" onClick={finish}>Skip and go to dashboard →</p>
+          <p className="ob3-skip" onClick={finish}>I'll set this up later</p>
         </div>
       </div>
     )
@@ -691,13 +769,33 @@ export default function Onboarding() {
           </div>
           <span className="ob3-eyebrow-pill">Almost there ✨</span>
           <h2 className="ob3-card-heading serif">Budget & vibe</h2>
-          <p className="ob3-section-label">Budget</p>
+
+          {/* Budget */}
+          <p className="ob3-section-label">Budget <span className="ob3-section-hint">Helps us alert you when spending exceeds the plan</span></p>
           <div className="ob3-budget-section">
             <div className="ob3-budget-slider-wrap" style={{ padding: '4px 0 0' }}>
-              <div className="ob3-budget-amount">{sliderLabel(budgetSlider)}</div>
+              {budgetInputMode ? (
+                <input
+                  className="ob3-budget-direct-input"
+                  type="text" autoFocus
+                  placeholder="e.g. 50 or 1.2Cr"
+                  value={budgetRawInput}
+                  onChange={e => setBudgetRawInput(e.target.value)}
+                  onBlur={commitBudgetInput}
+                  onKeyDown={e => e.key === 'Enter' && commitBudgetInput()}
+                />
+              ) : (
+                <div className="ob3-budget-amount ob3-budget-amount-tap" title="Tap to enter exact amount"
+                  onClick={() => { setBudgetInputMode(true); setBudgetRawInput('') }}>
+                  {sliderLabel(budgetSlider)}
+                  <span className="ob3-budget-edit-hint">tap to edit</span>
+                </div>
+              )}
               <input type="range" className="ob3-range" min={0} max={37} step={1}
-                value={budgetSlider} onChange={e => setBudgetSlider(Number(e.target.value))} />
+                value={budgetSlider} onChange={e => setBudgetSlider(Number(e.target.value))}
+                style={{ '--slider-pct': `${(budgetSlider / 37) * 100}%` } as React.CSSProperties} />
               <div className="ob3-range-bounds"><span>₹20L</span><span>₹2Cr+</span></div>
+              <p className="ob3-budget-context">Avg. Indian wedding is ₹40–80L · most couples plan ₹50–120L</p>
             </div>
           </div>
           <div className="ob3-field" style={{ marginTop: 20 }}>
@@ -708,6 +806,7 @@ export default function Onboarding() {
                 {showBudgetEventsExpander ? '✕ Done' : '+ Add event'}
               </button>
             </div>
+            <p className="ob3-events-hint">We'll use this to suggest how to split your budget across events.</p>
             <div className="ob3-chip-row ob3-chip-wrap ob3-events-tags" style={{ marginTop: 8 }}>
               {budgetEvents.length > 0
                 ? budgetEvents.map(ev => <span key={ev} className="ob3-chip on"><span className="ob3-chip-emoji">{EVENTS_EMOJI[ev]}</span>{ev}</span>)
@@ -724,7 +823,17 @@ export default function Onboarding() {
               </div>
             )}
           </div>
-          <p className="ob3-section-label">Vibe</p>
+
+          {/* Vibe */}
+          <div className="ob3-vibe-section-header">
+            <p className="ob3-section-label" style={{ margin: 0, flex: 1 }}>
+              Vibe
+              {vibes.length > 0 && <span className="ob3-vibe-count-badge">{vibes.length} selected</span>}
+            </p>
+            <span className="ob3-vibe-scroll-hint">scroll to explore →</span>
+          </div>
+          <p className="ob3-card-sub" style={{ marginBottom: 10, marginTop: 4 }}>Pick all that match — we'll theme the dashboard and suggestions around this.</p>
+          {vibeNudge && <p className="ob3-vibe-nudge">Pick at least one vibe to personalise your experience ✨</p>}
           <div className="ob3-vibe-strip-wrap">
             <div className="ob3-vibe-strip" role="list">
               {VIBE_SETS.map((v, i) => (
@@ -746,11 +855,12 @@ export default function Onboarding() {
               ))}
             </div>
           </div>
+
           <div className="ob3-actions" style={{ marginTop: 28 }}>
             <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
-            <button className="ob3-btn-primary ob3-btn-finish" onClick={finish}>Start planning ✨</button>
+            <button className="ob3-btn-primary ob3-btn-finish" onClick={tryFinish}>Start planning ✨</button>
           </div>
-          <p className="ob3-skip" onClick={finish}>Skip and go to dashboard →</p>
+          <p className="ob3-skip" onClick={finish}>I'll set this up later</p>
         </div>
       </div>
     )
