@@ -176,16 +176,12 @@ const ROLES: { value: Role; label: string; icon: React.ReactNode; sub: string }[
 ]
 
 const VIBES_WITH_EMOJI = [
-  { label: 'Romantic',    emoji: '💕', desc: 'Soft & dreamy' },
-  { label: 'Floral',      emoji: '🌸', desc: 'Blooms everywhere' },
-  { label: 'Elegant',     emoji: '✨', desc: 'Refined & timeless' },
-  { label: 'Traditional', emoji: '🪔', desc: 'Heritage & rituals' },
-  { label: 'Modern',      emoji: '🖤', desc: 'Clean & bold' },
-  { label: 'Minimal',     emoji: '🤍', desc: 'Less is more' },
-  { label: 'Bohemian',    emoji: '🌿', desc: 'Free-spirited & earthy' },
-  { label: 'Vintage',     emoji: '🎞️', desc: 'Old-world charm' },
-  { label: 'Grand',       emoji: '🏰', desc: 'Opulent & show-stopping' },
-  { label: 'Intimate',    emoji: '🕯️', desc: 'Warm & personal' },
+  { label: 'Romantic Luxe',     emoji: '💕', tagline: 'Soft, dreamy & elegant',     elements: ['Blush tones', 'Candles & fairy lights', 'Lush florals'] },
+  { label: 'Modern Minimal',    emoji: '🖤', tagline: 'Clean, bold & stylish',       elements: ['Neutral palettes', 'Sharp layouts', 'Statement decor'] },
+  { label: 'Floral Garden',     emoji: '🌸', tagline: 'Bloom-filled & vibrant',      elements: ['Floral ceilings', 'Pastel setups', 'Outdoor vibes'] },
+  { label: 'Royal Traditional', emoji: '🪔', tagline: 'Rich, cultural & timeless',   elements: ['Reds & golds', 'Grand mandaps', 'Heritage rituals'] },
+  { label: 'Boho Intimate',     emoji: '🌿', tagline: 'Warm, earthy & personal',     elements: ['Pampas grass', 'Muted tones', 'Cozy setups'] },
+  { label: 'Grand Statement',   emoji: '🏰', tagline: 'Big, bold & unforgettable',   elements: ['Dramatic entries', 'Large-scale decor', 'Wow moments'] },
 ]
 
 function sliderLabel(v: number): string {
@@ -549,7 +545,10 @@ export default function Onboarding() {
                 onClick={() => toggleVibe(v.label)}>
                 <span className="ob3-vibe-emoji">{v.emoji}</span>
                 <span className="ob3-vibe-label">{v.label}</span>
-                <span className="ob3-vibe-desc">{v.desc}</span>
+                <span className="ob3-vibe-tagline">{v.tagline}</span>
+                <div className="ob3-vibe-pills">
+                  {v.elements.map(el => <span key={el} className="ob3-vibe-pill">{el}</span>)}
+                </div>
               </button>
             ))}
           </div>
@@ -738,7 +737,10 @@ export default function Onboarding() {
                 onClick={() => toggleVibe(v.label)}>
                 <span className="ob3-vibe-emoji">{v.emoji}</span>
                 <span className="ob3-vibe-label">{v.label}</span>
-                <span className="ob3-vibe-desc">{v.desc}</span>
+                <span className="ob3-vibe-tagline">{v.tagline}</span>
+                <div className="ob3-vibe-pills">
+                  {v.elements.map(el => <span key={el} className="ob3-vibe-pill">{el}</span>)}
+                </div>
               </button>
             ))}
           </div>
