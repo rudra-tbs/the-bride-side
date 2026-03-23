@@ -144,8 +144,6 @@ export default function Landing() {
     return 'left'
   }
 
-  const [spotlightFeature, ...toolkitFeatures] = FEATURES
-
   // Tracks mouse anywhere in the stage — tilt follows even outside the card
   function handleStageMouseMove(e: React.MouseEvent<HTMLDivElement>) {
     const card = centerCardRef.current
@@ -502,43 +500,19 @@ export default function Landing() {
               Six powerful tools purpose-built for the scale and beauty of Indian weddings.
             </p>
           </div>
-          <div className="toolkit-layout">
-            <div className="feat-card feat-card-spotlight">
-              <div className="feat-icon-badge" style={{ background: spotlightFeature.iconBg, color: spotlightFeature.accent } as React.CSSProperties}>
-                {spotlightFeature.icon}
-              </div>
-              <div className="feat-body">
-                <span className="feat-tag" style={{ color: spotlightFeature.accent } as React.CSSProperties}>{spotlightFeature.tag} · Most Loved</span>
-                <div className="feat-title">{spotlightFeature.title}</div>
-                <div className="feat-desc">{spotlightFeature.desc}</div>
-                {spotlightFeature.preview && (
-                  <div className="feat-preview-strip">
-                    {spotlightFeature.preview.map(p => (
-                      <div key={p.label} className={`feat-preview-chip${p.active ? ' active' : ''}`}>
-                        <span className="fpc-dot" style={{ background: p.dot } as React.CSSProperties} />
-                        <span>{p.label}</span>
-                        {p.active && <span className="fpc-badge">Today</span>}
-                      </div>
-                    ))}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className="feat-grid">
-              {toolkitFeatures.map(f => (
-                <div className="feat-card" key={f.title}>
-                  <div className="feat-icon-badge" style={{ background: f.iconBg, color: f.accent } as React.CSSProperties}>
-                    {f.icon}
-                  </div>
-                  <div className="feat-body">
-                    <span className="feat-tag" style={{ color: f.accent } as React.CSSProperties}>{f.tag}</span>
-                    <div className="feat-title">{f.title}</div>
-                    <div className="feat-desc">{f.desc}</div>
-                  </div>
+          <div className="feat-grid">
+            {FEATURES.map(f => (
+              <div className="feat-card" key={f.title}>
+                <div className="feat-icon-badge" style={{ background: f.iconBg, color: f.accent } as React.CSSProperties}>
+                  {f.icon}
                 </div>
-              ))}
-            </div>
+                <div className="feat-body">
+                  <span className="feat-tag" style={{ color: f.accent } as React.CSSProperties}>{f.tag}</span>
+                  <div className="feat-title">{f.title}</div>
+                  <div className="feat-desc">{f.desc}</div>
+                </div>
+              </div>
+            ))}
           </div>
         </div>
       </section>

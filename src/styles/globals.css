@@ -838,18 +838,12 @@ textarea.input { resize: vertical; min-height: 80px; }
 }
 
 /* ── Toolkit / Features ────────────────────────────────────────── */
-.toolkit-layout {
+.feat-grid {
   max-width: 1100px;
   margin: 48px auto 0;
   display: grid;
-  grid-template-columns: minmax(320px, 1.15fr) minmax(0, 1.85fr);
-  gap: 20px;
-  align-items: stretch;
-}
-.feat-grid {
-  display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 16px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 18px;
 }
 .feat-card {
   border-radius: 20px;
@@ -864,16 +858,12 @@ textarea.input { resize: vertical; min-height: 80px; }
   transition: transform 0.22s ease, box-shadow 0.22s ease;
   animation: featFadeUp 0.55s ease-out both;
 }
-.feat-card-spotlight {
-  background: linear-gradient(165deg, #fff2f6 0%, #fff 62%, #f4fbf7 100%);
-  border-color: rgba(232,116,138,0.2);
-  padding: 28px;
-}
-.feat-grid .feat-card:nth-child(1) { animation-delay: 0.08s; }
-.feat-grid .feat-card:nth-child(2) { animation-delay: 0.14s; }
-.feat-grid .feat-card:nth-child(3) { animation-delay: 0.2s; }
-.feat-grid .feat-card:nth-child(4) { animation-delay: 0.26s; }
-.feat-grid .feat-card:nth-child(5) { animation-delay: 0.32s; }
+.feat-grid .feat-card:nth-child(1) { animation-delay: 0.06s; }
+.feat-grid .feat-card:nth-child(2) { animation-delay: 0.12s; }
+.feat-grid .feat-card:nth-child(3) { animation-delay: 0.18s; }
+.feat-grid .feat-card:nth-child(4) { animation-delay: 0.24s; }
+.feat-grid .feat-card:nth-child(5) { animation-delay: 0.30s; }
+.feat-grid .feat-card:nth-child(6) { animation-delay: 0.36s; }
 /* Hover */
 .feat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.06); border-color: rgba(232,116,138,0.3); }
 /* Icon badge */
@@ -897,25 +887,6 @@ textarea.input { resize: vertical; min-height: 80px; }
 .feat-title { font-size: 17px; font-weight: 800; color: var(--ink); margin-bottom: 8px; letter-spacing: -0.3px; position: relative; z-index: 1; }
 /* Desc */
 .feat-desc { font-size: 14px; color: #475569; line-height: 1.65; position: relative; z-index: 1; }
-/* Mini preview strip (first card only) */
-.feat-preview-strip { display: flex; flex-direction: column; gap: 5px; margin-top: 16px; }
-.feat-preview-chip {
-  display: flex; align-items: center; gap: 8px;
-  background: rgba(255,255,255,0.7); border: 1px solid rgba(0,0,0,0.06);
-  border-radius: 8px; padding: 5px 10px;
-  font-size: 11.5px; font-weight: 500; color: var(--ink2);
-  backdrop-filter: blur(4px);
-}
-.feat-preview-chip.active {
-  background: rgba(232,116,138,0.07); border-color: rgba(232,116,138,0.2);
-  color: var(--rose-dark); font-weight: 600;
-}
-.fpc-dot { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
-.fpc-badge {
-  margin-left: auto; font-size: 9px; font-weight: 700; letter-spacing: 0.5px;
-  text-transform: uppercase; background: var(--rose); color: white;
-  border-radius: 100px; padding: 1px 6px;
-}
 .landing-page { overflow-y: auto; flex: 1; background: var(--bg); scroll-behavior: smooth; }
 
 /* ── CENTERED HERO ─────────────────────────────────────────────── */
@@ -1248,7 +1219,6 @@ textarea.input { resize: vertical; min-height: 80px; }
   .hero-stats-center { flex-direction: column; gap: 16px; }
   .hero-stat { border-right: none; padding-right: 0; margin-right: 0; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 0; }
   .hero-stat:last-child { border-bottom: none; padding-bottom: 0; }
-  .toolkit-layout { grid-template-columns: 1fr; gap: 14px; }
   .feat-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
   .feat-card { padding: 20px; }
   .t-stage-outer { height: 340px; }
@@ -1376,7 +1346,6 @@ textarea.input { resize: vertical; min-height: 80px; }
   .stat-grid, .g2, .g3 { grid-template-columns: 1fr; }
   .page-head { padding: 16px 16px 0; }
   .page-body { padding: 16px 16px 28px; }
-  .toolkit-layout { gap: 12px; }
   .feat-grid { grid-template-columns: 1fr; gap: 12px; }
   .landing-nav { padding: 0 16px; }
   .hero-scroll-cue { display: none; }
