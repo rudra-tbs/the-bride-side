@@ -5,7 +5,7 @@ const FEATURES = [
   {
     icon: <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/><path d="M8 14h.01M12 14h4M8 18h.01M12 18h4"/></svg>,
     accent: '#E8748A', iconBg: 'rgba(232,116,138,0.1)', tag: 'Planning',
-    title: 'Smart Itinerary', desc: 'Timeline planner for every event — Mehendi, Sangeet, Wedding, Reception.',
+    title: 'Smart Itinerary', desc: 'Plan every ceremony timeline from Mehendi to Reception in one view.',
     preview: [
       { label: 'Mehendi · 14 Nov', dot: '#C898B8' },
       { label: 'Sangeet · 15 Nov', dot: '#7AAA90' },

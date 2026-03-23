@@ -855,6 +855,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   display: flex; flex-direction: column;
   justify-content: flex-start;
   gap: 14px;
+  min-height: 230px;
   transition: transform 0.22s ease, box-shadow 0.22s ease;
   animation: featFadeUp 0.55s ease-out both;
 }
@@ -886,7 +887,13 @@ textarea.input { resize: vertical; min-height: 80px; }
 /* Title */
 .feat-title { font-size: 17px; font-weight: 800; color: var(--ink); margin-bottom: 8px; letter-spacing: -0.3px; position: relative; z-index: 1; }
 /* Desc */
-.feat-desc { font-size: 14px; color: #475569; line-height: 1.65; position: relative; z-index: 1; }
+.feat-desc {
+  font-size: 14px; color: #475569; line-height: 1.65; position: relative; z-index: 1;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
 .landing-page { overflow-y: auto; flex: 1; background: var(--bg); scroll-behavior: smooth; }
 
 /* ── CENTERED HERO ─────────────────────────────────────────────── */
@@ -1347,6 +1354,7 @@ textarea.input { resize: vertical; min-height: 80px; }
   .page-head { padding: 16px 16px 0; }
   .page-body { padding: 16px 16px 28px; }
   .feat-grid { grid-template-columns: 1fr; gap: 12px; }
+  .feat-card { min-height: auto; }
   .landing-nav { padding: 0 16px; }
   .hero-scroll-cue { display: none; }
   .role-cards { grid-template-columns: 1fr 1fr; }
