@@ -44,6 +44,69 @@ const FEATURES = [
   },
 ]
 
+const VIBE_SETS = [
+  {
+    emoji: '💕',
+    name: 'Romantic Luxe',
+    tagline: 'Soft, dreamy & elegant celebrations',
+    elements: ['Blush tones', 'Candles & fairy lights', 'Lush florals'],
+    forText: 'For couples who want a Pinterest-worthy love story',
+    accent: '#E8748A',
+    bg: '#fff1f4',
+    topColor: '#E8748A',
+  },
+  {
+    emoji: '🖤',
+    name: 'Modern Minimal',
+    tagline: 'Clean, bold & effortlessly stylish',
+    elements: ['Neutral palettes', 'Sharp layouts', 'Statement decor'],
+    forText: 'For couples who love simplicity with impact',
+    accent: '#374151',
+    bg: '#f8f9fa',
+    topColor: '#374151',
+  },
+  {
+    emoji: '🌸',
+    name: 'Floral Garden',
+    tagline: 'Bloom-filled, fresh & vibrant',
+    elements: ['Floral ceilings', 'Pastel setups', 'Outdoor vibes'],
+    forText: 'Feels like a daytime fairytale in full bloom',
+    accent: '#7AAA90',
+    bg: '#f0faf5',
+    topColor: '#7AAA90',
+  },
+  {
+    emoji: '🪔',
+    name: 'Royal Traditional',
+    tagline: 'Rich, cultural & timeless',
+    elements: ['Reds & golds', 'Grand mandaps', 'Heritage rituals'],
+    forText: 'Rooted in heritage with a regal wedding feel',
+    accent: '#D4956A',
+    bg: '#fdf8f0',
+    topColor: '#D4956A',
+  },
+  {
+    emoji: '🌿',
+    name: 'Boho Intimate',
+    tagline: 'Warm, earthy & personal',
+    elements: ['Pampas grass', 'Muted tones', 'Cozy setups'],
+    forText: 'Ideal for close-knit, aesthetic celebrations',
+    accent: '#A06080',
+    bg: '#fdf5f8',
+    topColor: '#A06080',
+  },
+  {
+    emoji: '🏰',
+    name: 'Grand Statement',
+    tagline: 'Big, bold & unforgettable',
+    elements: ['Dramatic entries', 'Large-scale decor', 'Wow moments'],
+    forText: 'Designed for couples who want a showstopper wedding',
+    accent: '#7098B8',
+    bg: '#f0f4fa',
+    topColor: '#7098B8',
+  },
+]
+
 const TESTIMONIALS = [
   {
     name: 'Priya & Arjun',
@@ -522,6 +585,44 @@ export default function Landing() {
                     </div>
                   )}
                 </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* Vibe Sets */}
+      <section className="landing-section landing-section-alt">
+        <div className="container">
+          <div className="section-header-center">
+            <div className="section-eyebrow">Wedding Vibes</div>
+            <h2 className="serif section-title">
+              Find your <em>perfect style</em>
+            </h2>
+            <p className="section-subtitle">
+              Six curated wedding vibes to inspire your dream celebration — pick the one that speaks to your heart.
+            </p>
+          </div>
+          <div className="vibe-set-grid">
+            {VIBE_SETS.map(v => (
+              <div
+                className="vibe-set-card"
+                key={v.name}
+                style={{ '--vs-accent': v.accent, '--vs-bg': v.bg, '--vs-top': v.topColor } as React.CSSProperties}
+              >
+                <div className="vibe-set-top-bar" />
+                <div className="vibe-set-emoji">{v.emoji}</div>
+                <div className="vibe-set-name serif">{v.name}</div>
+                <div className="vibe-set-tagline">{v.tagline}</div>
+                <ul className="vibe-set-elements">
+                  {v.elements.map(el => (
+                    <li key={el} className="vibe-set-element">
+                      <span className="vibe-set-dot" />
+                      {el}
+                    </li>
+                  ))}
+                </ul>
+                <div className="vibe-set-for">{v.forText}</div>
               </div>
             ))}
           </div>
