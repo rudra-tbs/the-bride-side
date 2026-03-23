@@ -837,49 +837,54 @@ textarea.input { resize: vertical; min-height: 80px; }
   to { opacity: 1; transform: translateY(0); }
 }
 
-/* ── Features bento grid ───────────────────────────────────────── */
-.feat-grid {
-  max-width: 1100px; margin: 48px auto 0;
+/* ── Toolkit / Features ────────────────────────────────────────── */
+.toolkit-layout {
+  max-width: 1100px;
+  margin: 48px auto 0;
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 24px;
+  grid-template-columns: minmax(320px, 1.15fr) minmax(0, 1.85fr);
+  gap: 20px;
+  align-items: stretch;
+}
+.feat-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 16px;
 }
 .feat-card {
-  border-radius: 24px; padding: 32px;
-  border: 1px solid #f1f5f9; /* slate-100 */
-  position: relative; overflow: hidden;
+  border-radius: 20px;
+  padding: 24px;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  background: linear-gradient(180deg, #ffffff 0%, #fff8fa 100%);
+  position: relative;
+  overflow: hidden;
   display: flex; flex-direction: column;
-  justify-content: space-between;
+  justify-content: flex-start;
+  gap: 14px;
   transition: transform 0.22s ease, box-shadow 0.22s ease;
   animation: featFadeUp 0.55s ease-out both;
 }
-/* 12-col strict layout: row1 = 6+6, row2 = 4+4+4, row3 = 12 */
-.feat-card:nth-child(1)  { grid-column: span 6;  animation-delay: 0.05s; }
-.feat-card:nth-child(2)  { grid-column: span 6;  animation-delay: 0.12s; }
-.feat-card:nth-child(3)  { grid-column: span 4;  animation-delay: 0.19s; }
-.feat-card:nth-child(4)  { grid-column: span 4;  animation-delay: 0.26s; }
-.feat-card:nth-child(5)  { grid-column: span 4;  animation-delay: 0.33s; }
-.feat-card:nth-child(6)  { grid-column: span 12; flex-direction: row; align-items: center; gap: 32px; justify-content: flex-start; animation-delay: 0.40s; }
-/* Extremely soft background tints (≈ Tailwind *-50/30) */
-.feat-card:nth-child(1) { background: #fff1f2; } /* rose-50 */
-.feat-card:nth-child(2) { background: #ecfdf5; } /* emerald-50 */
-.feat-card:nth-child(3) { background: #fffbeb; } /* amber-50 */
-.feat-card:nth-child(4) { background: #eff6ff; } /* blue-50 */
-.feat-card:nth-child(5) { background: #faf5ff; } /* purple-50 */
-.feat-card:nth-child(6) { background: #fff1f2; } /* tasks = rose-50 */
+.feat-card-spotlight {
+  background: linear-gradient(165deg, #fff2f6 0%, #fff 62%, #f4fbf7 100%);
+  border-color: rgba(232,116,138,0.2);
+  padding: 28px;
+}
+.feat-grid .feat-card:nth-child(1) { animation-delay: 0.08s; }
+.feat-grid .feat-card:nth-child(2) { animation-delay: 0.14s; }
+.feat-grid .feat-card:nth-child(3) { animation-delay: 0.2s; }
+.feat-grid .feat-card:nth-child(4) { animation-delay: 0.26s; }
+.feat-grid .feat-card:nth-child(5) { animation-delay: 0.32s; }
 /* Hover */
-.feat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.06); }
+.feat-card:hover { transform: translateY(-3px); box-shadow: 0 10px 28px rgba(0,0,0,0.06); border-color: rgba(232,116,138,0.3); }
 /* Icon badge */
 .feat-icon-badge {
   width: 46px; height: 46px; border-radius: 13px;
   display: flex; align-items: center; justify-content: center;
-  margin-bottom: 20px; flex-shrink: 0; position: relative; z-index: 1;
+  flex-shrink: 0; position: relative; z-index: 1;
   transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
 }
 .feat-icon-badge svg { width: 22px; height: 22px; }
-.feat-card:nth-child(6) .feat-icon-badge { margin-bottom: 0; }
 .feat-card:hover .feat-icon-badge { transform: scale(1.08) rotate(-5deg); }
-.feat-card:nth-child(6):hover .feat-icon-badge { transform: scale(1.08) rotate(0deg); }
 /* Tag label */
 .feat-tag {
   display: block; font-size: 10px; font-weight: 700;
@@ -888,11 +893,10 @@ textarea.input { resize: vertical; min-height: 80px; }
 }
 /* Body — fills remaining vertical space, content stacks from top */
 .feat-body { position: relative; z-index: 1; flex: 1; display: flex; flex-direction: column; }
-.feat-card:nth-child(6) .feat-body { flex: 1; }
 /* Title */
 .feat-title { font-size: 17px; font-weight: 800; color: var(--ink); margin-bottom: 8px; letter-spacing: -0.3px; position: relative; z-index: 1; }
 /* Desc */
-.feat-desc { font-size: 15px; color: #475569; line-height: 1.65; position: relative; z-index: 1; }
+.feat-desc { font-size: 14px; color: #475569; line-height: 1.65; position: relative; z-index: 1; }
 /* Mini preview strip (first card only) */
 .feat-preview-strip { display: flex; flex-direction: column; gap: 5px; margin-top: 16px; }
 .feat-preview-chip {
@@ -1244,14 +1248,9 @@ textarea.input { resize: vertical; min-height: 80px; }
   .hero-stats-center { flex-direction: column; gap: 16px; }
   .hero-stat { border-right: none; padding-right: 0; margin-right: 0; border-bottom: 1px solid var(--border); padding-bottom: 16px; margin-bottom: 0; }
   .hero-stat:last-child { border-bottom: none; padding-bottom: 0; }
-  /* Tablet: collapse to 2-col (6-unit) grid */
-  .feat-grid { grid-template-columns: repeat(6, 1fr) !important; gap: 16px !important; }
-  .feat-card:nth-child(1)  { grid-column: span 3 !important; }
-  .feat-card:nth-child(2)  { grid-column: span 3 !important; }
-  .feat-card:nth-child(3)  { grid-column: span 2 !important; }
-  .feat-card:nth-child(4)  { grid-column: span 2 !important; }
-  .feat-card:nth-child(5)  { grid-column: span 2 !important; }
-  .feat-card:nth-child(6)  { grid-column: span 6 !important; flex-direction: column; align-items: flex-start; gap: 16px; justify-content: flex-start; }
+  .toolkit-layout { grid-template-columns: 1fr; gap: 14px; }
+  .feat-grid { grid-template-columns: 1fr 1fr; gap: 14px; }
+  .feat-card { padding: 20px; }
   .t-stage-outer { height: 340px; }
   .t-positioner { width: calc(100% - 32px); }
   .t-pos-left, .t-pos-right { opacity: 0; pointer-events: none; }
@@ -1377,11 +1376,8 @@ textarea.input { resize: vertical; min-height: 80px; }
   .stat-grid, .g2, .g3 { grid-template-columns: 1fr; }
   .page-head { padding: 16px 16px 0; }
   .page-body { padding: 16px 16px 28px; }
-  /* Mobile: full single-column stack */
-  .feat-grid { grid-template-columns: 1fr !important; gap: 12px !important; }
-  .feat-card:nth-child(1), .feat-card:nth-child(2), .feat-card:nth-child(3),
-  .feat-card:nth-child(4), .feat-card:nth-child(5), .feat-card:nth-child(6) { grid-column: span 1 !important; }
-  .feat-card:nth-child(6) { flex-direction: column; align-items: flex-start; gap: 16px; }
+  .toolkit-layout { gap: 12px; }
+  .feat-grid { grid-template-columns: 1fr; gap: 12px; }
   .landing-nav { padding: 0 16px; }
   .hero-scroll-cue { display: none; }
   .role-cards { grid-template-columns: 1fr 1fr; }
