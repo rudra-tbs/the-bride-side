@@ -3,11 +3,7 @@ import { useAppStore } from '@/store/app'
 import type { Role } from '@/types'
 import { uuid } from '@/lib/utils'
 import { dbSaveWedding } from '@/lib/supabase'
-import {
-  mockEvents, mockItinerary, mockGuests, mockVendors,
-  mockBudgetCategories, mockExpenses, mockClCategories,
-  mockClTasks, mockPins, mockNotes,
-} from '@/mock/data'
+import { makeStarterData } from '@/mock/data'
 
 const BrideIcon = () => (
   <svg className="ob3-role-svg" viewBox="0 0 100 170" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -389,16 +385,20 @@ export default function Onboarding() {
       total_budget: wedding.total_budget,
       vibe_tags: wedding.vibe_tags,
     }).catch(() => null)
-    setEvents(mockEvents)
-    setItinerary(mockItinerary)
-    setGuests(mockGuests)
-    setVendors(mockVendors)
-    setBudgetCategories(mockBudgetCategories)
-    setExpenses(mockExpenses)
-    setClCategories(mockClCategories)
-    setClTasks(mockClTasks)
-    setPins(mockPins)
-    setNotes(mockNotes)
+
+    const { events, budgetCategories, clCategories, clTasks } = makeStarterData(
+      wedding.id, selectedEvents, wedding.wedding_date, wedding.venue,
+    )
+    setEvents(events)
+    setItinerary([])
+    setGuests([])
+    setVendors([])
+    setBudgetCategories(budgetCategories)
+    setExpenses([])
+    setClCategories(clCategories)
+    setClTasks(clTasks)
+    setPins([])
+    setNotes([])
     setShowReady(true)
     setTimeout(() => setScreen('dashboard'), 2400)
   }
