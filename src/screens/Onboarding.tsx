@@ -3,11 +3,7 @@ import { useAppStore } from '@/store/app'
 import type { Role } from '@/types'
 import { uuid } from '@/lib/utils'
 import { dbSaveWedding } from '@/lib/supabase'
-import {
-  mockEvents, mockItinerary, mockGuests, mockVendors,
-  mockBudgetCategories, mockExpenses, mockClCategories,
-  mockClTasks, mockPins, mockNotes,
-} from '@/mock/data'
+import { makeStarterData } from '@/mock/data'
 
 const BrideIcon = () => (
   <svg className="ob3-role-svg" viewBox="0 0 100 170" fill="none" xmlns="http://www.w3.org/2000/svg"
@@ -175,17 +171,13 @@ const ROLES: { value: Role; label: string; icon: React.ReactNode; sub: string }[
   { value: 'other',   label: 'Family',  icon: <FamilyIcon />,  sub: 'Helping a loved one' },
 ]
 
-const VIBES_WITH_EMOJI = [
-  { label: 'Romantic',    emoji: '💕', desc: 'Soft & dreamy' },
-  { label: 'Floral',      emoji: '🌸', desc: 'Blooms everywhere' },
-  { label: 'Elegant',     emoji: '✨', desc: 'Refined & timeless' },
-  { label: 'Traditional', emoji: '🪔', desc: 'Heritage & rituals' },
-  { label: 'Modern',      emoji: '🖤', desc: 'Clean & bold' },
-  { label: 'Minimal',     emoji: '🤍', desc: 'Less is more' },
-  { label: 'Bohemian',    emoji: '🌿', desc: 'Free-spirited & earthy' },
-  { label: 'Vintage',     emoji: '🎞️', desc: 'Old-world charm' },
-  { label: 'Grand',       emoji: '🏰', desc: 'Opulent & show-stopping' },
-  { label: 'Intimate',    emoji: '🕯️', desc: 'Warm & personal' },
+const VIBE_SETS = [
+  { label: 'Romantic Luxe',     tagline: 'Soft, dreamy & elegant',     elements: ['Blush tones', 'Candles & fairy lights', 'Lush florals'],      image: 'https://images.unsplash.com/photo-1602874801006-bf8c1b70e0b0?w=400&h=300&fit=crop&q=80' },
+  { label: 'Modern Minimal',    tagline: 'Clean, bold & stylish',       elements: ['Neutral palettes', 'Sharp layouts', 'Statement decor'],        image: 'https://images.unsplash.com/photo-1625755568824-c27ef71d62a5?w=400&h=300&fit=crop&q=80' },
+  { label: 'Floral Garden',     tagline: 'Bloom-filled & vibrant',      elements: ['Floral ceilings', 'Pastel setups', 'Outdoor vibes'],           image: 'https://images.unsplash.com/photo-1519225421980-715cb0215aed?w=400&h=300&fit=crop&q=80' },
+  { label: 'Royal Traditional', tagline: 'Rich, cultural & timeless',   elements: ['Reds & golds', 'Grand mandaps', 'Heritage rituals'],           image: 'https://images.unsplash.com/photo-1589463349208-95817c91f971?w=400&h=300&fit=crop&q=80' },
+  { label: 'Boho Intimate',     tagline: 'Warm, earthy & personal',     elements: ['Pampas grass', 'Muted tones', 'Cozy setups'],                  image: 'https://images.unsplash.com/photo-1485955900006-10f4d324d411?w=400&h=300&fit=crop&q=80' },
+  { label: 'Grand Statement',   tagline: 'Big, bold & unforgettable',   elements: ['Dramatic entries', 'Large-scale decor', 'Wow moments'],        image: 'https://images.unsplash.com/photo-1519167758481-83f550bb49b3?w=400&h=300&fit=crop&q=80' },
 ]
 
 function sliderLabel(v: number): string {
@@ -257,8 +249,12 @@ export default function Onboarding() {
   const [selectedEvents, setSelectedEvents]     = useState<string[]>(['Wedding'])
   const [venue, setVenue]                       = useState('')
   const [budgetSlider, setBudgetSlider]         = useState(10) // default ~₹70L
+  const [budgetInputMode, setBudgetInputMode]   = useState(false)
+  const [budgetRawInput, setBudgetRawInput]     = useState('')
   const [budgetEvents, setBudgetEvents]         = useState<string[]>([])
   const [vibes, setVibes]                       = useState<string[]>([])
+  const [vibeNudge, setVibeNudge]               = useState(false)
+  const [showReady, setShowReady]               = useState(false)
   // Planner
   const [agencyName, setAgencyName]             = useState('')
   const [workEmail, setWorkEmail]               = useState('')
@@ -309,10 +305,33 @@ export default function Onboarding() {
   function goFwd(n: number) { setDir('fwd'); setStep(n) }
   function goBck(n: number) { setDir('bck'); setStep(n) }
 
+  // Convert raw lakhs/crore input back to slider position
+  function commitBudgetInput() {
+    setBudgetInputMode(false)
+    const raw = budgetRawInput.trim().toLowerCase()
+    if (!raw) return
+    let lakhs = 0
+    if (raw.endsWith('cr')) lakhs = parseFloat(raw) * 100
+    else if (raw.endsWith('l')) lakhs = parseFloat(raw)
+    else lakhs = parseFloat(raw) // assume lakhs
+    if (isNaN(lakhs)) return
+    lakhs = Math.max(20, Math.min(200, lakhs))
+    setBudgetSlider(Math.round((lakhs - 20) / 5))
+  }
+
   function enterKey(action: () => void, enabled = true) {
     return (e: React.KeyboardEvent<HTMLInputElement>) => {
       if (e.key === 'Enter' && enabled) action()
     }
+  }
+
+  function tryFinish() {
+    if (vibes.length === 0) {
+      setVibeNudge(true)
+      setTimeout(() => setVibeNudge(false), 2000)
+      return
+    }
+    finish()
   }
 
   function finish() {
@@ -366,17 +385,43 @@ export default function Onboarding() {
       total_budget: wedding.total_budget,
       vibe_tags: wedding.vibe_tags,
     }).catch(() => null)
-    setEvents(mockEvents)
-    setItinerary(mockItinerary)
-    setGuests(mockGuests)
-    setVendors(mockVendors)
-    setBudgetCategories(mockBudgetCategories)
-    setExpenses(mockExpenses)
-    setClCategories(mockClCategories)
-    setClTasks(mockClTasks)
-    setPins(mockPins)
-    setNotes(mockNotes)
-    setScreen('dashboard')
+
+    const { events, budgetCategories, clCategories, clTasks } = makeStarterData(
+      wedding.id, selectedEvents, wedding.wedding_date, wedding.venue,
+    )
+    setEvents(events)
+    setItinerary([])
+    setGuests([])
+    setVendors([])
+    setBudgetCategories(budgetCategories)
+    setExpenses([])
+    setClCategories(clCategories)
+    setClTasks(clTasks)
+    setPins([])
+    setNotes([])
+    setShowReady(true)
+    setTimeout(() => setScreen('dashboard'), 2400)
+  }
+
+  // ── Ready screen (post-finish transition) ─────────────────────
+  if (showReady) {
+    const coupleName = isBG
+      ? (selfName && partnerName ? `${selfName} & ${partnerName}` : selfName || 'You')
+      : isPlanner
+        ? (clientBrideName && clientGroomName ? `${clientBrideName} & ${clientGroomName}` : 'The couple')
+        : selfName || 'You'
+    return (
+      <div className="ob3-ready-screen">
+        <div className="ob3-ready-inner">
+          <div className="ob3-ready-ring">💍</div>
+          <h2 className="ob3-ready-title serif">You're all set{coupleName ? `, ${coupleName.split(' ')[0]}` : ''}!</h2>
+          <p className="ob3-ready-sub">Your planning space is ready.<br />Let's make this wedding unforgettable.</p>
+          <div className="ob3-ready-dots">
+            <span /><span /><span />
+          </div>
+        </div>
+      </div>
+    )
   }
 
   // ── Step 0: Role selection ─────────────────────────────────────
@@ -524,40 +569,73 @@ export default function Onboarding() {
           </div>
           <span className="ob3-eyebrow-pill">Almost there ✨</span>
           <h2 className="ob3-card-heading serif">Budget & vibe</h2>
-          {/* Recap of what was entered */}
-          <div className="ob3-recap">
-            {selfName && <span className="ob3-recap-pill"><span>👤</span>{selfName}{partnerName ? ` & ${partnerName}` : ''}</span>}
-            {weddingDate && <span className="ob3-recap-pill"><span>📅</span>{new Date(weddingDate).toLocaleDateString('en-IN', { day: 'numeric', month: 'short', year: 'numeric' })}</span>}
-            {city && <span className="ob3-recap-pill"><span>📍</span>{city}</span>}
-            {venue && <span className="ob3-recap-pill"><span>🏛️</span>{venue}</span>}
-          </div>
-          <p className="ob3-section-label">Budget</p>
+
+          {/* Budget */}
+          <p className="ob3-section-label">Budget <span className="ob3-section-hint">Helps us alert you when spending exceeds your plan</span></p>
           <div className="ob3-budget-section">
             <div className="ob3-budget-slider-wrap" style={{ padding: '4px 0 0' }}>
-              <div className="ob3-budget-amount">{sliderLabel(budgetSlider)}</div>
+              {budgetInputMode ? (
+                <input
+                  className="ob3-budget-direct-input"
+                  type="text" autoFocus
+                  placeholder="e.g. 50 or 1.2Cr"
+                  value={budgetRawInput}
+                  onChange={e => setBudgetRawInput(e.target.value)}
+                  onBlur={commitBudgetInput}
+                  onKeyDown={e => e.key === 'Enter' && commitBudgetInput()}
+                />
+              ) : (
+                <div className="ob3-budget-amount ob3-budget-amount-tap" title="Tap to enter exact amount"
+                  onClick={() => { setBudgetInputMode(true); setBudgetRawInput('') }}>
+                  {sliderLabel(budgetSlider)}
+                  <span className="ob3-budget-edit-hint">tap to edit</span>
+                </div>
+              )}
               <input type="range" className="ob3-range" min={0} max={37} step={1}
                 value={budgetSlider} onChange={e => setBudgetSlider(Number(e.target.value))}
                 style={{ '--slider-pct': `${(budgetSlider / 37) * 100}%` } as React.CSSProperties} />
               <div className="ob3-range-bounds"><span>₹20L</span><span>₹2Cr+</span></div>
+              <p className="ob3-budget-context">Avg. Indian wedding is ₹40–80L · most couples plan ₹50–120L</p>
             </div>
           </div>
-          <p className="ob3-section-label">Vibe</p>
-          <p className="ob3-card-sub" style={{ marginBottom: 12 }}>Pick all that match your dream — we'll personalise everything.</p>
-          <div className="ob3-vibe-grid">
-            {VIBES_WITH_EMOJI.map(v => (
-              <button key={v.label} className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
-                onClick={() => toggleVibe(v.label)}>
-                <span className="ob3-vibe-emoji">{v.emoji}</span>
-                <span className="ob3-vibe-label">{v.label}</span>
-                <span className="ob3-vibe-desc">{v.desc}</span>
-              </button>
-            ))}
+
+          {/* Vibe */}
+          <div className="ob3-vibe-section-header">
+            <p className="ob3-section-label" style={{ margin: 0, flex: 1 }}>
+              Vibe
+              {vibes.length > 0 && <span className="ob3-vibe-count-badge">{vibes.length} selected</span>}
+            </p>
+            <span className="ob3-vibe-scroll-hint">scroll to explore →</span>
           </div>
+          <p className="ob3-card-sub" style={{ marginBottom: 10, marginTop: 4 }}>Pick all that match — we'll theme your dashboard and suggestions around this.</p>
+          {vibeNudge && <p className="ob3-vibe-nudge">Pick at least one vibe to personalise your experience ✨</p>}
+          <div className="ob3-vibe-strip-wrap">
+            <div className="ob3-vibe-strip" role="list">
+              {VIBE_SETS.map((v, i) => (
+                <button
+                  key={v.label}
+                  role="listitem"
+                  className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
+                  onClick={() => toggleVibe(v.label)}
+                  style={{ '--vibe-i': i, '--vibe-img': `url("${v.image}")` } as React.CSSProperties}
+                  aria-pressed={vibes.includes(v.label)}
+                >
+                  <div className="ob3-vibe-img-overlay" />
+                  {vibes.includes(v.label) && <div className="ob3-vibe-selected-badge">✓</div>}
+                  <div className="ob3-vibe-card-body">
+                    <span className="ob3-vibe-label">{v.label}</span>
+                    <span className="ob3-vibe-tagline">{v.tagline}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="ob3-actions" style={{ marginTop: 28 }}>
             <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
-            <button className="ob3-btn-primary ob3-btn-finish" onClick={finish}>Start planning ✨</button>
+            <button className="ob3-btn-primary ob3-btn-finish" onClick={tryFinish}>Start planning ✨</button>
           </div>
-          <p className="ob3-skip" onClick={finish}>Skip and go to dashboard →</p>
+          <p className="ob3-skip" onClick={finish}>I'll set this up later</p>
         </div>
       </div>
     )
@@ -691,20 +769,33 @@ export default function Onboarding() {
           </div>
           <span className="ob3-eyebrow-pill">Almost there ✨</span>
           <h2 className="ob3-card-heading serif">Budget & vibe</h2>
-          <div className="ob3-recap">
-            {selfName && <span className="ob3-recap-pill"><span>👤</span>{selfName}</span>}
-            {(clientBrideName || clientGroomName) && (
-              <span className="ob3-recap-pill"><span>💍</span>{[clientBrideName, clientGroomName].filter(Boolean).join(' & ')}</span>
-            )}
-            {city && <span className="ob3-recap-pill"><span>📍</span>{city}</span>}
-          </div>
-          <p className="ob3-section-label">Budget</p>
+
+          {/* Budget */}
+          <p className="ob3-section-label">Budget <span className="ob3-section-hint">Helps us alert you when spending exceeds the plan</span></p>
           <div className="ob3-budget-section">
             <div className="ob3-budget-slider-wrap" style={{ padding: '4px 0 0' }}>
-              <div className="ob3-budget-amount">{sliderLabel(budgetSlider)}</div>
+              {budgetInputMode ? (
+                <input
+                  className="ob3-budget-direct-input"
+                  type="text" autoFocus
+                  placeholder="e.g. 50 or 1.2Cr"
+                  value={budgetRawInput}
+                  onChange={e => setBudgetRawInput(e.target.value)}
+                  onBlur={commitBudgetInput}
+                  onKeyDown={e => e.key === 'Enter' && commitBudgetInput()}
+                />
+              ) : (
+                <div className="ob3-budget-amount ob3-budget-amount-tap" title="Tap to enter exact amount"
+                  onClick={() => { setBudgetInputMode(true); setBudgetRawInput('') }}>
+                  {sliderLabel(budgetSlider)}
+                  <span className="ob3-budget-edit-hint">tap to edit</span>
+                </div>
+              )}
               <input type="range" className="ob3-range" min={0} max={37} step={1}
-                value={budgetSlider} onChange={e => setBudgetSlider(Number(e.target.value))} />
+                value={budgetSlider} onChange={e => setBudgetSlider(Number(e.target.value))}
+                style={{ '--slider-pct': `${(budgetSlider / 37) * 100}%` } as React.CSSProperties} />
               <div className="ob3-range-bounds"><span>₹20L</span><span>₹2Cr+</span></div>
+              <p className="ob3-budget-context">Avg. Indian wedding is ₹40–80L · most couples plan ₹50–120L</p>
             </div>
           </div>
           <div className="ob3-field" style={{ marginTop: 20 }}>
@@ -715,6 +806,7 @@ export default function Onboarding() {
                 {showBudgetEventsExpander ? '✕ Done' : '+ Add event'}
               </button>
             </div>
+            <p className="ob3-events-hint">We'll use this to suggest how to split your budget across events.</p>
             <div className="ob3-chip-row ob3-chip-wrap ob3-events-tags" style={{ marginTop: 8 }}>
               {budgetEvents.length > 0
                 ? budgetEvents.map(ev => <span key={ev} className="ob3-chip on"><span className="ob3-chip-emoji">{EVENTS_EMOJI[ev]}</span>{ev}</span>)
@@ -731,22 +823,44 @@ export default function Onboarding() {
               </div>
             )}
           </div>
-          <p className="ob3-section-label">Vibe</p>
-          <div className="ob3-vibe-grid">
-            {VIBES_WITH_EMOJI.map(v => (
-              <button key={v.label} className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
-                onClick={() => toggleVibe(v.label)}>
-                <span className="ob3-vibe-emoji">{v.emoji}</span>
-                <span className="ob3-vibe-label">{v.label}</span>
-                <span className="ob3-vibe-desc">{v.desc}</span>
-              </button>
-            ))}
+
+          {/* Vibe */}
+          <div className="ob3-vibe-section-header">
+            <p className="ob3-section-label" style={{ margin: 0, flex: 1 }}>
+              Vibe
+              {vibes.length > 0 && <span className="ob3-vibe-count-badge">{vibes.length} selected</span>}
+            </p>
+            <span className="ob3-vibe-scroll-hint">scroll to explore →</span>
           </div>
+          <p className="ob3-card-sub" style={{ marginBottom: 10, marginTop: 4 }}>Pick all that match — we'll theme the dashboard and suggestions around this.</p>
+          {vibeNudge && <p className="ob3-vibe-nudge">Pick at least one vibe to personalise your experience ✨</p>}
+          <div className="ob3-vibe-strip-wrap">
+            <div className="ob3-vibe-strip" role="list">
+              {VIBE_SETS.map((v, i) => (
+                <button
+                  key={v.label}
+                  role="listitem"
+                  className={`ob3-vibe-card${vibes.includes(v.label) ? ' on' : ''}`}
+                  onClick={() => toggleVibe(v.label)}
+                  style={{ '--vibe-i': i, '--vibe-img': `url("${v.image}")` } as React.CSSProperties}
+                  aria-pressed={vibes.includes(v.label)}
+                >
+                  <div className="ob3-vibe-img-overlay" />
+                  {vibes.includes(v.label) && <div className="ob3-vibe-selected-badge">✓</div>}
+                  <div className="ob3-vibe-card-body">
+                    <span className="ob3-vibe-label">{v.label}</span>
+                    <span className="ob3-vibe-tagline">{v.tagline}</span>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+
           <div className="ob3-actions" style={{ marginTop: 28 }}>
             <button className="ob3-btn-ghost" onClick={() => goBck(2)}>← Back</button>
-            <button className="ob3-btn-primary ob3-btn-finish" onClick={finish}>Start planning ✨</button>
+            <button className="ob3-btn-primary ob3-btn-finish" onClick={tryFinish}>Start planning ✨</button>
           </div>
-          <p className="ob3-skip" onClick={finish}>Skip and go to dashboard →</p>
+          <p className="ob3-skip" onClick={finish}>I'll set this up later</p>
         </div>
       </div>
     )
@@ -841,14 +955,6 @@ export default function Onboarding() {
         </div>
         <span className="ob3-eyebrow-pill">Almost done ✨</span>
         <h2 className="ob3-card-heading serif">How can you help?</h2>
-        {selfName && (
-          <div className="ob3-recap">
-            <span className="ob3-recap-pill"><span>👤</span>{selfName}{relation ? ` · ${relation}` : ''}</span>
-            {attendingEvents.length > 0 && (
-              <span className="ob3-recap-pill"><span>🎉</span>{attendingEvents.slice(0, 2).join(', ')}{attendingEvents.length > 2 ? ` +${attendingEvents.length - 2}` : ''}</span>
-            )}
-          </div>
-        )}
         <div className="ob3-field" style={{ marginTop: 8 }}>
           <label className="ob3-label">Areas you can help with <span className="ob3-opt">(pick any)</span></label>
           <div className="ob3-chip-row ob3-chip-wrap" style={{ marginTop: 8 }}>

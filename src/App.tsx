@@ -104,9 +104,9 @@ export default function App() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
-  // Seed mock data if user lands on an app screen without any data
+  // In dev: seed mock data if navigating to an app screen with no data (DemoBar usage)
   useEffect(() => {
-    if (!wedding && userId && APP_SCREENS.includes(screen)) {
+    if (isDev && !wedding && userId && APP_SCREENS.includes(screen)) {
       seedMockData()
     }
   }, [wedding, userId, screen])

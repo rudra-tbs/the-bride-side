@@ -1,7 +1,7 @@
 import type {
   Wedding, WeddingEvent, ItineraryItem, Guest, Vendor,
   BudgetCategory, Expense, ChecklistCategory, ChecklistTask,
-  MoodPin, Note,
+  MoodPin, Note, EventType,
 } from '@/types'
 
 export const MOCK_WEDDING_ID = 'w1'
@@ -184,3 +184,70 @@ export const mockNotes: Note[] = [
     type: 'general', vendor_id: null, created_at: '2026-03-15T10:00:00Z', updated_at: '2026-03-18T10:00:00Z',
   },
 ]
+
+// ── Fresh starter data for real onboarded users ──────────────────
+const EVENT_TYPE_MAP: Record<string, { type: EventType; name: string }> = {
+  Wedding:    { type: 'wedding',    name: 'Wedding Ceremony' },
+  Reception:  { type: 'reception',  name: 'Reception' },
+  Mehndi:     { type: 'mehndi',     name: 'Mehendi' },
+  Sangeet:    { type: 'sangeet',    name: 'Sangeet' },
+  Haldi:      { type: 'haldi',      name: 'Haldi' },
+  Engagement: { type: 'engagement', name: 'Engagement' },
+  Roka:       { type: 'roka',       name: 'Roka' },
+}
+
+export function makeStarterData(
+  weddingId: string,
+  selectedEvents: string[],
+  weddingDate: string,
+  venue: string,
+) {
+  const now = new Date().toISOString()
+
+  const events: WeddingEvent[] = selectedEvents.map((ev, i) => ({
+    id: `ev_${weddingId}_${i}`,
+    wedding_id: weddingId,
+    type: EVENT_TYPE_MAP[ev]?.type ?? 'other',
+    name: EVENT_TYPE_MAP[ev]?.name ?? ev,
+    date: weddingDate || '',
+    venue: venue || '',
+    start_time: '',
+    end_time: '',
+    notes: '',
+  }))
+
+  const budgetCategories: BudgetCategory[] = [
+    { name: 'Venue',               emoji: '🏛️', sort_order: 1 },
+    { name: 'Catering',            emoji: '🍽️', sort_order: 2 },
+    { name: 'Photography & Film',  emoji: '📷', sort_order: 3 },
+    { name: 'Decor & Flowers',     emoji: '🌸', sort_order: 4 },
+    { name: 'Entertainment',       emoji: '🎶', sort_order: 5 },
+    { name: 'Attire & Beauty',     emoji: '💍', sort_order: 6 },
+    { name: 'Invitations',         emoji: '✉️', sort_order: 7 },
+  ].map((cat, i) => ({
+    id: `bc_${weddingId}_${i}`,
+    wedding_id: weddingId,
+    allocated: 0,
+    ...cat,
+  }))
+
+  // Checklist template — fresh IDs, all tasks reset to not done, no names assigned
+  const idMap: Record<string, string> = {}
+  const clCategories: ChecklistCategory[] = mockClCategories.map(cat => {
+    const newId = `${cat.id}_${weddingId}`
+    idMap[cat.id] = newId
+    return { ...cat, id: newId, wedding_id: weddingId, badge_label: 'To Do' }
+  })
+  const clTasks: ChecklistTask[] = mockClTasks.map(task => ({
+    ...task,
+    id: `${task.id}_${weddingId}`,
+    wedding_id: weddingId,
+    category_id: idMap[task.category_id] ?? task.category_id,
+    is_done: false,
+    assigned_to: '',
+    due_date: null,
+    created_at: now,
+  }))
+
+  return { events, budgetCategories, clCategories, clTasks }
+}
