@@ -41,6 +41,24 @@ const NAV_ITEMS: NavItem[] = [
   { screen: 'moodboard', label: 'Moodboard', icon: <Icon path="M4 15s1-1 4-1 5 2 8 2 4-1 4-1V3s-1 1-4 1-5-2-8-2-4 1-4 1z M4 22v-7" /> },
 ]
 
+const SCREEN_TITLES: Record<Screen, string> = {
+  landing: 'Landing',
+  onboarding: 'Onboarding',
+  dashboard: 'Dashboard',
+  guests: 'Guests',
+  vendors: 'Vendors',
+  budget: 'Budget',
+  checklist: 'Checklist',
+  moodboard: 'Moodboard',
+}
+
+const DASH_TITLES: Record<DashTab, string> = {
+  guest: 'Overview',
+  itinerary: 'Itinerary',
+  details: 'Event Details',
+  mom: 'Notes',
+}
+
 export default function AppShell({ children }: { children: ReactNode }) {
   const { screen, setScreen, wedding, dashTab, setDashTab } = useAppStore()
   const [open, setOpen] = useState(true)
@@ -50,6 +68,10 @@ export default function AppShell({ children }: { children: ReactNode }) {
   const days = wedding ? Math.max(0, daysUntil(wedding.wedding_date)) : 0
   const offset = 314 * (1 - Math.min(1, Math.max(0, (365 - days) / 365)))
   const ringColor = days <= 30 ? 'var(--rose)' : days <= 90 ? 'var(--amber)' : 'var(--sage)'
+  const sectionLabel = screen === 'dashboard'
+    ? `${SCREEN_TITLES[screen]} · ${DASH_TITLES[dashTab]}`
+    : SCREEN_TITLES[screen]
+  const todayLabel = formatDate(new Date().toISOString(), 'EEE, d MMM')
 
   return (
     <div className={`app-shell${open ? '' : ' sidebar-closed'}`}>
@@ -70,7 +92,12 @@ export default function AppShell({ children }: { children: ReactNode }) {
             </svg>
           </button>
         </div>
-        <nav className="topbar-nav" />
+        <nav className="topbar-nav">
+          <div className="topbar-context">
+            <span className="topbar-pill">{sectionLabel}</span>
+            {!!wedding && <span className="topbar-context-sub">{todayLabel} · {days} days left</span>}
+          </div>
+        </nav>
         <div className="topbar-right">
           <button
             className="topbar-search-btn"
