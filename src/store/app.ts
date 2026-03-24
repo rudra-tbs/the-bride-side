@@ -71,6 +71,7 @@ interface AppState {
   pins: MoodPin[]
   setPins: (p: MoodPin[]) => void
   addPin: (p: MoodPin) => void
+  updatePin: (id: string, patch: Partial<MoodPin>) => void
   removePin: (id: string) => void
   togglePinLike: (id: string) => void
 
@@ -159,6 +160,8 @@ export const useAppStore = create<AppState>()(
       pins: [],
       setPins: (pins) => set({ pins }),
       addPin: (p) => set((s) => ({ pins: [p, ...s.pins] })),
+      updatePin: (id, patch) =>
+        set((s) => ({ pins: s.pins.map((p) => (p.id === id ? { ...p, ...patch } : p)) })),
       removePin: (id) => set((s) => ({ pins: s.pins.filter((p) => p.id !== id) })),
       togglePinLike: (id) =>
         set((s) => ({

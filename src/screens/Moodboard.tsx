@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { useAppStore } from '@/store/app'
 import EmptyState from '@/components/ui/EmptyState'
-import type { PinCategory } from '@/types'
+import type { MoodPin, PinCategory } from '@/types'
 import { uuid } from '@/lib/utils'
 import toast from 'react-hot-toast'
 
@@ -20,7 +20,6 @@ const CAT_EMOJI: Record<PinCategory, string> = {
   decor: '🌸', outfit: '👗', makeup: '💄', venue: '🏛️', food: '🍽️', lighting: '💡', other: '📌',
 }
 
-// Generate a gradient background for a pin based on its color palette or category
 function pinBg(palette: string[], category: PinCategory): string {
   if (palette.length >= 2) return `linear-gradient(135deg, ${palette[0]}, ${palette[1]})`
   const fallbacks: Record<PinCategory, string> = {
@@ -35,33 +34,108 @@ function pinBg(palette: string[], category: PinCategory): string {
   return fallbacks[category]
 }
 
+// ── Pin Form Modal (Add & Edit) ─────────────────────────────────────
+function PinModal({
+  pin,
+  weddingId,
+  onClose,
+}: {
+  pin: MoodPin | null
+  weddingId: string
+  onClose: () => void
+}) {
+  const { addPin, updatePin } = useAppStore()
+  const isNew = pin === null
+
+  const [caption, setCaption] = useState(pin?.caption ?? '')
+  const [imageUrl, setImageUrl] = useState(pin?.image_url ?? '')
+  const [category, setCategory] = useState<PinCategory>(pin?.category ?? 'decor')
+
+  function handleSave() {
+    if (!caption.trim()) return
+    if (isNew) {
+      addPin({
+        id: uuid(),
+        wedding_id: weddingId,
+        image_url: imageUrl.trim(),
+        storage_path: null,
+        caption: caption.trim(),
+        category,
+        is_liked: false,
+        color_palette: [],
+        created_at: new Date().toISOString(),
+      })
+      toast.success('Pin added to moodboard!')
+    } else {
+      updatePin(pin!.id, {
+        caption: caption.trim(),
+        image_url: imageUrl.trim(),
+        category,
+      })
+      toast.success('Pin updated')
+    }
+    onClose()
+  }
+
+  return (
+    <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) onClose() }}>
+      <div className="modal-box">
+        <div className="modal-title">{isNew ? 'Add Inspiration Pin' : 'Edit Pin'}</div>
+        <div className="modal-field">
+          <label className="modal-label">Image URL (optional)</label>
+          <input className="input" type="url" placeholder="https://..." value={imageUrl} onChange={e => setImageUrl(e.target.value)} />
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">Caption *</label>
+          <input className="input" placeholder="Describe your inspiration..." value={caption} onChange={e => setCaption(e.target.value)} />
+        </div>
+        <div className="modal-field">
+          <label className="modal-label">Category</label>
+          <select className="select" value={category} onChange={e => setCategory(e.target.value as PinCategory)}>
+            <option value="decor">🌸 Decor</option>
+            <option value="outfit">👗 Outfit</option>
+            <option value="makeup">💄 Makeup</option>
+            <option value="venue">🏛️ Venue</option>
+            <option value="food">🍽️ Food</option>
+            <option value="lighting">💡 Lighting</option>
+            <option value="other">📌 Other</option>
+          </select>
+        </div>
+        <div className="modal-footer">
+          <button className="btn btn-ghost" onClick={onClose}>Cancel</button>
+          <button className="btn btn-rose" onClick={handleSave} disabled={!caption.trim()}>
+            {isNew ? 'Add Pin' : 'Save Changes'}
+          </button>
+        </div>
+      </div>
+    </div>
+  )
+}
+
+// ── Moodboard Screen ────────────────────────────────────────────────
 export default function Moodboard() {
   const { wedding, pins, addPin, removePin, togglePinLike } = useAppStore()
   const [catFilter, setCatFilter] = useState<PinCategory | 'all'>('all')
-  const [showAdd, setShowAdd] = useState(false)
-  const [caption, setCaption] = useState('')
-  const [imageUrl, setImageUrl] = useState('')
-  const [category, setCategory] = useState<PinCategory>('decor')
+  const [pinModal, setPinModal] = useState<MoodPin | null | undefined>(undefined)
+  // undefined = closed, null = adding new, MoodPin = editing
 
   const filtered = pins.filter(p => catFilter === 'all' || p.category === catFilter)
   const liked = pins.filter(p => p.is_liked).length
 
-  function handleAdd() {
-    if (!caption.trim()) return
-    addPin({
-      id: uuid(),
-      wedding_id: wedding?.id ?? 'w1',
-      image_url: imageUrl.trim(),
-      storage_path: null,
-      caption: caption.trim(),
-      category,
-      is_liked: false,
-      color_palette: [],
-      created_at: new Date().toISOString(),
-    })
-    setCaption(''); setImageUrl(''); setCategory('decor')
-    setShowAdd(false)
-    toast.success('Pin added to moodboard!')
+  function handleRemovePin(pin: MoodPin) {
+    const snapshot = { ...pin }
+    removePin(pin.id)
+    toast((t) => (
+      <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+        <span>Pin removed</span>
+        <button
+          onClick={() => { addPin(snapshot); toast.dismiss(t.id) }}
+          style={{ fontSize: '11px', fontWeight: 600, color: 'var(--rose-dark)', background: 'none', border: 'none', cursor: 'pointer', fontFamily: 'inherit' }}
+        >
+          Undo
+        </button>
+      </div>
+    ), { duration: 5000 })
   }
 
   return (
@@ -71,7 +145,7 @@ export default function Moodboard() {
           <div className="page-title">Moodboard</div>
           <div className="page-date">{pins.length} pins · {liked} liked</div>
         </div>
-        <button className="btn btn-rose btn-sm" onClick={() => setShowAdd(true)}>+ Add Pin</button>
+        <button className="btn btn-rose btn-sm" onClick={() => setPinModal(null)}>+ Add Pin</button>
       </div>
 
       <div style={{ padding: '12px 28px 0', display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
@@ -92,13 +166,13 @@ export default function Moodboard() {
             icon="🌸"
             title={catFilter === 'all' ? 'Your moodboard is empty' : `No ${catFilter} pins yet`}
             subtitle="Pin inspiration for your decor, outfits, makeup, and venue. Share with your vendors."
-            action={{ label: '+ Add your first pin', onClick: () => setShowAdd(true) }}
+            action={{ label: '+ Add your first pin', onClick: () => setPinModal(null) }}
           />
         ) : (
           <div className="mood-grid">
             {filtered.map(pin => {
               const bg = pinBg(pin.color_palette, pin.category)
-              const height = 120 + (pin.id.charCodeAt(1) % 3) * 40 // varied heights
+              const height = 120 + (pin.id.charCodeAt(1) % 3) * 40
               return (
                 <div className="mood-pin" key={pin.id}>
                   <div
@@ -124,7 +198,14 @@ export default function Moodboard() {
                       </button>
                       <button
                         className="mood-pin-btn"
-                        onClick={() => { removePin(pin.id); toast('Pin removed') }}
+                        onClick={() => setPinModal(pin)}
+                        title="Edit pin"
+                      >
+                        ✏
+                      </button>
+                      <button
+                        className="mood-pin-btn"
+                        onClick={() => handleRemovePin(pin)}
                         title="Remove"
                       >
                         ✕
@@ -142,36 +223,12 @@ export default function Moodboard() {
         )}
       </div>
 
-      {showAdd && (
-        <div className="modal-backdrop" onClick={e => { if (e.target === e.currentTarget) setShowAdd(false) }}>
-          <div className="modal-box">
-            <div className="modal-title">Add Inspiration Pin</div>
-            <div className="modal-field">
-              <label className="modal-label">Image URL (optional)</label>
-              <input className="input" type="url" placeholder="https://..." value={imageUrl} onChange={e => setImageUrl(e.target.value)} />
-            </div>
-            <div className="modal-field">
-              <label className="modal-label">Caption</label>
-              <input className="input" placeholder="Describe your inspiration..." value={caption} onChange={e => setCaption(e.target.value)} />
-            </div>
-            <div className="modal-field">
-              <label className="modal-label">Category</label>
-              <select className="select" value={category} onChange={e => setCategory(e.target.value as PinCategory)}>
-                <option value="decor">🌸 Decor</option>
-                <option value="outfit">👗 Outfit</option>
-                <option value="makeup">💄 Makeup</option>
-                <option value="venue">🏛️ Venue</option>
-                <option value="food">🍽️ Food</option>
-                <option value="lighting">💡 Lighting</option>
-                <option value="other">📌 Other</option>
-              </select>
-            </div>
-            <div className="modal-footer">
-              <button className="btn btn-ghost" onClick={() => setShowAdd(false)}>Cancel</button>
-              <button className="btn btn-rose" onClick={handleAdd} disabled={!caption.trim()}>Add Pin</button>
-            </div>
-          </div>
-        </div>
+      {pinModal !== undefined && (
+        <PinModal
+          pin={pinModal}
+          weddingId={wedding?.id ?? 'w1'}
+          onClose={() => setPinModal(undefined)}
+        />
       )}
     </div>
   )

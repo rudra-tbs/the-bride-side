@@ -42,7 +42,7 @@ const NAV_ITEMS: NavItem[] = [
 ]
 
 export default function AppShell({ children }: { children: ReactNode }) {
-  const { screen, setScreen, wedding, dashTab, setDashTab } = useAppStore()
+  const { screen, setScreen, wedding, dashTab, setDashTab, setUserId, setWedding } = useAppStore()
   const [open, setOpen] = useState(true)
 
   const coupleName = wedding?.couple_name ?? 'Your Wedding'
@@ -86,7 +86,6 @@ export default function AppShell({ children }: { children: ReactNode }) {
             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2}>
               <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9 M13.73 21a2 2 0 01-3.46 0" />
             </svg>
-            <span className="notif-dot" />
           </div>
           <div className="topbar-user">
             <div className="user-avatar">{initials(selfName)}</div>
@@ -172,7 +171,7 @@ export default function AppShell({ children }: { children: ReactNode }) {
 
           {/* Sign out */}
           <div className="sb-bottom">
-            <button className="sb-item sb-signout" onClick={() => { signOut(); setScreen('landing') }}>
+            <button className="sb-item sb-signout" onClick={() => { signOut(); setUserId(null); setWedding(null); setScreen('landing') }}>
               <span className="sb-item-icon">
                 <Icon path="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4 M16 17l5-5-5-5 M21 12H9" />
               </span>
